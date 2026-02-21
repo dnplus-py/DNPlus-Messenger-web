@@ -3,234 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Home</title>
+    <title>Chat DNPlus</title>
     <style>
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; color: #e9edef; }
+        
+        /* Cabecera Estilo DNPlus */
+        .chat-header { background-color: #085f56; padding: 10px 15px; display: flex; align-items: center; gap: 10px; z-index: 10; }
+        .back-icon { font-size: 22px; cursor: pointer; color: white; padding-right: 5px; }
+        .user-img { width: 38px; height: 38px; border-radius: 50%; background: #232d36; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-info span { display: block; font-weight: bold; font-size: 16px; color: white; }
+        .user-info small { color: rgba(255,255,255,0.8); font-size: 12px; }
+
+        /* Contenedor de Mensajes */
+        .messages-container {
+            flex: 1; padding: 15px; overflow-y: auto;
             background-color: #0b141a; 
-            color: #e9edef;
-            overflow: hidden;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay;
+            display: flex; flex-direction: column; gap: 8px;
         }
 
-        /* --- ENCABEZADO COLOR OFICIAL --- */
-        .header {
-            background-color: #085f56;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 { font-size: 20px; margin: 0; color: #ffffff; }
+        /* Burbujas */
+        .bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 15px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .received { background-color: #202c33; align-self: flex-start; border-top-left-radius: 2px; }
+        .sent { background-color: #085f56; align-self: flex-end; border-top-right-radius: 2px; }
+        .time { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px; }
+        
+        .bubble img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
 
-        /* --- TABS --- */
-        .tabs {
-            display: flex;
-            background-color: #085f56;
-        }
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 15px 0;
-            color: rgba(255,255,255,0.7);
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .tab.active {
-            color: #ffffff;
-            border-bottom: 3px solid #ffffff;
-        }
-
-        /* --- VIEW PAGER --- */
-        .window-container { width: 100vw; overflow: hidden; }
-        .view-pager {
-            display: flex;
-            width: 300%;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .page { width: 100vw; height: 85vh; background-color: #0b141a; overflow-y: auto; }
-
-        /* --- ESTILOS DE LISTA --- */
-        .item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); }
-        .item:active { background-color: #202c33; }
-        .avatar {
-            width: 55px; height: 55px;
-            border-radius: 50%;
-            background-color: #232d36;
-            margin-right: 15px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: #8696a0;
-            overflow: hidden;
-        }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .details { flex: 1; }
-        .name { font-weight: bold; font-size: 16px; color: #e9edef; }
-        .msg { color: #8696a0; font-size: 14px; display: block; margin-top: 2px; }
-
-        /* --- FABS --- */
-        .fab-container { position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 1000; }
-        .fab {
-            background-color: #085f56;
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            cursor: pointer;
-        }
-        .fab-mini {
-            width: 45px; height: 45px;
-            background-color: #232d36;
-            display: none;
-            border-radius: 50%;
-            align-items: center; justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        #fileInput { display: none; }
+        /* Input de Texto */
+        .input-wrapper { background-color: transparent; padding: 8px; display: flex; align-items: flex-end; gap: 8px; }
+        .input-container { flex: 1; background-color: #202c33; border-radius: 25px; display: flex; align-items: center; padding: 5px 12px; }
+        .chat-input { flex: 1; background: transparent; border: none; color: white; font-size: 17px; outline: none; padding: 8px 5px; }
+        .icon-btn { color: #8696a0; font-size: 22px; padding: 8px; cursor: pointer; }
+        
+        /* Botón de Acción */
+        .action-btn { background-color: #085f56; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; flex-shrink: 0; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <input type="file" id="fileInput" accept="image/*" onchange="subirEstado(event)">
-
-    <div class="header">
-        <h1>DNPlus</h1>
-        <div style="color: #ffffff; display: flex; gap: 20px;">
-            <span onclick="location.href='buscar.html'">🔍</span>
-            <span onclick="location.href='ajustes.html'">⋮</span>
+    <div class="chat-header">
+        <div class="back-icon" onclick="history.back()">←</div>
+        <img class="user-img" id="headerFoto" src="https://www.w3schools.com/howto/img_avatar.png">
+        <div class="user-info">
+            <span id="chatNombre">Cargando...</span>
+            <small>en línea</small>
         </div>
     </div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="movePage(0)">Chats</div>
-        <div class="tab" onclick="movePage(1)">Estados</div>
-        <div class="tab" onclick="movePage(2)">Llamadas</div>
-    </div>
+    <div class="messages-container" id="msgContainer"></div>
 
-    <div class="window-container">
-        <div class="view-pager" id="pager">
-            
-            <div class="page" id="chatPage">
-                <div class="item" onclick="abrirChat('Soporte DNPlus', 'S')">
-                    <div class="avatar" style="background-color: #085f56; color: white;">S</div>
-                    <div class="details">
-                        <span class="name">Soporte DNPlus</span>
-                        <span class="msg">¡Bienvenido a DNPlus, <span class="user-name-text">David</span>! 🚀</span>
-                    </div>
-                </div>
-                <div id="listaChatsDinamica"></div>
-            </div>
-
-            <div class="page">
-                <div class="item" onclick="document.getElementById('fileInput').click()">
-                    <div class="avatar" style="border: 2px solid #085f56; position: relative;">
-                        <img id="miFotoEstado" src="https://www.w3schools.com/howto/img_avatar.png">
-                        <div style="position:absolute; bottom:0; right:0; background:#085f56; border-radius:50%; width:18px; height:18px; font-size:14px; display:flex; align-items:center; justify-content:center; border: 2px solid #0b141a;">+</div>
-                    </div>
-                    <div class="details">
-                        <span class="name">Mi estado</span>
-                        <span class="msg">Toca para añadir</span>
-                    </div>
-                </div>
-                <div style="padding: 10px 15px; color: #085f56; font-size: 13px; font-weight: bold;">RECIENTES</div>
-                <div id="listaEstados" style="text-align: center; margin-top: 50px; color: #8696a0;">No hay estados nuevos</div>
-            </div>
-
-            <div class="page">
-                <div id="listaLlamadas" style="text-align: center; margin-top: 100px; color: #8696a0;">
-                    No tienes llamadas recientes.
-                </div>
-            </div>
-
+    <div class="input-wrapper">
+        <div class="input-container">
+            <div class="icon-btn">😊</div>
+            <input type="text" id="chatInput" class="chat-input" placeholder="Mensaje" oninput="toggleIcon()">
+            <div class="icon-btn">📎</div>
         </div>
-    </div>
-
-    <div class="fab-container">
-        <div class="fab-mini" id="fabTexto" onclick="location.href='publicar_texto.html'">
-            <span style="font-size: 20px; color: #b1b1b1;">✏️</span>
-        </div>
-        <div class="fab" onclick="fabAction()">
-            <span id="fabIcon" style="font-size: 24px; color: #ffffff;">💬</span>
-        </div>
+        <button class="action-btn" onclick="handleAction()">
+            <span id="actionIcon" style="font-size: 22px;">🎙️</span>
+        </button>
     </div>
 
     <script>
-        let currentPage = 0;
+        let chatActual = "";
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
 
         window.onload = function() {
-            // Cargar datos del usuario logueado
-            const foto = localStorage.getItem("user_photo");
-            const nombre = localStorage.getItem("user_name");
+            chatActual = localStorage.getItem("chat_actual") || "Contacto";
+            document.getElementById('chatNombre').innerText = chatActual;
             
-            if(foto) document.getElementById('miFotoEstado').src = foto;
-            if(nombre) {
-                const elements = document.getElementsByClassName('user-name-text');
-                for(let el of elements) el.innerText = nombre;
-            }
-            
-            cargarChats();
+            // Cargar historial
+            cargarHistorial();
+
+            // Pedir micro
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => guardarMensaje(reader.result, 'audio');
+                        audioChunks = [];
+                    };
+                }).catch(err => console.log("Micro no disponible"));
         };
 
-        function cargarChats() {
-            const contenedor = document.getElementById('listaChatsDinamica');
-            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
+        function toggleIcon() {
+            const input = document.getElementById('chatInput');
+            const icon = document.getElementById('actionIcon');
+            icon.innerText = input.value.trim() !== "" ? "➤" : "🎙️";
+        }
+
+        function handleAction() {
+            const input = document.getElementById('chatInput');
+            if (input.value.trim() !== "") {
+                guardarMensaje(input.value, 'text');
+                input.value = "";
+                toggleIcon();
+            } else {
+                if (!isRecording) {
+                    audioChunks = [];
+                    mediaRecorder.start();
+                    document.getElementById('actionIcon').innerText = "🛑";
+                    document.getElementById('actionIcon').style.color = "#ff5252";
+                } else {
+                    mediaRecorder.stop();
+                    document.getElementById('actionIcon').innerText = "🎙️";
+                    document.getElementById('actionIcon').style.color = "white";
+                }
+                isRecording = !isRecording;
+            }
+        }
+
+        function guardarMensaje(contenido, tipo) {
+            const now = new Date();
+            const time = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
+            const msg = { tipo, contenido, time, sender: 'me' };
             
-            contenedor.innerHTML = "";
-            contacts.forEach(c => {
-                const item = document.createElement('div');
-                item.className = 'item';
-                item.onclick = function() {
-                    abrirChat(c.nombre, c.nombre.charAt(0).toUpperCase());
-                };
-                
-                const inicial = c.nombre.charAt(0).toUpperCase();
-
-                item.innerHTML = `
-                    <div class="avatar">${inicial}</div>
-                    <div class="details">
-                        <div style="display:flex; justify-content: space-between;">
-                            <span class="name">${c.nombre}</span>
-                            <span class="time" style="font-size:12px; color:#8696a0;">10:00 AM</span>
-                        </div>
-                        <span class="msg">Toca para chatear con ${c.nombre}</span>
-                    </div>
-                `;
-                contenedor.appendChild(item);
-            });
-        }
-
-        function abrirChat(nombre, inicial) {
-            localStorage.setItem("chat_actual", nombre);
-            window.location.href = 'mensajes.html';
-        }
-
-        function movePage(index) {
-            currentPage = index;
-            const pager = document.getElementById('pager');
-            const tabs = document.querySelectorAll('.tab');
-            const fabIcon = document.getElementById('fabIcon');
-            const fabTexto = document.getElementById('fabTexto');
+            let historial = JSON.parse(localStorage.getItem("hist_ " + chatActual)) || [];
+            historial.push(msg);
+            localStorage.setItem("hist_ " + chatActual, JSON.stringify(historial));
             
-            pager.style.transform = `translateX(-${index * 100}vw)`;
-            tabs.forEach(t => t.classList.remove('active'));
-            tabs[index].classList.add('active');
+            renderMensaje(msg);
+        }
 
-            fabTexto.style.display = (index === 1) ? "flex" : "none";
+        function renderMensaje(m) {
+            const container = document.getElementById('msgContainer');
+            const bubble = document.createElement('div');
+            bubble.className = m.sender === 'me' ? 'bubble sent' : 'bubble received';
             
-            if(index === 0) fabIcon.innerText = "💬";
-            if(index === 1) fabIcon.innerText = "📷";
-            if(index === 2) fabIcon.innerText = "📞";
+            if (m.tipo === 'text') {
+                bubble.innerHTML = `${m.contenido} <div class="time">${m.time}</div>`;
+            } else if (m.tipo === 'audio') {
+                bubble.innerHTML = `<audio controls style="width:200px; height:35px;"><source src="${m.contenido}" type="audio/mp3"></audio><div class="time">${m.time}</div>`;
+            }
+            
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
         }
 
-        function fabAction() {
-            if(currentPage === 0) window.location.href = 'lista_contactos.html';
-            else if(currentPage === 1) document.getElementById('fileInput').click();
-            else if(currentPage === 2) window.location.href = 'add_contactos.html';
-        }
-
-        function subirEstado(event) {
-            alert("Imagen seleccionada para estado");
+        function cargarHistorial() {
+            let historial = JSON.parse(localStorage.getItem("hist_ " + chatActual)) || [];
+            historial.forEach(m => renderMensaje(m));
         }
     </script>
 </body>
