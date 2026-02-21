@@ -3,53 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat - DNPlus</title>
+    <title>DNPlus Chat</title>
     <style>
-        recorder.onstop = () => {
-    cons
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; }
+        
+        .header { background-color: #075e54; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
 
-        /* Ajuste total de la pantalla */
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: #0b141a; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            color: white;
-        }
-
-        /* Encabezado fijo */
-        .header { 
-            background-color: #075e54; 
-            padding: 15px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            font-weight: bold;
-        }
-
-        /* BANDEJA DE CHAT: Se ajusta sola y tiene scroll */
+        /* BANDEJA DE CHAT: No se tapa y tiene scroll */
         #chat-box { 
             flex: 1; 
             overflow-y: auto; 
             padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            gap: 10px;
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: contain;
+            gap: 12px;
+            background-color: #0b141a;
         }
 
-        /* Barra de entrada de mensajes */
-        .footer { 
-            background-color: #1f2c33; 
-            padding: 10px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
+        /* Burbuja de tus mensajes/audios con TU COLOR FAVORITO */
+        .msg-mio { 
+            align-self: flex-end; 
+            background-color: #176f47; /* Tu verde #176f47 */
+            color: white; 
+            padding: 8px; 
+            border-radius: 10px 0px 10px 10px; 
+            max-width: 80%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
+        .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        
         input { 
             flex: 1; 
             background-color: #2a3942; 
@@ -63,33 +46,26 @@
         .btn-mic { 
             background-color: #00a884; 
             border: none; 
-            width: 48px; 
-            height: 48px; 
+            width: 50px; height: 50px; 
             border-radius: 50%; 
             color: white; 
             font-size: 22px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+            cursor: pointer;
         }
-
-        /* Burbujas de audio */
-        audio { margin-left: auto; filter: invert(100%); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="window.history.back()" style="cursor:pointer">←</span>
-        <span>Soporte DNPlus</span>
+        <span onclick="window.history.back()">←</span>
+        <strong>Soporte DNPlus</strong>
     </div>
 
-    <div id="chat-box"></div>
+    <div id="chat-box">
+        </div>
 
     <div class="footer">
         <input type="text" id="msg-input" placeholder="Mensaje">
-        
         <button class="btn-mic" id="btn-audio" onclick="controlarVoz()">🎙️</button>
     </div>
 
@@ -105,30 +81,34 @@
                     const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
                     grabador = new MediaRecorder(flujo);
                     fragmentos = [];
-
                     grabador.ondataavailable = (e) => fragmentos.push(e.data);
                     
                     grabador.onstop = () => {
                         const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
                         const urlAudio = URL.createObjectURL(blobAudio);
                         
-                        // Crear el elemento de audio en el chat
                         const chat = document.getElementById('chat-box');
+                        
+                        // Crear burbuja verde para el audio
+                        const divMensaje = document.createElement('div');
+                        divMensaje.className = "msg-mio";
+                        
                         const nuevoAudio = document.createElement('audio');
                         nuevoAudio.src = urlAudio;
                         nuevoAudio.controls = true;
-                        nuevoAudio.style.display = "block";
-                        nuevoAudio.style.marginTop = "10px";
+                        nuevoAudio.style.width = "200px"; // Ajuste para que no sea gigante
                         
-                        chat.appendChild(nuevoAudio);
-                        chat.scrollTop = chat.scrollHeight; // Baja el scroll automáticamente
+                        divMensaje.appendChild(nuevoAudio);
+                        chat.appendChild(divMensaje);
+                        
+                        chat.scrollTop = chat.scrollHeight;
                     };
 
                     grabador.start();
                     boton.innerHTML = "🛑";
                     boton.style.backgroundColor = "#ff3b30";
                 } catch (error) {
-                    alert("David, por favor activa los permisos del micrófono.");
+                    alert("David, activa el permiso del micro.");
                 }
             } else {
                 grabador.stop();
@@ -137,85 +117,5 @@
             }
         }
     </script>
-
-
-   <script>
-        let grabador;
-    let fragmentos = [];
-
-    // Esta función decide si envía TEXTO o graba AUDIO
-    function enviarOgrabar() {
-        const input = document.getElementById('msg-input');
-        const mensaje = input.value.trim();
-
-        if (mensaje !== "") {
-            // SI HAY TEXTO: Lo envía
-            enviarTexto(mensaje);
-            input.value = ""; // Limpia la barra
-        } else {
-            // SI ESTÁ VACÍO: Activa el micrófono
-            controlarVoz();
-        }
-    }
-
-    function enviarTexto(texto) {
-        const chat = document.getElementById('chat-box');
-        const div = document.createElement('div');
-        
-        // Estilo de burbuja de texto con tu color favorito
-        div.style.alignSelf = "flex-end";
-        div.style.backgroundColor = "#176f47";
-        div.style.color = "white";
-        div.style.padding = "10px 15px";
-        div.style.borderRadius = "15px 0px 15px 15px";
-        div.style.maxWidth = "80%";
-        div.style.marginBottom = "10px";
-        div.style.fontSize = "16px";
-        div.innerText = texto;
-
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight; // Baja el scroll
-    }
-
-    // Tu función de voz que ya funcionaba, pero mejorada
-    async function controlarVoz() {
-        const boton = document.getElementById('btn-audio');
-        if (!grabador || grabador.state === "inactive") {
-            try {
-                const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
-                grabador = new MediaRecorder(flujo);
-                fragmentos = [];
-                grabador.ondataavailable = (e) => fragmentos.push(e.data);
-                grabador.onstop = () => {
-                    const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
-                    const urlAudio = URL.createObjectURL(blobAudio);
-                    const chat = document.getElementById('chat-box');
-                    
-                    // Burbuja de audio verde
-                    const divAudio = document.createElement('div');
-                    divAudio.style.alignSelf = "flex-end";
-                    divAudio.style.backgroundColor = "#176f47";
-                    divAudio.style.padding = "10px";
-                    divAudio.style.borderRadius = "15px 0px 15px 15px";
-                    divAudio.style.marginBottom = "10px";
-                    
-                    const audio = document.createElement('audio');
-                    audio.src = urlAudio;
-                    audio.controls = true;
-                    audio.style.width = "200px";
-                    
-                    divAudio.appendChild(audio);
-                    chat.appendChild(divAudio);
-                    chat.scrollTop = chat.scrollHeight;
-                };
-                grabador.start();
-                boton.innerHTML = "🛑";
-            } catch (error) { alert("Activa el micro, David."); }
-        } else {
-            grabador.stop();
-            boton.innerHTML = "🎙️";
-        }
-    }
-</script>
 </body>
 </html>
