@@ -14,24 +14,19 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            overflow: hidden;
         }
 
-        /* --- CABECERA OFICIAL #085f56 --- */
+        /* Cabecera */
         .header-perfil {
             background-color: #085f56;
             color: white;
             padding: 15px;
             text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        .header-perfil span { font-size: 24px; cursor: pointer; padding: 0 5px; }
         .header-perfil h2 { margin: 0; font-size: 19px; font-weight: 500; }
 
-        /* --- Estilos del Loader --- */
+        /* Loader */
         #loader-overlay {
             display: none; 
             position: fixed;
@@ -43,207 +38,101 @@
             align-items: center;
         }
         .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid rgba(8, 95, 86, 0.2);
-            border-top: 5px solid #085f56;
+            width: 40px; height: 40px;
+            border: 4px solid rgba(8, 95, 86, 0.2);
+            border-top: 4px solid #085f56;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- Contenido --- */
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .profile-pic-container {
-            margin-top: 30px;
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        .circle-avatar {
+        /* Foto de Perfil */
+        .profile-pic {
             width: 150px; height: 150px;
             background-color: #202c33;
             border-radius: 50%;
+            margin: 40px auto 20px;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
-            border: 1px solid rgba(134, 150, 160, 0.2);
+            border: 1px solid #085f56;
+            cursor: pointer;
         }
         #imgPerfil { width: 100%; height: 100%; object-fit: cover; }
-        
-        .camera-icon {
-            position: absolute;
-            bottom: 5px; right: 5px;
-            background: #085f56;
-            color: white;
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            border: 3px solid #0b141a;
-        }
 
+        /* Input y Botón */
         .input-name {
-            background: transparent;
-            border: none;
+            background: transparent; border: none;
             border-bottom: 2px solid #085f56;
-            width: 85%;
-            max-width: 300px;
-            padding: 10px;
-            font-size: 18px;
-            margin-top: 40px;
-            outline: none;
+            width: 80%; padding: 10px;
+            font-size: 18px; color: white;
+            outline: none; margin-top: 20px;
             text-align: center;
-            color: white;
         }
-        .hint { color: #8696a0; font-size: 13px; margin-top: 15px; padding: 0 30px; line-height: 1.4; }
-        
         .btn-confirmar {
-            background-color: #085f56;
-            color: white;
-            padding: 14px 70px;
-            border-radius: 30px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            margin-top: auto; 
+            background-color: #085f56; color: white;
+            padding: 14px 60px; border-radius: 30px;
+            font-weight: bold; border: none;
+            cursor: pointer; margin-top: auto;
             margin-bottom: 40px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-
-        #fileInput { display: none; }
     </style>
 </head>
 <body>
 
     <div id="loader-overlay">
         <div class="spinner"></div>
-        <p style="margin-top: 20px; color: #085f56; font-weight: bold; font-family: sans-serif;">Iniciando DNPlus...</p>
+        <p style="color: #085f56; font-family: sans-serif; margin-top: 15px;">Iniciando DNPlus...</p>
     </div>
 
     <div class="header-perfil">
-        <span onclick="history.back()">←</span>
         <h2>Info. de perfil</h2>
     </div>
 
-    <div class="content">
-        <p style="color: #8696a0; margin-top: 20px; font-size: 15px;">Proporciona tu nombre y una foto opcional.</p>
+    <div style="flex: 1; padding: 20px;">
+        <p style="color: #8696a0; font-size: 15px;">Escribe tu nombre y elige una foto.</p>
 
-        <div class="profile-pic-container" onclick="document.getElementById('fileInput').click()">
-            <div class="circle-avatar">
-                <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar">
-            </div>
-            <div class="camera-icon">📷</div>
+        <div class="profile-pic" onclick="document.getElementById('fileInput').click()">
+            <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png">
         </div>
-        
-        <input type="file" id="fileInput" accept="image/*" onchange="previewImagen(event)">
+        <input type="file" id="fileInput" style="display:none" accept="image/*" onchange="preview(event)">
 
-        <input type="text" id="userName" class="input-name" placeholder="Escribe tu nombre aquí" maxlength="25">
-        <p class="hint">Este nombre será visible para tus contactos de DNPlus cuando les escribas.</p>
-
-        <button class="btn-confirmar" onclick="guardarPerfil()">
-            SIGUIENTE
-        </button>
+        <input type="text" id="userName" class="input-name" placeholder="Tu nombre">
     </div>
 
+    <button class="btn-confirmar" onclick="guardarYSalir()">SIGUIENTE</button>
+
     <script>
-        // Previsualizar y guardar la imagen en Base64
-        function previewImagen(event) {
+        // Previsualizar imagen
+        function preview(event) {
             const reader = new FileReader();
-            reader.onload = function(){
-                const output = document.getElementById('imgPerfil');
-                output.src = reader.result;
-                // Guardamos inmediatamente para no perderla
+            reader.onload = function() {
+                document.getElementById('imgPerfil').src = reader.result;
                 localStorage.setItem("user_photo", reader.result);
-            };
-            if(event.target.files[0]) {
-                reader.readAsDataURL(event.target.files[0]);
             }
+            reader.readAsDataURL(event.target.files[0]);
         }
 
-        function guardarPerfil() {
-            const nombre = document.getElementById('userName').value;
-            const imagenActual = document.getElementById('imgPerfil').src;
+        // Función Principal: De Perfil a Home
+        function guardarYSalir() {
+            const nombre = document.getElementById('userName').value.trim();
 
-            if(nombre.trim().length >= 2) {
-                // Mostrar Loader
+            if (nombre.length >= 2) {
+                // 1. Mostrar carga
                 document.getElementById('loader-overlay').style.display = 'flex';
 
-                // GUARDAR DATOS CLAVE
-                localStorage.setItem("user_name", nombre.trim());
-                
-                // Si el usuario no cambió la foto, guardamos la de por defecto
-                if(!localStorage.getItem("user_photo")) {
-                    localStorage.setItem("user_photo", imagenActual);
-                }
+                // 2. Guardar nombre en el celular
+                localStorage.setItem("user_name", nombre);
 
-                // Estado inicial por defecto
-                localStorage.setItem("user_status", "¡Hola! Estoy usando DNPlus.");
-
-                // Conexión con Android (si aplica)
-                if(window.Android && window.Android.guardarNombre) {
-                    window.Android.guardarNombre(nombre);
-                }
-
-                // Simular carga para ir al Home
+                // 3. REDIRECCIÓN A HOME (Corregida)
                 setTimeout(function() {
+                    // Importante: El archivo debe llamarse home.html
                     window.location.href = 'home.html';
                 }, 2000);
+
             } else {
-                alert("Tu nombre es demasiado corto.");
+                alert("Por favor, ingresa tu nombre, David.");
             }
         }
     </script>
-  
-    <script>
-    // Función para la imagen
-    function previewImagen(event) {
-        const reader = new FileReader();
-        reader.onload = function(){
-            const output = document.getElementById('imgPerfil');
-            output.src = reader.result;
-            localStorage.setItem("user_photo", reader.result);
-        };
-        if(event.target.files[0]) {
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    }
-
-    // Función para guardar y saltar al Home
-    function guardarPerfil() {
-        const nombreInput = document.getElementById('userName');
-        const nombre = nombreInput.value.trim();
-
-        if(nombre.length >= 2) {
-            // Activar el círculo de carga
-            document.getElementById('loader-overlay').style.display = 'flex';
-
-            // Guardar en la memoria del celular
-            localStorage.setItem("user_name", nombre);
-            
-            // Si no subió foto, guardamos la que está puesta por defecto
-            const fotoActual = document.getElementById('imgPerfil').src;
-            if(!localStorage.getItem("user_photo")) {
-                localStorage.setItem("user_photo", fotoActual);
-            }
-
-            // Redirección forzada al home
-            setTimeout(function() {
-                // Importante: Asegurate que tu archivo se llame home.html en minúsculas
-                window.location.assign("home.html");
-            }, 1500);
-
-        } else {
-            alert("Escribe un nombre de al menos 2 letras, bro.");
-        }
-    }
-</script>
-
 </body>
 </html>
