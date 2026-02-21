@@ -1,1 +1,77 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar DNPlus</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .otp-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        .otp-box {
+            width: 40px;
+            height: 50px;
+            border: none;
+            border-bottom: 3px solid #176F47; /* Tu verde */
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #085F56;
+            background: transparent;
+            outline: none;
+        }
+        .resend-text {
+            color: #176F47;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="margin-top: 60px; text-align: center;">
+        <h2 style="color: #085F56;">Verifica tu número</h2>
+        <p style="color: #666; padding: 0 30px;">Introduce el código de 6 dígitos que enviamos a tu dispositivo.</p>
+    </div>
+
+    <div class="otp-inputs">
+        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 1)">
+        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 2)">
+        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 3)">
+        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 4)">
+        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 5)">
+        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 6)">
+    </div>
+
+    <button class="btn-confirmar" onclick="validarYEntrar()" style="padding: 12px 60px;">
+        VERIFICAR
+    </button>
+
+    <span class="resend-text">¿No recibiste el código?</span>
+
+    <script>
+        // Función para saltar de cuadrito en cuadrito automáticamente
+        function moveNext(current, index) {
+            if (current.value.length >= 1 && index < 6) {
+                document.getElementsByClassName('otp-box')[index].focus();
+            }
+        }
+
+        function validarYEntrar() {
+            // Aquí conectamos con tu lógica de Sketchware
+            if(window.Android && window.Android.verificarCodigo) {
+                window.Android.verificarCodigo();
+            } else {
+                window.location.href = 'mensajes.html'; // Si todo está bien, vamos al chat
+            }
+        }
+    </script>
+</body>
+</html>
