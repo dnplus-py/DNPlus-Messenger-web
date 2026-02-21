@@ -4,25 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contactos - DNPlus</title>
-    <link rel="stylesheet" href="style.css">
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: white; }
+        /* Fondo oscuro para que no se vea blanco al abrir */
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            background-color: #0b141a; 
+            color: #e9edef;
+        }
+
+        /* CABECERA CON TU VERDE #085f56 */
         .header-c {
-            background-color: #085F56; color: white;
-            padding: 15px; display: flex; align-items: center; gap: 15px;
+            background-color: #085f56; 
+            color: white;
+            padding: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
+
+        .header-c span { font-size: 24px; cursor: pointer; }
+
+        /* FILAS DE CONTACTO */
         .contact-row {
-            display: flex; align-items: center; padding: 12px 20px;
-            gap: 15px; border-bottom: 1px solid #f0f0f0;
+            display: flex; 
+            align-items: center; 
+            padding: 12px 20px;
+            gap: 15px; 
+            border-bottom: 1px solid rgba(134, 150, 160, 0.1);
+            cursor: pointer;
+            transition: background 0.2s;
         }
+
+        .contact-row:active { background-color: #202c33; }
+
+        /* AVATAR CIRCULAR */
         .img-avatar {
-            width: 45px; height: 45px; border-radius: 50%;
-            background-color: #176F47; display: flex;
-            align-items: center; justify-content: center; color: white;
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%;
+            background-color: #232d36; /* Gris azulado oscuro */
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            color: #8696a0;
+            font-weight: bold;
+            font-size: 18px;
         }
-        .btn-add {
-            background: #176F47; color: white; border: none;
-            padding: 8px 15px; border-radius: 20px; font-weight: bold;
+
+        /* TEXTOS */
+        .contact-name { font-weight: 500; font-size: 16px; color: #e9edef; }
+        .contact-status { font-size: 13px; color: #8696a0; }
+
+        /* Estilo especial para el botón "Nuevo Contacto" */
+        .btn-new-contact {
+            color: #00a884; /* Verde brillante para resaltar */
+            font-weight: bold;
         }
     </style>
 </head>
@@ -31,24 +72,61 @@
     <div class="header-c">
         <span onclick="history.back()">←</span>
         <div>
-            <div style="font-weight: bold;">Seleccionar contacto</div>
-            <div style="font-size: 12px; opacity: 0.8;">150 contactos</div>
+            <div style="font-weight: bold; font-size: 18px;">Seleccionar contacto</div>
+            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando...</div>
         </div>
     </div>
 
-    <div class="contact-row" onclick="location.href='add_contacto.html'">
-        <div class="img-avatar">👤</div>
-        <div style="flex: 1; color: #176F47; font-weight: bold;">Nuevo contacto</div>
+    <div class="contact-row" onclick="location.href='agregar_contacto.html'">
+        <div class="img-avatar" style="background-color: #085f56; color: white;">+</div>
+        <div class="btn-new-contact">Nuevo contacto</div>
     </div>
 
-    <div class="contact-row" onclick="location.href='mensajes.html'">
-        <div class="img-avatar">D</div>
-        <div style="flex: 1;">
-            <div style="font-weight: 500;">David Oviedo</div>
-            <div style="font-size: 13px; color: #666;">Disponible</div>
-        </div>
-    </div>
+    <div id="listaDinamica"></div>
 
+    <script>
+        window.onload = function() {
+            renderContactos();
+        };
+
+        function renderContactos() {
+            const container = document.getElementById('listaDinamica');
+            const label = document.getElementById('countLabel');
+            
+            // Leemos de la memoria (SharedPreferences/LocalStorage)
+            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
+            
+            // Actualizamos contador
+            label.innerText = contacts.length + " contactos";
+
+            if (contacts.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay contactos guardados</div>';
+                return;
+            }
+
+            // Limpiamos y creamos las filas
+            container.innerHTML = "";
+            contacts.forEach(c => {
+                const row = document.createElement('div');
+                row.className = 'contact-row';
+                row.onclick = function() {
+                    localStorage.setItem("chat_actual", c.nombre);
+                    window.location.href = 'mensajes.html';
+                };
+
+                // Tomamos la primera letra para el avatar
+                const inicial = c.nombre.charAt(0).toUpperCase();
+
+                row.innerHTML = `
+                    <div class="img-avatar">${inicial}</div>
+                    <div style="flex: 1;">
+                        <div class="contact-name">${c.nombre}</div>
+                        <div class="contact-status">${c.telefono}</div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+    </script>
 </body>
 </html>
-
