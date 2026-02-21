@@ -2,34 +2,123 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin: 0; font-family: sans-serif; background: white; }
-        .title { padding: 15px; color: #666; font-size: 14px; font-weight: bold; }
-        .item { display: flex; align-items: center; padding: 10px 15px; gap: 15px; }
-        .ring { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #176F47; padding: 2px; }
-        .img { width: 100%; height: 100%; border-radius: 50%; background: #ddd; }
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            background-color: #0b141a; /* Tu negro azulado */
+            color: #e9edef; 
+        }
+        
+        .title { 
+            padding: 20px 15px 10px 15px; 
+            color: #8696a0; 
+            font-size: 14px; 
+            font-weight: 500; 
+            text-transform: uppercase;
+        }
+
+        .item { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 15px; 
+            gap: 15px; 
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .item:active { background-color: #202c33; }
+
+        .ring { 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%; 
+            border: 2px solid #00a884; /* Verde DNPlus */
+            padding: 2px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            background: #232d36; 
+            object-fit: cover;
+        }
+
+        .add-icon {
+            position: absolute; 
+            bottom: 0; 
+            right: 0; 
+            background: #00a884; 
+            color: #0b141a; 
+            border-radius: 50%; 
+            width: 22px; 
+            height: 22px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px; 
+            font-weight: bold;
+            border: 2px solid #0b141a;
+        }
+
+        .text-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .name { font-weight: bold; font-size: 16px; }
+        .subtitle { color: #8696a0; font-size: 14px; margin-top: 2px; }
     </style>
 </head>
 <body>
-    <div class="item">
+
+    <div class="item" onclick="abrirGaleria()">
         <div style="position: relative;">
-            <div class="ring" style="border-color: #ccc;">
-                <div class="img"></div>
+            <div class="ring" style="border-color: #8696a0;"> <div class="img">
+                    <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" width="100%" style="border-radius: 50%; filter: brightness(0.7);">
+                </div>
             </div>
-            <div style="position:absolute; bottom:0; right:0; background:#176F47; color:white; border-radius:50%; width:18px; height:18px; text-align:center; font-size:14px; border:2px solid white;">+</div>
+            <div class="add-icon">+</div>
         </div>
-        <div>
-            <div style="font-weight:bold;">Mi estado</div>
-            <div style="color:gray; font-size:13px;">Toca para añadir</div>
+        <div class="text-container">
+            <div class="name">Mi estado</div>
+            <div class="subtitle">Toca para añadir una actualización</div>
         </div>
     </div>
+
     <div class="title">Recientes</div>
-    <div class="item">
-        <div class="ring"><div class="img"></div></div>
-        <div>
-            <div style="font-weight:bold;">David Oviedo</div>
-            <div style="color:gray; font-size:13px;">Hace 5 minutos</div>
+
+    <div class="item" onclick="verEstado('David Oviedo')">
+        <div class="ring">
+            <div class="img">
+                <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" width="100%" style="border-radius: 50%;">
+            </div>
+        </div>
+        <div class="text-container">
+            <div class="name">David Oviedo</div>
+            <div class="subtitle">Hace 5 minutos</div>
         </div>
     </div>
+
+    <script>
+        function abrirGaleria() {
+            // Llamada directa a tu lógica de Sketchware
+            if(window.Android && window.Android.abrirGaleria) {
+                window.Android.abrirGaleria();
+            } else {
+                // Esto es solo por si lo probás en navegador
+                alert("Accediendo a la Galería para subir foto o video...");
+            }
+        }
+
+        function verEstado(nombre) {
+            console.log("Viendo estado de: " + nombre);
+        }
+    </script>
 </body>
 </html>
