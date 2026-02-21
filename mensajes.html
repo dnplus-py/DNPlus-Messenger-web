@@ -1,191 +1,91 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat DNPlus</title>
-    <style>
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: #0b141a; 
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            color: #e9edef;
-        }
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
 
-        /* --- CABECERA --- */
-        .chat-header {
-            background-color: #085f56;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 10;
-        }
-        .back-icon { font-size: 22px; cursor: pointer; color: white; }
-        .user-img { width: 38px; height: 38px; border-radius: 50%; background: #232d36; }
-        .user-info { flex: 1; }
-        .user-info span { display: block; font-weight: bold; font-size: 16px; color: white; }
-        .user-info small { color: rgba(255,255,255,0.8); font-size: 12px; }
-
-        /* --- ÁREA DE MENSAJES (FONDO DINÁMICO) --- */
-        .messages-container {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            /* Aquí el fondo se puede cambiar por JS */
-            background-color: #0b141a; 
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .bubble {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 15px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.2);
-        }
-        .received { background-color: #202c33; align-self: flex-start; border-top-left-radius: 2px; }
-        .sent { background-color: #085f56; align-self: flex-end; border-top-right-radius: 2px; }
-        .time { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px; }
-
-        /* --- ENTRADA DE TEXTO ESTILO WHATSAPP --- */
-        .input-wrapper {
-            background-color: transparent;
-            padding: 8px;
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-        }
-
-        .input-container {
-            flex: 1;
-            background-color: #202c33;
-            border-radius: 25px;
-            display: flex;
-            align-items: center;
-            padding: 5px 12px;
-            min-height: 40px;
-        }
-
-        .icon-btn {
-            color: #8696a0;
-            font-size: 22px;
-            padding: 8px;
-            cursor: pointer;
-        }
-
-        .chat-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 17px;
-            outline: none;
-            padding: 8px 5px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .action-btn {
-            background-color: #085f56;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            border: none;
-            flex-shrink: 0;
-        }
-    </style>
-</head>
-<body id="chatBody">
-
-    <div class="chat-header">
-        <div class="back-icon" onclick="history.back()">←</div>
-        <img class="user-img" id="headerFoto" src="https://www.w3schools.com/howto/img_avatar.png">
-        <div class="user-info">
-            <span id="chatNombre">Nombre</span>
-            <small>en línea</small>
-        </div>
-        <div style="color: white; font-size: 20px;">⋮</div>
-    </div>
-
-    <div class="messages-container" id="msgContainer">
-        </div>
-
-    <div class="input-wrapper">
-        <div class="input-container">
-            <div class="icon-btn">😊</div>
+// 1. Configurar el grabador al cargar
+window.onload = function() {
+    chatActual = localStorage.getItem("chat_actual") || "Contacto";
+    document.getElementById('chatNombre').innerText = chatActual;
+    cargarHistorial();
+    
+    // Solicitar permiso de micro desde el inicio
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
             
-            <input type="text" id="chatInput" class="chat-input" placeholder="Mensaje" oninput="toggleIcon()">
-            
-            <div class="icon-btn" onclick="abrirAdjuntos()">📎</div>
-            <div class="icon-btn">📷</div>
-        </div>
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
 
-        <button class="action-btn" id="mainActionBtn" onclick="handleAction()">
-            <span id="actionIcon" style="font-size: 22px;">🎙️</span>
-        </button>
-    </div>
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob); 
+                reader.onloadend = () => {
+                    const base64Audio = reader.result;
+                    guardarMensaje(base64Audio, 'audio'); // Guardamos el audio real
+                };
+                audioChunks = [];
+            };
+        }).catch(err => console.error("Error al acceder al micro:", err));
+};
 
-    <script>
-        // Cargar datos del contacto
-        window.onload = function() {
-            const nombre = localStorage.getItem("chat_actual") || "Contacto";
-            document.getElementById('chatNombre').innerText = nombre;
-            
-            // Si quieres cambiar el fondo dinámicamente:
-            // document.getElementById('msgContainer').style.backgroundColor = "#176f47";
-        };
+// 2. Manejar el botón de acción (Enviar o Grabar)
+function handleAction() {
+    const input = document.getElementById('chatInput');
+    const btnIcon = document.getElementById('actionIcon');
 
-        function toggleIcon() {
-            const input = document.getElementById('chatInput');
-            const btn = document.getElementById('actionIcon');
-            
-            if (input.value.trim().length > 0) {
-                btn.innerText = "➤"; // Icono de enviar
-            } else {
-                btn.innerText = "🎙️"; // Icono de micro
-            }
+    if (input.value.trim() !== "") {
+        guardarMensaje(input.value, 'text');
+        input.value = "";
+        toggleIcon();
+    } else {
+        // Lógica de Grabación Real
+        if (!isRecording) {
+            startRecording();
+            btnIcon.innerText = "🛑"; // Cambia a stop
+            btnIcon.style.color = "red";
+        } else {
+            stopRecording();
+            btnIcon.innerText = "🎙️";
+            btnIcon.style.color = "white";
         }
+        isRecording = !isRecording;
+    }
+}
 
-        function handleAction() {
-            const input = document.getElementById('chatInput');
-            if (input.value.trim() !== "") {
-                enviarMensaje(input.value);
-                input.value = "";
-                toggleIcon();
-            } else {
-                alert("Grabando audio...");
-            }
-        }
+function startRecording() {
+    audioChunks = [];
+    mediaRecorder.start();
+    console.log("Grabando...");
+}
 
-        function enviarMensaje(texto) {
-            const container = document.getElementById('msgContainer');
-            const now = new Date();
-            const time = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble sent';
-            bubble.innerHTML = `${texto} <div class="time">${time}</div>`;
-            
-            container.appendChild(bubble);
-            container.scrollTop = container.scrollHeight;
-        }
+function stopRecording() {
+    mediaRecorder.stop();
+    console.log("Grabación detenida.");
+}
 
-        function abrirAdjuntos() {
-            alert("Galería, Documento, Ubicación...");
-        }
-    </script>
-</body>
-</html>
+// 3. Modificar el render para que el audio se pueda REPRODUCIR
+function renderMensaje(m) {
+    const container = document.getElementById('msgContainer');
+    const bubble = document.createElement('div');
+    bubble.className = m.sender === 'me' ? 'bubble sent' : 'bubble received';
+    
+    if (m.tipo === 'text') {
+        bubble.innerHTML = `${m.contenido} <div class="time">${m.time}</div>`;
+    } else if (m.tipo === 'image') {
+        bubble.innerHTML = `<img src="${m.contenido}"> <div class="time">${m.time}</div>`;
+    } else if (m.tipo === 'audio') {
+        // Creamos un reproductor real de audio
+        bubble.innerHTML = `
+            <div class="audio-msg">
+                <audio controls style="width: 200px; height: 30px;">
+                    <source src="${m.contenido}" type="audio/mp3">
+                </audio>
+            </div>
+            <div class="time">${m.time}</div>`;
+    }
+    
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+}
