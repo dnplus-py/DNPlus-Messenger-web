@@ -1,1 +1,35 @@
+/* Colores Oficiales DNPlus Messenger */
+:root {
+    --verde-principal: #176F47;
+    --verde-oscuro: #085F56;
+    --blanco-fondo: #FAFAFA;
+}
+
+body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--blanco-fondo);
+    display: flex; flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.btn-confirmar {
+    background-color: var(--verde-principal);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(23, 111, 71, 0.3);
+}
+
+.header-chat {
+    background-color: var(--verde-oscuro);
+    width: 100%;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+}
 
