@@ -6,37 +6,8 @@
     <title>Chat - DNPlus</title>
     <style>
         recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: 'audio/mp3' });
-    const url = URL.createObjectURL(blob);
-    
-    const chatBox = document.getElementById('chat-box');
-    
-    // Creamos la burbuja verde
-    const burbuja = document.createElement('div');
-    burbuja.style.backgroundColor = "#176f47"; // Tu color favorito
-    burbuja.style.color = "white";
-    burbuja.style.padding = "10px";
-    burbuja.style.borderRadius = "15px 15px 0 15px";
-    burbuja.style.marginBottom = "10px";
-    burbuja.style.alignSelf = "flex-end";
-    burbuja.style.display = "flex";
-    burbuja.style.alignItems = "center";
-    burbuja.style.gap = "10px";
-    burbuja.style.maxWidth = "70%";
+    cons
 
-    // Ponemos un icono de Play y el audio escondido
-    burbuja.innerHTML = `
-        <span style="cursor:pointer" onclick="this.nextElementSibling.play()">▶️</span>
-        <audio src="${url}"></audio>
-        <small style="font-size:10px; opacity:0.7">Audio</small>
-    `;
-
-    chatBox.appendChild(burbuja);
-    chatBox.scrollTop = chatBox.scrollHeight;
-};
-
-
-        
         /* Ajuste total de la pantalla */
         body { 
             margin: 0; 
