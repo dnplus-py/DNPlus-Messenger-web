@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a DNPlus</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-around; 
+            height: 100vh; 
+            background-color: white; 
+            text-align: center;
+            padding: 20px;
+        }
+        .logo-circle {
+            width: 250px;
+            height: 250px;
+            background-color: #25D366; /* Verde vibrante */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-img { width: 150px; }
+        .title { font-size: 28px; font-weight: bold; margin-top: 20px; }
+        .terms { color: #666; font-size: 14px; padding: 0 20px; line-height: 1.5; }
+        .terms a { color: #00a884; text-decoration: none; }
+        .btn-agree {
+            background-color: #008069;
+            color: white;
+            padding: 12px 60px;
+            border-radius: 5px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            width: 80%;
+        }
+        .language-selector {
+            color: #008069;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-circle">
+        <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" class="logo-img">
+    </div>
+
+    <div>
+        <div class="title">Bienvenido a DNPlus</div>
+        <p class="terms">
+            Lee nuestra <a href="#">Política de privacidad</a>. Toca "Aceptar y continuar" para aceptar los <a href="#">Términos de servicio</a>.
+        </p>
+    </div>
+
+    <button class="btn-agree" onclick="irAlRegistro()">
+        Aceptar y continuar
+    </button>
+
+    <div class="language-selector">
+        🌐 Español ▼
+    </div>
+
+    <script>
+        function irAlRegistro() {
+            // Esto te lleva a la siguiente pantalla que ya creaste
+            window.location.href = 'otp.html';
+        }
+    </script>
+
+</body>
+</html>
