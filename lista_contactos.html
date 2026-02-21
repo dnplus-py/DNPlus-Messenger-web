@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactos - DNPlus</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { margin: 0; font-family: sans-serif; background-color: white; }
+        .header-c {
+            background-color: #085F56; color: white;
+            padding: 15px; display: flex; align-items: center; gap: 15px;
+        }
+        .contact-row {
+            display: flex; align-items: center; padding: 12px 20px;
+            gap: 15px; border-bottom: 1px solid #f0f0f0;
+        }
+        .img-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            background-color: #176F47; display: flex;
+            align-items: center; justify-content: center; color: white;
+        }
+        .btn-add {
+            background: #176F47; color: white; border: none;
+            padding: 8px 15px; border-radius: 20px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-c">
+        <span onclick="history.back()">←</span>
+        <div>
+            <div style="font-weight: bold;">Seleccionar contacto</div>
+            <div style="font-size: 12px; opacity: 0.8;">150 contactos</div>
+        </div>
+    </div>
+
+    <div class="contact-row" onclick="location.href='add_contacto.html'">
+        <div class="img-avatar">👤</div>
+        <div style="flex: 1; color: #176F47; font-weight: bold;">Nuevo contacto</div>
+    </div>
+
+    <div class="contact-row" onclick="location.href='mensajes.html'">
+        <div class="img-avatar">D</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 500;">David Oviedo</div>
+            <div style="font-size: 13px; color: #666;">Disponible</div>
+        </div>
+    </div>
+
+</body>
+</html>
 
