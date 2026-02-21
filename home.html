@@ -153,5 +153,22 @@
             historial.forEach(m => renderMensaje(m));
         }
     </script>
+
+<script>
+    window.onload = function() {
+        // Buscamos el nombre que guardaste en el perfil
+        const nombreGuardado = localStorage.getItem("user_name");
+        
+        if (nombreGuardado) {
+            // Si tienes un elemento con id "nombreUsuario", le pone tu nombre
+            const el = document.getElementById('nombreUsuario');
+            if(el) el.innerText = nombreGuardado;
+            
+            // También lo actualizamos en el mensaje de soporte
+            const msgSoporte = document.querySelector('.msg');
+            if(msgSoporte) msgSoporte.innerText = "¡Bienvenido, " + nombreGuardado + "! 🚀";
+        }
+    };
+</script>    
 </body>
 </html>
