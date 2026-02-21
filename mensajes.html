@@ -3,197 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat DNPlus</title>
+    <title>Chat - DNPlus</title>
     <style>
+        /* Ajuste total de la pantalla */
         body { 
             margin: 0; 
             font-family: sans-serif; 
             background-color: #0b141a; 
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            color: #e9edef;
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            color: white;
         }
 
-        /* --- CABECERA --- */
-        .chat-header {
-            background-color: #085f56;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
+        /* Encabezado fijo */
+        .header { 
+            background-color: #075e54; 
+            padding: 15px; 
+            display: flex; 
+            align-items: center; 
             gap: 10px;
-            z-index: 10;
+            font-weight: bold;
         }
-        .back-icon { font-size: 22px; cursor: pointer; color: white; }
-        .user-img { width: 38px; height: 38px; border-radius: 50%; background: #232d36; }
-        .user-info { flex: 1; }
-        .user-info span { display: block; font-weight: bold; font-size: 16px; color: white; }
-        .user-info small { color: rgba(255,255,255,0.8); font-size: 12px; }
 
-        /* --- ÁREA DE MENSAJES (FONDO DINÁMICO) --- */
-        .messages-container {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            /* Aquí el fondo se puede cambiar por JS */
-            background-color: #0b141a; 
+        /* BANDEJA DE CHAT: Se ajusta sola y tiene scroll */
+        #chat-box { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            background-size: contain;
         }
 
-        .bubble {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 15px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.2);
-        }
-        .received { background-color: #202c33; align-self: flex-start; border-top-left-radius: 2px; }
-        .sent { background-color: #085f56; align-self: flex-end; border-top-right-radius: 2px; }
-        .time { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px; }
-
-        /* --- ENTRADA DE TEXTO ESTILO WHATSAPP --- */
-        .input-wrapper {
-            background-color: transparent;
-            padding: 8px;
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
+        /* Barra de entrada de mensajes */
+        .footer { 
+            background-color: #1f2c33; 
+            padding: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
         }
 
-        .input-container {
-            flex: 1;
-            background-color: #202c33;
-            border-radius: 25px;
-            display: flex;
-            align-items: center;
-            padding: 5px 12px;
-            min-height: 40px;
+        input { 
+            flex: 1; 
+            background-color: #2a3942; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 25px; 
+            color: white; 
+            outline: none; 
         }
 
-        .icon-btn {
-            color: #8696a0;
-            font-size: 22px;
-            padding: 8px;
-            cursor: pointer;
+        .btn-mic { 
+            background-color: #00a884; 
+            border: none; 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 50%; 
+            color: white; 
+            font-size: 22px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
         }
 
-        .chat-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 17px;
-            outline: none;
-            padding: 8px 5px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .action-btn {
-            background-color: #085f56;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            border: none;
-            flex-shrink: 0;
-        }
+        /* Burbujas de audio */
+        audio { margin-left: auto; filter: invert(100%); }
     </style>
 </head>
-<body id="chatBody">
+<body>
 
-    <div class="chat-header">
-        <div class="back-icon" onclick="history.back()">←</div>
-        <img class="user-img" id="headerFoto" src="https://www.w3schools.com/howto/img_avatar.png">
-        <div class="user-info">
-            <span id="chatNombre">Nombre</span>
-            <small>en línea</small>
-        </div>
-        <div style="color: white; font-size: 20px;">⋮</div>
+    <div class="header">
+        <span onclick="window.history.back()" style="cursor:pointer">←</span>
+        <span>Soporte DNPlus</span>
     </div>
 
-    <div class="messages-container" id="msgContainer">
-        </div>
+    <div id="chat-box"></div>
 
-    <div class="input-wrapper">
-        <div class="input-container">
-            <div class="icon-btn">😊</div>
-            
-            <input type="text" id="chatInput" class="chat-input" placeholder="Mensaje" oninput="toggleIcon()">
-            
-            <div class="icon-btn" onclick="abrirAdjuntos()">📎</div>
-            <div class="icon-btn">📷</div>
-        </div>
-
-        <button class="action-btn" id="mainActionBtn" onclick="handleAction()">
-            <span id="actionIcon" style="font-size: 22px;">🎙️</span>
-        </button>
+    <div class="footer">
+        <input type="text" id="msg-input" placeholder="Mensaje">
+        
+        <button class="btn-mic" id="btn-audio" onclick="controlarVoz()">🎙️</button>
     </div>
 
     <script>
-        // Cargar datos del contacto
-        window.onload = function() {
-            const nombre = localStorage.getItem("chat_actual") || "Contacto";
-            document.getElementById('chatNombre').innerText = nombre;
-            
-            // Si quieres cambiar el fondo dinámicamente:
-            // document.getElementById('msgContainer').style.backgroundColor = "#176f47";
-        };
+        let grabador;
+        let fragmentos = [];
 
-        function toggleIcon() {
-            const input = document.getElementById('chatInput');
-            const btn = document.getElementById('actionIcon');
+        async function controlarVoz() {
+            const boton = document.getElementById('btn-audio');
             
-            if (input.value.trim().length > 0) {
-                btn.innerText = "➤"; // Icono de enviar
+            if (!grabador || grabador.state === "inactive") {
+                try {
+                    const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    grabador = new MediaRecorder(flujo);
+                    fragmentos = [];
+
+                    grabador.ondataavailable = (e) => fragmentos.push(e.data);
+                    
+                    grabador.onstop = () => {
+                        const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
+                        const urlAudio = URL.createObjectURL(blobAudio);
+                        
+                        // Crear el elemento de audio en el chat
+                        const chat = document.getElementById('chat-box');
+                        const nuevoAudio = document.createElement('audio');
+                        nuevoAudio.src = urlAudio;
+                        nuevoAudio.controls = true;
+                        nuevoAudio.style.display = "block";
+                        nuevoAudio.style.marginTop = "10px";
+                        
+                        chat.appendChild(nuevoAudio);
+                        chat.scrollTop = chat.scrollHeight; // Baja el scroll automáticamente
+                    };
+
+                    grabador.start();
+                    boton.innerHTML = "🛑";
+                    boton.style.backgroundColor = "#ff3b30";
+                } catch (error) {
+                    alert("David, por favor activa los permisos del micrófono.");
+                }
             } else {
-                btn.innerText = "🎙️"; // Icono de micro
+                grabador.stop();
+                boton.innerHTML = "🎙️";
+                boton.style.backgroundColor = "#00a884";
             }
-        }
-
-        function handleAction() {
-            const input = document.getElementById('chatInput');
-            if (input.value.trim() !== "") {
-                enviarMensaje(input.value);
-                input.value = "";
-                toggleIcon();
-            } else {
-                alert("Grabando audio...");
-            }
-        }
-
-        function enviarMensaje(texto) {
-            const container = document.getElementById('msgContainer');
-            const now = new Date();
-            const time = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble sent';
-            bubble.innerHTML = `${texto} <div class="time">${time}</div>`;
-            
-            container.appendChild(bubble);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function abrirAdjuntos() {
-            alert("Galería, Documento, Ubicación...");
         }
     </script>
-
-<script>
-    // Este código lee tu nombre para identificar tus burbujas
-    const miNombre = localStorage.getItem("user_name") || "Yo";
-    console.log("Chateando como: " + miNombre);
-</script>
-
-    
 </body>
 </html>
