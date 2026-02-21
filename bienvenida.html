@@ -13,46 +13,76 @@
             align-items: center; 
             justify-content: space-around; 
             height: 100vh; 
-            background-color: white; 
+            /* Fondo Negro Azulado oscuro */
+            background-color: #0b141a; 
+            color: #e9edef; /* Blanco grisáceo para el texto */
             text-align: center;
             padding: 20px;
         }
-        .logo-circle {
-            width: 250px;
-            height: 250px;
-            background-color: #25D366; /* Verde vibrante */
-            border-radius: 50%;
+        .logo-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .logo-img { width: 150px; }
-        .title { font-size: 28px; font-weight: bold; margin-top: 20px; }
-        .terms { color: #666; font-size: 14px; padding: 0 20px; line-height: 1.5; }
-        .terms a { color: #00a884; text-decoration: none; }
+        /* Círculo de fondo para el logo */
+        .logo-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #176F47; /* Tu verde característico */
+            border-radius: 50%;
+            opacity: 0.1; /* Un toque sutil */
+        }
+        .logo-img { 
+            width: 180px; 
+            z-index: 2;
+            filter: drop-shadow(0 0 10px rgba(23, 111, 71, 0.5));
+        }
+        .title { 
+            font-size: 28px; 
+            font-weight: bold; 
+            margin-top: 20px; 
+        }
+        .terms { 
+            color: #8696a0; /* Gris para textos secundarios */
+            font-size: 14px; 
+            padding: 0 20px; 
+            line-height: 1.5; 
+        }
+        .terms a { 
+            color: #53bdeb; /* Azul clarito para los links */
+            text-decoration: none; 
+        }
         .btn-agree {
-            background-color: #008069;
-            color: white;
+            background-color: #00a884; /* Verde brillante para que resalte en lo oscuro */
+            color: #0b141a; /* Texto oscuro dentro del botón */
             padding: 12px 60px;
-            border-radius: 5px;
+            border-radius: 30px; /* Bordes más redondeados */
             font-weight: bold;
             border: none;
             cursor: pointer;
             text-transform: uppercase;
-            width: 80%;
+            width: 85%;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .language-selector {
-            color: #008069;
+            color: #00a884;
             display: flex;
             align-items: center;
             gap: 5px;
             font-weight: 500;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="logo-circle">
+    <div class="logo-container">
+        <div class="logo-bg"></div>
         <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" class="logo-img">
     </div>
 
@@ -73,8 +103,8 @@
 
     <script>
         function irAlRegistro() {
-            // Esto te lleva a la siguiente pantalla que ya creaste
-            window.location.href = 'otp.html';
+            // Te lleva a la pantalla de ingreso de número
+            window.location.href = 'termino.html';
         }
     </script>
 
