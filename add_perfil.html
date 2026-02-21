@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil DNPlus</title>
+    <title>Perfil - DNPlus</title>
     <style>
-        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        .header { background-color: #085f56; padding: 20px; text-align: left; font-size: 18px; font-weight: bold; }
+        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 0; }
+        .header { background-color: #075e54; padding: 15px; text-align: left; font-size: 19px; }
         .container { padding: 20px; }
-        .avatar-circle { 
-            width: 160px; height: 160px; background: #202c33; 
-            border-radius: 50%; margin: 40px auto; overflow: hidden; 
-            border: 2px solid #085f56; cursor: pointer;
-        }
+        .avatar { width: 150px; height: 150px; background: #202c33; border-radius: 50%; margin: 30px auto; overflow: hidden; border: 1px solid #075e54; }
         img { width: 100%; height: 100%; object-fit: cover; }
-        input { 
-            background: transparent; border: none; border-bottom: 2px solid #085f56; 
-            color: white; width: 85%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px;
-        }
-        .btn { 
-            background: #085f56; color: white; border: none; padding: 15px; 
-            border-radius: 30px; width: 85%; font-weight: bold; margin-top: 60px; cursor: pointer; 
-        }
+        input { background: transparent; border: none; border-bottom: 2px solid #075e54; color: white; width: 85%; padding: 10px; font-size: 18px; outline: none; text-align: center; margin-top: 20px; }
+        .btn { background: #075e54; color: white; border: none; padding: 15px; border-radius: 30px; width: 85%; font-weight: bold; margin-top: 60px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -29,40 +19,27 @@
     <div class="header">Info. de perfil</div>
 
     <div class="container">
-        <div class="avatar-circle" onclick="document.getElementById('inputFoto').click()">
-            <img id="imgVista" src="https://www.w3schools.com/howto/img_avatar.png">
+        <div class="avatar">
+            <img id="foto" src="https://www.w3schools.com/howto/img_avatar.png">
         </div>
-        <input type="file" id="inputFoto" style="display:none" accept="image/*" onchange="cargarFoto(event)">
-
-        <input type="text" id="nombreCaja" placeholder="Escribe tu nombre">
         
-        <button class="btn" onclick="finalizarPerfil()">SIGUIENTE</button>
+        <input type="text" id="nombreUsuario" placeholder="Escribe tu nombre">
+        
+        <button class="btn" onclick="irAlHome()">SIGUIENTE</button>
     </div>
 
     <script>
-        // Función para la foto
-        function cargarFoto(e) {
-            const leer = new FileReader();
-            leer.onload = () => {
-                document.getElementById('imgVista').src = leer.result;
-                localStorage.setItem("user_photo", leer.result);
-            };
-            leer.readAsDataURL(e.target.files[0]);
-        }
+        function irAlHome() {
+            const nombre = document.getElementById('nombreUsuario').value.trim();
 
-        // Función para saltar al Home
-        function finalizarPerfil() {
-            const nom = document.getElementById('nombreCaja').value.trim();
-
-            if (nom.length >= 2) {
-                // Guardamos el nombre en la memoria
-                localStorage.setItem("user_name", nom);
+            if (nombre.length >= 2) {
+                // Guardamos el nombre David Oviedo para que la app lo recuerde
+                localStorage.setItem("user_name", nombre);
                 
-                // Forzamos el salto
-                console.log("Entrando a home...");
+                // Forzamos el salto al archivo que vi en tu lista
                 window.location.href = "home.html";
             } else {
-                alert("David, el nombre es muy corto.");
+                alert("Escribe tu nombre para continuar, bro.");
             }
         }
     </script>
