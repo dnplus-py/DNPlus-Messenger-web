@@ -5,93 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - DNPlus</title>
     <style>
-        body { 
-            background-color: #0b141a; 
-            color: #e9edef; 
-            text-align: center; 
-            font-family: sans-serif;
-            margin: 0; padding: 20px;
-        }
+        body { background-color: #0b141a; color: #e9edef; text-align: center; font-family: sans-serif; margin: 0; padding: 20px; }
         .title { color: #e9edef; font-weight: 500; margin-top: 40px; font-size: 22px; }
         .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; }
-
-        /* Selector de País Estilo WhatsApp */
-        .country-picker {
-            border-bottom: 1px solid #085f56;
-            width: 280px;
-            margin: 0 auto 20px;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .phone-input-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            width: 280px;
-            margin: 0 auto 40px;
-        }
+        .country-picker { border-bottom: 1px solid #085f56; width: 280px; margin: 0 auto 20px; padding: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .phone-input-container { display: flex; justify-content: center; align-items: center; gap: 10px; width: 280px; margin: 0 auto 40px; }
         .prefix { border-bottom: 1px solid #085f56; padding: 10px 0; width: 60px; font-size: 18px; }
-        .number-input { 
-            background: transparent; border: none; 
-            border-bottom: 1px solid #085f56; 
-            padding: 10px 0; font-size: 18px; 
-            width: 100%; outline: none; color: #e9edef; 
-        }
-
-        .btn-confirmar { 
-            background-color: #085f56; color: white; 
-            padding: 12px 60px; border-radius: 30px; 
-            font-weight: bold; border: none; cursor: pointer;
-        }
-
-        /* MODAL DE PAÍSES */
-        .modal-countries {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #0b141a;
-            z-index: 2000;
-            flex-direction: column;
-        }
-        .search-bar {
-            background: #085f56;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .search-input {
-            background: transparent; border: none;
-            color: white; font-size: 18px; width: 100%; outline: none;
-        }
+        .number-input { background: transparent; border: none; border-bottom: 1px solid #085f56; padding: 10px 0; font-size: 18px; width: 100%; outline: none; color: #e9edef; }
+        .btn-confirmar { background-color: #085f56; color: white; padding: 12px 60px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; }
+        .modal-countries { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b141a; z-index: 2000; flex-direction: column; }
+        .search-bar { background: #085f56; padding: 15px; display: flex; align-items: center; gap: 15px; }
+        .search-input { background: transparent; border: none; color: white; font-size: 18px; width: 100%; outline: none; }
         .country-list { overflow-y: auto; flex: 1; }
-        .country-item {
-            display: flex; justify-content: space-between;
-            padding: 15px 25px;
-            border-bottom: 1px solid rgba(134,150,160,0.1);
-        }
+        .country-item { display: flex; justify-content: space-between; padding: 15px 25px; border-bottom: 1px solid rgba(134,150,160,0.1); }
     </style>
 </head>
 <body>
-
     <h2 class="title">Introduce tu número</h2>
     <p class="instruccion">DNPlus verificará tu número de teléfono.</p>
-
     <div class="country-picker" onclick="abrirPaises()">
         <span id="countryName">Paraguay</span>
         <span style="color: #085f56;">▼</span>
     </div>
-
     <div class="phone-input-container">
         <div class="prefix" id="countryCode">+595</div>
         <input type="tel" id="phoneInput" class="number-input" placeholder="Número de teléfono" autofocus>
     </div>
-
     <button class="btn-confirmar" onclick="validar()">SIGUIENTE</button>
 
     <div id="modalPaises" class="modal-countries">
@@ -99,34 +38,17 @@
             <span onclick="cerrarPaises()" style="cursor:pointer">←</span>
             <input type="text" class="search-input" id="busqueda" placeholder="Busca un país..." oninput="filtrarPaises()">
         </div>
-        <div class="country-list" id="listaPaises">
-            </div>
+        <div class="country-list" id="listaPaises"></div>
     </div>
 
     <script>
-        const paises = [
-            {n: "Paraguay", c: "+595", b: "🇵🇾"},
-            {n: "Argentina", c: "+54", b: "🇦🇷"},
-            {n: "Brasil", c: "+55", b: "🇧🇷"},
-            {n: "Bolivia", c: "+591", b: "🇧🇴"},
-            {n: "Chile", c: "+56", b: "🇨🇱"},
-            {n: "Colombia", c: "+57", b: "🇨🇴"},
-            {n: "España", c: "+34", b: "🇪🇸"},
-            {n: "Estados Unidos", c: "+1", b: "🇺🇸"},
-            {n: "México", c: "+52", b: "🇲🇽"},
-            {n: "Perú", c: "+51", b: "🇵🇪"},
-            {n: "Uruguay", c: "+598", b: "🇺🇾"},
-            {n: "Venezuela", c: "+58", b: "🇻🇪"}
-        ];
-
+        const paises = [{n: "Paraguay", c: "+595", b: "🇵🇾"}, {n: "Argentina", c: "+54", b: "🇦🇷"}, {n: "Brasil", c: "+55", b: "🇧🇷"}, {n: "España", c: "+34", b: "🇪🇸"}, {n: "México", c: "+52", b: "🇲🇽"}];
         function abrirPaises() { document.getElementById('modalPaises').style.display = 'flex'; filtrarPaises(); }
         function cerrarPaises() { document.getElementById('modalPaises').style.display = 'none'; }
-
         function filtrarPaises() {
             const busqueda = document.getElementById('busqueda').value.toLowerCase();
             const lista = document.getElementById('listaPaises');
             lista.innerHTML = "";
-
             paises.filter(p => p.n.toLowerCase().includes(busqueda)).forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'country-item';
@@ -135,22 +57,15 @@
                 lista.appendChild(div);
             });
         }
-
-        function seleccionar(p) {
-            document.getElementById('countryName').innerText = p.n;
-            document.getElementById('countryCode').innerText = p.c;
-            cerrarPaises();
-        }
-
+        function seleccionar(p) { document.getElementById('countryName').innerText = p.n; document.getElementById('countryCode').innerText = p.c; cerrarPaises(); }
+        
         function validar() {
             const num = document.getElementById('phoneInput').value;
-            const code = document.getElementById('countryCode').innerText;
             if(num.length > 5) {
-                localStorage.setItem("user_phone", code + " " + num);
-                window.location.href = 'otp.html';
-            } else {
-                alert("Número inválido");
-            }
+                localStorage.setItem("user_phone", num);
+                // SALTO AL PERFIL
+                window.location.href = 'add_perfil.html';
+            } else { alert("Número inválido"); }
         }
     </script>
 </body>
