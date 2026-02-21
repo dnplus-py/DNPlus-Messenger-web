@@ -3,134 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - DNPlus</title>
+    <title>Perfil DNPlus</title>
     <style>
-        body { 
-            background-color: #0b141a; 
-            color: #e9edef; 
-            text-align: center; 
-            font-family: sans-serif; 
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Cabecera */
-        .header-perfil {
-            background-color: #085f56;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .header-perfil h2 { margin: 0; font-size: 19px; font-weight: 500; }
-
-        /* Loader */
-        #loader-overlay {
-            display: none; 
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #0b141a;
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(8, 95, 86, 0.2);
-            border-top: 4px solid #085f56;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Foto de Perfil */
-        .profile-pic {
-            width: 150px; height: 150px;
-            background-color: #202c33;
-            border-radius: 50%;
-            margin: 40px auto 20px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-            border: 1px solid #085f56;
-            cursor: pointer;
-        }
-        #imgPerfil { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Input y Botón */
-        .input-name {
-            background: transparent; border: none;
-            border-bottom: 2px solid #085f56;
-            width: 80%; padding: 10px;
-            font-size: 18px; color: white;
-            outline: none; margin-top: 20px;
-            text-align: center;
-        }
-        .btn-confirmar {
-            background-color: #085f56; color: white;
-            padding: 14px 60px; border-radius: 30px;
-            font-weight: bold; border: none;
-            cursor: pointer; margin-top: auto;
-            margin-bottom: 40px;
-        }
+        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .header { background-color: #085f56; padding: 15px; position: fixed; top: 0; left: 0; width: 100%; text-align: left; }
+        .circle { width: 150px; height: 150px; background: #202c33; border-radius: 50%; margin: 80px auto 20px; overflow: hidden; border: 2px solid #085f56; }
+        img { width: 100%; height: 100%; object-fit: cover; }
+        input { background: transparent; border: none; border-bottom: 2px solid #085f56; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; }
+        button { background: #085f56; color: white; border: none; padding: 15px 50px; border-radius: 30px; font-weight: bold; margin-top: 50px; cursor: pointer; width: 80%; }
     </style>
 </head>
 <body>
 
-    <div id="loader-overlay">
-        <div class="spinner"></div>
-        <p style="color: #085f56; font-family: sans-serif; margin-top: 15px;">Iniciando DNPlus...</p>
+    <div class="header"><strong>Info. de perfil</strong></div>
+
+    <div class="circle" onclick="document.getElementById('f').click()">
+        <img id="p" src="https://www.w3schools.com/howto/img_avatar.png">
     </div>
+    <input type="file" id="f" style="display:none" accept="image/*" onchange="preview(event)">
 
-    <div class="header-perfil">
-        <h2>Info. de perfil</h2>
-    </div>
-
-    <div style="flex: 1; padding: 20px;">
-        <p style="color: #8696a0; font-size: 15px;">Escribe tu nombre y elige una foto.</p>
-
-        <div class="profile-pic" onclick="document.getElementById('fileInput').click()">
-            <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png">
-        </div>
-        <input type="file" id="fileInput" style="display:none" accept="image/*" onchange="preview(event)">
-
-        <input type="text" id="userName" class="input-name" placeholder="Tu nombre">
-    </div>
-
-    <button class="btn-confirmar" onclick="guardarYSalir()">SIGUIENTE</button>
+    <input type="text" id="n" placeholder="Tu nombre">
+    <br>
+    <button onclick="irHome()">SIGUIENTE</button>
 
     <script>
-        // Previsualizar imagen
-        function preview(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                document.getElementById('imgPerfil').src = reader.result;
-                localStorage.setItem("user_photo", reader.result);
-            }
-            reader.readAsDataURL(event.target.files[0]);
+        // Función para la foto
+        function preview(e) {
+            const r = new FileReader();
+            r.onload = () => { 
+                document.getElementById('p').src = r.result; 
+                localStorage.setItem("user_photo", r.result);
+            };
+            r.readAsDataURL(e.target.files[0]);
         }
 
-        // Función Principal: De Perfil a Home
-        function guardarYSalir() {
-            const nombre = document.getElementById('userName').value.trim();
-
+        // Función para ir al Home (REFORZADA)
+        function irHome() {
+            const nombre = document.getElementById('n').value.trim();
+            
             if (nombre.length >= 2) {
-                // 1. Mostrar carga
-                document.getElementById('loader-overlay').style.display = 'flex';
-
-                // 2. Guardar nombre en el celular
+                // Guardamos el nombre
                 localStorage.setItem("user_name", nombre);
+                
+                console.log("Guardando nombre: " + nombre);
+                alert("Perfil guardado. Entrando a DNPlus...");
 
-                // 3. REDIRECCIÓN A HOME (Corregida)
-                setTimeout(function() {
-                    // Importante: El archivo debe llamarse home.html
-                    window.location.href = 'home.html';
-                }, 2000);
+                // INTENTO 1: Redirección simple
+                window.location.href = "home.html";
+
+                // INTENTO 2: Si el 1 falla después de 1 segundo (por si acaso)
+                setTimeout(() => {
+                    window.location.assign("home.html");
+                }, 1000);
 
             } else {
-                alert("Por favor, ingresa tu nombre, David.");
+                alert("Escribe tu nombre, David.");
             }
         }
     </script>
