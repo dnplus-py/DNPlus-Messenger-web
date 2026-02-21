@@ -3,42 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - DNPlus</title>
+    <title>Perfil DNPlus</title>
     <style>
         body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        .header { background-color: #075e54; padding: 15px; text-align: left; font-size: 19px; }
+        .header { background-color: #075e54; padding: 20px; text-align: left; font-size: 18px; font-weight: bold; }
         .container { padding: 20px; }
         
-        /* Círculo de la foto */
-        .avatar-container {
-            width: 150px; height: 150px;
-            background: #202c33;
-            border-radius: 50%;
-            margin: 30px auto;
-            overflow: hidden;
-            border: 2px solid #075e54;
-            cursor: pointer;
-            position: relative;
+        /* Círculo de Foto */
+        .avatar-circle { 
+            width: 150px; height: 150px; background: #202c33; 
+            border-radius: 50%; margin: 40px auto; overflow: hidden; 
+            border: 2px solid #075e54; cursor: pointer;
         }
-        #fotoPerfil { width: 100%; height: 100%; object-fit: cover; }
+        #imgPerfil { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Icono de cámara superpuesto */
-        .camera-icon {
-            position: absolute; bottom: 10px; right: 10px;
-            background: #075e54; padding: 8px; border-radius: 50%; font-size: 12px;
-        }
-
-        input[type="text"] {
-            background: transparent; border: none;
-            border-bottom: 2px solid #075e54;
-            color: white; width: 85%; padding: 10px;
-            font-size: 18px; outline: none; text-align: center; margin-top: 20px;
+        input[type="text"] { 
+            background: transparent; border: none; border-bottom: 2px solid #075e54; 
+            color: white; width: 85%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px;
         }
         
-        .btn {
-            background: #075e54; color: white; border: none;
-            padding: 15px; border-radius: 30px; width: 85%;
-            font-weight: bold; margin-top: 60px; cursor: pointer;
+        .btn-verde { 
+            background: #075e54; color: white; border: none; padding: 15px; 
+            border-radius: 30px; width: 85%; font-weight: bold; margin-top: 50px; cursor: pointer; 
         }
     </style>
 </head>
@@ -47,44 +33,44 @@
     <div class="header">Info. de perfil</div>
 
     <div class="container">
-        <div class="avatar-container" onclick="document.getElementById('selectorFoto').click()">
-            <img id="fotoPerfil" src="https://www.w3schools.com/howto/img_avatar.png">
-            <div class="camera-icon">📷</div>
+        <div class="avatar-circle" onclick="document.getElementById('inputOculto').click()">
+            <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png">
         </div>
 
-        <input type="file" id="selectorFoto" style="display:none" accept="image/*" onchange="seleccionarFoto(event)">
+        <input type="file" id="inputOculto" style="display:none" accept="image/*" onchange="verFoto(event)">
+
+        <input type="text" id="nombreCaja" placeholder="Tu nombre">
         
-        <input type="text" id="nombreUsuario" placeholder="Escribe tu nombre">
-        
-        <button class="btn" onclick="irAlHome()">SIGUIENTE</button>
+        <button class="btn-verde" onclick="guardarTodo()">SIGUIENTE</button>
     </div>
 
     <script>
-        // Función para abrir galería y mostrar la foto elegida
-        function seleccionarFoto(event) {
-            const archivo = event.target.files[0];
+        // 1. Función para mostrar la foto que elijas
+        function verFoto(e) {
+            var archivo = e.target.files[0];
             if (archivo) {
-                const lector = new FileReader();
-                lector.onload = function(e) {
-                    // Mostramos la foto en el círculo
-                    document.getElementById('fotoPerfil').src = e.target.result;
-                    // Guardamos la foto en la memoria del celu
-                    localStorage.setItem("user_photo", e.target.result);
-                }
+                var lector = new FileReader();
+                lector.onload = function(res) {
+                    document.getElementById('imgPerfil').src = res.target.result;
+                    // Guardamos la foto en el cel
+                    localStorage.setItem("user_photo", res.target.result);
+                };
                 lector.readAsDataURL(archivo);
             }
         }
 
-        // Función para guardar nombre y saltar al Home
-        function irAlHome() {
-            const nombre = document.getElementById('nombreUsuario').value.trim();
+        // 2. Función para guardar nombre y SALTAR al Home
+        function guardarTodo() {
+            var elNombre = document.getElementById('nombreCaja').value.trim();
 
-            if (nombre.length >= 2) {
-                localStorage.setItem("user_name", nombre);
-                // Salto directo al archivo home.html
+            if (elNombre.length >= 2) {
+                localStorage.setItem("user_name", elNombre);
+                
+                // Forzamos el salto a home.html
+                console.log("Saltando a home...");
                 window.location.href = "home.html";
             } else {
-                alert("David, por favor escribe tu nombre.");
+                alert("David, escribe tu nombre antes de seguir.");
             }
         }
     </script>
