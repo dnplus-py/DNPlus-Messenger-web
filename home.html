@@ -40,8 +40,8 @@
             text-transform: uppercase;
         }
         .tab.active {
-            color: #00a884;
-            border-bottom: 3px solid #00a884;
+            color: #085f56; /* Tu verde */
+            border-bottom: 3px solid #085f56;
         }
 
         /* --- VIEW PAGER --- */
@@ -78,18 +78,22 @@
         .details { flex: 1; }
         .name { font-weight: bold; font-size: 16px; display: block; }
         .msg { color: #8696a0; font-size: 14px; }
-        .time { font-size: 12px; color: #00a884; }
+        .time { font-size: 12px; color: #085f56; }
 
-        /* --- FAB --- */
+        /* --- FAB DINÁMICO --- */
         .fab {
             position: fixed;
-            bottom: 20px; right: 20px;
-            background-color: #00a884;
-            width: 55px; height: 55px;
+            bottom: 25px; right: 25px;
+            background-color: #085f56; /* Tu verde */
+            width: 60px; height: 60px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
+        .fab:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -109,7 +113,7 @@
         <div class="view-pager" id="pager">
             
             <div class="page">
-                <div class="item" onclick="location.href='add_contacto.html'">
+                <div class="item" onclick="location.href='mensajes.html'">
                     <div class="avatar">🚀</div>
                     <div class="details">
                         <div style="display:flex; justify-content: space-between;">
@@ -122,14 +126,17 @@
             </div>
 
             <div class="page">
-                <div class="item">
-                    <div class="avatar" style="border: 2px solid #8696a0;">📸</div>
+                <div class="item" onclick="abrirGaleria()">
+                    <div class="avatar" style="border: 2px solid #8696a0; position: relative;">
+                        📸
+                        <div style="position:absolute; bottom:0; right:0; background:#085f56; border-radius:50%; width:18px; height:18px; font-size:14px; display:flex; align-items:center; justify-content:center; border: 2px solid #0b141a;">+</div>
+                    </div>
                     <div class="details">
                         <span class="name">Mi estado</span>
                         <span class="msg">Toca para añadir</span>
                     </div>
                 </div>
-                <div style="padding: 10px 15px; color: #00a884; font-size: 13px; font-weight: bold;">RECIENTES</div>
+                <div style="padding: 10px 15px; color: #085f56; font-size: 13px; font-weight: bold;">RECIENTES</div>
                 <div style="text-align: center; margin-top: 50px; color: #8696a0;">No hay estados nuevos</div>
             </div>
 
@@ -142,21 +149,52 @@
         </div>
     </div>
 
-    <div class="fab" onclick="location.href='agregar_contacto.html'">
-        <span style="font-size: 24px; color: #0b141a;">💬</span>
+    <div class="fab" id="mainFab" onclick="fabAction()">
+        <span id="fabIcon" style="font-size: 24px; color: #ffffff;">💬</span>
     </div>
 
     <script>
+        let currentPage = 0;
+
         function movePage(index) {
+            currentPage = index;
             const pager = document.getElementById('pager');
             const tabs = document.querySelectorAll('.tab');
+            const fabIcon = document.getElementById('fabIcon');
             
-            // Mover el ViewPager
             pager.style.transform = `translateX(-${index * 100}vw)`;
             
-            // Actualizar Tabs
             tabs.forEach(t => t.classList.remove('active'));
             tabs[index].classList.add('active');
+
+            // Cambiar icono del FAB según la página
+            if(index === 0) fabIcon.innerText = "💬";
+            if(index === 1) fabIcon.innerText = "📷";
+            if(index === 2) fabIcon.innerText = "📞";
+        }
+
+        // ACCIONES DE LOS BOTONES
+        function fabAction() {
+            if(currentPage === 0) {
+                // Chats -> lista_contactos.html
+                window.location.href = 'lista_contactos.html';
+            } 
+            else if(currentPage === 1) {
+                // Estados -> Galería
+                abrirGaleria();
+            } 
+            else if(currentPage === 2) {
+                // Llamadas -> add_contactos.html
+                window.location.href = 'agregar_contacto.html';
+            }
+        }
+
+        function abrirGaleria() {
+            if(window.Android && window.Android.abrirGaleria) {
+                window.Android.abrirGaleria();
+            } else {
+                alert("Abriendo Galería...");
+            }
         }
     </script>
 </body>
