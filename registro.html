@@ -6,29 +6,29 @@
     <title>Registro - DNPlus</title>
     <style>
         body { 
-            background-color: #0b141a; 
+            background-color: #0b141a; /* Tu negro azulado */
             color: #e9edef; 
             text-align: center; 
             font-family: sans-serif;
             margin: 0;
             padding: 20px;
         }
-        .title { color: #e9edef; font-weight: 500; margin-top: 50px; }
-        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 30px; line-height: 1.4; }
+        .title { color: #e9edef; font-weight: 500; margin-top: 60px; }
+        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; }
         .phone-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 40px; }
         .country-select { border-bottom: 2px solid #00a884; padding: 5px 0; width: 80px; font-size: 18px; color: #e9edef; }
         .number-input { background: transparent; border: none; border-bottom: 2px solid #00a884; padding: 5px 0; font-size: 18px; width: 180px; outline: none; color: #e9edef; }
-        .btn-confirmar { background-color: #00a884; color: #0b141a; padding: 12px 40px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 14px; }
+        .btn-confirmar { background-color: #00a884; color: #0b141a; padding: 12px 60px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; }
 
-        /* Modal Oscuro */
+        /* Modal DNPlus Oscuro */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; }
-        .modal-box { background: #232d36; width: 85%; max-width: 320px; margin: 50% auto; padding: 25px; border-radius: 5px; text-align: left; }
-        .btn-flat { background: none; border: none; color: #00a884; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 14px; }
+        .modal-box { background: #232d36; width: 85%; max-width: 320px; margin: 50% auto; padding: 25px; border-radius: 10px; text-align: left; }
+        .btn-flat { background: none; border: none; color: #00a884; font-weight: bold; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <h2 class="title">Verifica tu número</h2>
+    <h2 class="title">Introduce tu número</h2>
     <p class="instruccion">DNPlus Messenger enviará un SMS para verificar tu número de teléfono.</p>
 
     <div class="phone-container">
@@ -41,9 +41,9 @@
     <div id="miModal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="margin-top:0;">¿Es este su número?</h3>
-            <p id="numeroMostrado" style="color: #e9edef; font-size: 17px; margin: 15px 0;"></p>
+            <p id="numeroMostrado" style="font-size: 18px; font-weight: bold; color: #e9edef;"></p>
             <p style="color: #8696a0;">Te enviaremos un código de activación por SMS.</p>
-            <div style="display:flex; justify-content: flex-end; gap:25px; margin-top:25px;">
+            <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 20px;">
                 <button class="btn-flat" onclick="cerrarModal()">Editar</button>
                 <button class="btn-flat" onclick="confirmarYEnviar()">OK</button>
             </div>
@@ -57,14 +57,20 @@
                 document.getElementById('numeroMostrado').innerText = "+595 " + num;
                 document.getElementById('miModal').style.display = 'block';
             } else {
-                alert("Introduce un número válido.");
+                alert("Por favor, introduce un número válido.");
             }
         }
         function cerrarModal() { document.getElementById('miModal').style.display = 'none'; }
+        
+        // Función actualizada para redirigir a otp.html
         function confirmarYEnviar() {
-            window.location.href = 'home.html'; // Aquí podés poner la siguiente pantalla
+            const num = document.getElementById('phoneInput').value;
+            // Guardamos el número en la memoria del navegador por si lo necesitamos mostrar en la siguiente pantalla
+            localStorage.setItem("telefono_usuario", "+595 " + num);
+            
+            // Redirigimos a la pantalla del código SMS
+            window.location.href = 'otp.html';
         }
     </script>
 </body>
 </html>
-
