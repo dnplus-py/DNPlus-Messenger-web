@@ -1,116 +1,96 @@
 <style>
-    /* El contenedor que corta lo que sobra */
+    /* 1. EL CONTENEDOR: Esconde lo que no está activo */
     .window-container {
-        width: 100%;
-        overflow: hidden; 
-        position: relative;
-        background-color: #0b141a; /* Fondo para evitar destellos blancos */
+        width: 100vw; /* Ocupa todo el ancho */
+        overflow: hidden; /* ¡ESTO ES LO QUE ESCONDE LAS OTRAS 2 PÁGINAS! */
+        background-color: #0b141a;
     }
 
-    /* La tira larga con las 3 páginas */
+    /* 2. LA TIRA: Se desliza */
     .view-pager {
         display: flex;
-        width: 300%; 
+        width: 300%; /* Triple de ancho para las 3 secciones */
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* 3. CADA PÁGINA: Todas con el mismo fondo oscuro */
     .page {
-        width: 100%; 
-        height: 85vh; /* Un poco más alto */
-        background: #0b141a; /* Negro azulado */
+        width: 100%; /* Cada una mide exactamente el ancho de la pantalla */
+        min-height: 85vh;
+        background-color: #0b141a; /* Fondo oscuro azulado */
         color: #e9edef;
     }
 
-    /* Estilo para los items de chat */
-    .chat-item {
+    /* Estilo para los ítems de la lista */
+    .list-item {
         display: flex;
         align-items: center;
         padding: 15px;
-        border-bottom: 1px solid rgba(134, 150, 160, 0.15);
+        border-bottom: 1px solid rgba(134, 150, 160, 0.1);
         cursor: pointer;
     }
-    
-    .avatar-chat {
+
+    .avatar-circle {
         width: 50px;
         height: 50px;
-        background-color: #00a884;
+        background-color: #232d36; /* Un gris azulado un poco más claro para el círculo */
         border-radius: 50%;
         margin-right: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 22px;
     }
 
-    /* Botón Flotante (FAB) */
-    .fab {
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        background-color: #00a884; /* Verde brillante para resaltar en el oscuro */
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        z-index: 999;
-    }
-
-    .empty-state {
-        text-align: center;
+    /* Texto secundario (Grisáceo) */
+    .subtext {
         color: #8696a0;
+        font-size: 14px;
+        margin: 2px 0;
+    }
+
+    .empty-msg {
+        text-align: center;
         margin-top: 100px;
-        font-size: 16px;
+        color: #8696a0;
     }
 </style>
 
 <div class="window-container">
     <div class="view-pager" id="pager">
         
-        <div class="page">
-            <div class="chat-item" onclick="location.href='mensajes.html'">
-                <div class="avatar-chat">🚀</div>
+        <div class="page" id="view_chats">
+            <div class="list-item" onclick="location.href='mensajes.html'">
+                <div class="avatar-circle" style="background-color: #00a884;">🚀</div>
                 <div>
-                    <strong style="color: #e9edef; font-size: 17px;">Soporte DNPlus</strong>
-                    <p style="margin:2px 0; color:#8696a0; font-size: 14px;">¡Bienvenido al nuevo mensajero! 🚀</p>
-                </div>
-                <div style="margin-left: auto; text-align: right;">
-                    <span style="color: #00a884; font-size: 12px; font-weight: bold;">10:45 AM</span><br>
-                    <span style="background: #00a884; color: #0b141a; border-radius: 50%; padding: 2px 7px; font-size: 12px; font-weight: bold;">1</span>
+                    <strong style="color: #e9edef;">Soporte DNPlus</strong>
+                    <p class="subtext">¡Bienvenido al nuevo mensajero! 🚀</p>
                 </div>
             </div>
         </div>
 
-        <div class="page">
-            <div class="empty-state">
-                <p>No hay estados para mostrar</p>
+        <div class="page" id="view_status">
+            <div class="list-item">
+                <div class="avatar-circle">📸</div>
+                <div>
+                    <strong style="color: #e9edef;">Mi estado</strong>
+                    <p class="subtext">Toca para añadir una actualización</p>
+                </div>
             </div>
+            <p style="padding: 15px; color: #00a884; font-size: 13px; font-weight: bold;">RECIENTES</p>
+            <div class="empty-msg">No hay actualizaciones de estados</div>
         </div>
 
-        <div class="page">
-            <div class="empty-state">
-                <p>Para llamar a tus contactos, toca el icono abajo</p>
+        <div class="page" id="view_calls">
+            <div class="empty-msg">
+                <p>No tienes llamadas recientes.</p>
+                <p class="subtext">Las llamadas que realices aparecerán aquí.</p>
             </div>
         </div>
 
     </div>
 </div>
 
-<div class="fab" onclick="alert('Buscando contactos...')">
+<div class="fab">
     <span style="color: #0b141a; font-size: 24px;">💬</span>
 </div>
-
-<script>
-    function movePage(index) {
-        const pager = document.getElementById('pager');
-        const tabs = document.querySelectorAll('.tab');
-        
-        let move = index * (100 / 3);
-        pager.style.transform = `translateX(-${move}%)`;
-        
-        tabs.forEach(t => t.classList.remove('active'));
-        if(tabs[index]) tabs[index].classList.add('active');
-    }
-</script>
