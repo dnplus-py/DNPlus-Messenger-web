@@ -5,49 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil DNPlus</title>
     <style>
-        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .box { padding: 20px; }
+        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
+        .header { background-color: #085f56; padding: 20px; text-align: left; font-size: 18px; font-weight: bold; }
+        .container { padding: 20px; }
+        .avatar-circle { 
+            width: 160px; height: 160px; background: #202c33; 
+            border-radius: 50%; margin: 40px auto; overflow: hidden; 
+            border: 2px solid #085f56; cursor: pointer;
+        }
+        img { width: 100%; height: 100%; object-fit: cover; }
         input { 
             background: transparent; border: none; border-bottom: 2px solid #085f56; 
-            color: white; width: 80%; padding: 10px; font-size: 20px; outline: none; 
+            color: white; width: 85%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px;
         }
-        button { 
+        .btn { 
             background: #085f56; color: white; border: none; padding: 15px; 
-            border-radius: 30px; width: 80%; font-weight: bold; margin-top: 40px; cursor: pointer; 
+            border-radius: 30px; width: 85%; font-weight: bold; margin-top: 60px; cursor: pointer; 
         }
     </style>
 </head>
 <body>
 
-    <h2>Info. de perfil</h2>
-    <p style="color: #8696a0;">Introduce tu nombre para empezar</p>
+    <div class="header">Info. de perfil</div>
 
-    <div class="box">
-        <input type="text" id="nombreInput" placeholder="Tu nombre..." autofocus>
-        <br>
-        <button onclick="validarYSaltar()">SIGUIENTE</button>
+    <div class="container">
+        <div class="avatar-circle" onclick="document.getElementById('inputFoto').click()">
+            <img id="imgVista" src="https://www.w3schools.com/howto/img_avatar.png">
+        </div>
+        <input type="file" id="inputFoto" style="display:none" accept="image/*" onchange="cargarFoto(event)">
+
+        <input type="text" id="nombreCaja" placeholder="Escribe tu nombre">
+        
+        <button class="btn" onclick="finalizarPerfil()">SIGUIENTE</button>
     </div>
 
     <script>
-        function validarYSaltar() {
-            var nombre = document.getElementById('nombreInput').value.trim();
+        // Función para la foto
+        function cargarFoto(e) {
+            const leer = new FileReader();
+            leer.onload = () => {
+                document.getElementById('imgVista').src = leer.result;
+                localStorage.setItem("user_photo", leer.result);
+            };
+            leer.readAsDataURL(e.target.files[0]);
+        }
 
-            if (nombre.length >= 2) {
-                // Guardamos el nombre rápido
-                localStorage.setItem("user_name", nombre);
+        // Función para saltar al Home
+        function finalizarPerfil() {
+            const nom = document.getElementById('nombreCaja').value.trim();
+
+            if (nom.length >= 2) {
+                // Guardamos el nombre en la memoria
+                localStorage.setItem("user_name", nom);
                 
-                // Intentamos entrar al home de tres formas distintas para asegurar
-                console.log("Intentando entrar a home.html...");
-                
-                // Forma 1
+                // Forzamos el salto
+                console.log("Entrando a home...");
                 window.location.href = "home.html";
-                
-                // Forma 2 (por si la 1 falla)
-                setTimeout(function() {
-                    location.replace("home.html");
-                }, 500);
             } else {
-                alert("Por favor, David, escribe al menos 2 letras.");
+                alert("David, el nombre es muy corto.");
             }
         }
     </script>
