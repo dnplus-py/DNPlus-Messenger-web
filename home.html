@@ -77,6 +77,13 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             cursor: pointer;
         }
+        /* Agrega esto a tu <style> */
+.fab:active {
+    transform: scale(0.9);
+    background-color: #064a44;
+}
+
+
         
         .fab-mini {
             width: 45px; height: 45px;
@@ -199,5 +206,60 @@
             // (Tu lógica de carga de chats del localStorage aquí...)
         }
     </script>
+
+    <script>
+    let currentPage = 0;
+
+    window.onload = function() {
+        const foto = localStorage.getItem("user_photo");
+        if(foto) document.getElementById('miFotoEstado').src = foto;
+        cargarChats();
+    };
+
+    function movePage(index) {
+        currentPage = index;
+        const pager = document.getElementById('pager');
+        const tabs = document.querySelectorAll('.tab');
+        const fabIcon = document.getElementById('fabIcon');
+        const fabTexto = document.getElementById('fabTexto');
+        
+        pager.style.transform = `translateX(-${index * 100}vw)`;
+        tabs.forEach(t => t.classList.remove('active'));
+        tabs[index].classList.add('active');
+
+        // Mostrar el lápiz solo en Estados
+        fabTexto.style.display = (index === 1) ? "flex" : "none";
+        
+        // Cambiar iconos del botón flotante
+        if(index === 0) fabIcon.innerText = "💬";
+        if(index === 1) fabIcon.innerText = "📷";
+        if(index === 2) fabIcon.innerText = "➕"; // Cambié el icono a + para Llamadas
+    }
+
+    // ESTA ES LA PARTE QUE BUSCABAS, DAVID
+    function fabAction() {
+        if(currentPage === 0) {
+            // En Chats, vamos a ver la lista o agregar
+            window.location.href = 'add_contacto.html'; 
+        } 
+        else if(currentPage === 1) {
+            // Abrir cámara/galería para estado
+            document.getElementById('fileInput').click();
+        } 
+        else if(currentPage === 2) {
+            // En Llamadas, vamos directo a agregar contacto
+            window.location.href = 'add_contacto.html';
+        }
+    }
+
+    function subirEstado(event) {
+        alert("Subiendo imagen a tus estados...");
+    }
+
+    function cargarChats() {
+        // Tu lógica para mostrar los chats guardados
+    }
+</script>
+
 </body>
 </html>
