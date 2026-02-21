@@ -6,27 +6,27 @@
     <title>Verificar DNPlus</title>
     <style>
         body { 
-            background-color: #0b141a; /* Tu negro azulado */
+            background-color: #0b141a; 
             color: #e9edef; 
             text-align: center; 
             font-family: sans-serif;
             margin: 0;
             padding: 20px;
         }
-        .title { color: #e9edef; font-weight: 500; margin-top: 60px; }
-        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; }
+        .title { color: #e9edef; font-weight: 500; margin-top: 60px; font-size: 20px; }
+        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; line-height: 1.5; }
         
         .otp-inputs {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin: 30px 0;
+            gap: 8px;
+            margin: 40px 0;
         }
         .otp-box {
-            width: 40px;
-            height: 50px;
+            width: 35px;
+            height: 45px;
             border: none;
-            border-bottom: 3px solid #00a884; /* Verde brillante */
+            border-bottom: 2px solid #00a884; 
             text-align: center;
             font-size: 24px;
             font-weight: bold;
@@ -34,32 +34,37 @@
             background: transparent;
             outline: none;
         }
-        /* Color cuando el cuadrito está seleccionado */
         .otp-box:focus {
-            border-bottom: 3px solid #53bdeb; /* Azul clarito al escribir */
+            border-bottom: 2px solid #53bdeb; 
         }
+
+        /* Quitar flechitas del input number */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
         .btn-confirmar { 
-            background-color: #00a884; 
-            color: #0b141a; 
+            background-color: #085f56; /* Tu verde oficial */
+            color: white; 
             padding: 12px 60px; 
             border-radius: 30px; 
             font-weight: bold; 
             border: none; 
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 40px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         
         .resend-text {
             color: #8696a0;
             font-size: 14px;
-            cursor: pointer;
-            margin-top: 30px;
+            margin-top: 40px;
             display: block;
         }
         .resend-text span {
             color: #00a884;
             font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -67,16 +72,16 @@
 
     <div style="margin-top: 40px;">
         <h2 class="title">Verifica tu número</h2>
-        <p class="instruccion">Introduce el código de 6 dígitos que enviamos a tu dispositivo.</p>
+        <p class="instruccion" id="descPhone">Introduce el código de 6 dígitos que enviamos por SMS.</p>
     </div>
 
     <div class="otp-inputs">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 1)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 2)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 3)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 4)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 5)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 6)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 4)" onkeydown="moveBack(event, 4)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 5)" onkeydown="moveBack(event, 5)">
     </div>
 
     <button class="btn-confirmar" onclick="validarYEntrar()">
@@ -86,20 +91,41 @@
     <span class="resend-text">¿No recibiste el código? <span>Reenviar</span></span>
 
     <script>
-        // Función para saltar de cuadrito en cuadrito automáticamente
+        const inputs = document.querySelectorAll('.otp-box');
+
+        window.onload = function() {
+            // Mostrar el número guardado en la instrucción (opcional)
+            const num = localStorage.getItem("user_phone");
+            if(num) document.getElementById('descPhone').innerText = "Introduce el código de 6 dígitos enviado al " + num;
+            inputs[0].focus();
+        };
+
         function moveNext(current, index) {
-            if (current.value.length >= 1 && index < 6) {
-                document.getElementsByClassName('otp-box')[index].focus();
+            if (current.value.length >= 1 && index < 5) {
+                inputs[index + 1].focus();
+            }
+        }
+
+        function moveBack(event, index) {
+            if (event.key === "Backspace" && inputs[index].value === "" && index > 0) {
+                inputs[index - 1].focus();
             }
         }
 
         function validarYEntrar() {
-            // Animación de carga o lógica de Sketchware
-            if(window.Android && window.Android.verificarCodigo) {
-                window.Android.verificarCodigo();
+            let code = "";
+            inputs.forEach(i => code += i.value);
+
+            if(code.length === 6) {
+                // Simulación de carga
+                document.querySelector('.btn-confirmar').innerText = "VERIFICANDO...";
+                
+                setTimeout(() => {
+                    // Redirigir a la creación de perfil
+                    window.location.href = 'add_perfil.html'; 
+                }, 1500);
             } else {
-                // Si todo está bien, nos dirigimos a crear el perfil
-                window.location.href = 'add_perfil.html'; 
+                alert("Por favor ingresa el código completo.");
             }
         }
     </script>
