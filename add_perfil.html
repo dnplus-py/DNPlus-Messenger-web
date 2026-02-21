@@ -14,6 +14,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow: hidden;
         }
 
         /* --- CABECERA OFICIAL #085f56 --- */
@@ -27,7 +28,7 @@
             gap: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        .header-perfil span { font-size: 24px; cursor: pointer; }
+        .header-perfil span { font-size: 24px; cursor: pointer; padding: 0 5px; }
         .header-perfil h2 { margin: 0; font-size: 19px; font-weight: 500; }
 
         /* --- Estilos del Loader --- */
@@ -46,7 +47,7 @@
             border: 5px solid rgba(8, 95, 86, 0.2);
             border-top: 5px solid #085f56;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -110,7 +111,7 @@
             font-weight: bold;
             border: none;
             cursor: pointer;
-            margin-top: auto; /* Empuja el botón hacia abajo */
+            margin-top: auto; 
             margin-bottom: 40px;
             text-transform: uppercase;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -123,7 +124,7 @@
 
     <div id="loader-overlay">
         <div class="spinner"></div>
-        <p style="margin-top: 20px; color: #085f56; font-weight: bold;">Iniciando DNPlus...</p>
+        <p style="margin-top: 20px; color: #085f56; font-weight: bold; font-family: sans-serif;">Iniciando DNPlus...</p>
     </div>
 
     <div class="header-perfil">
@@ -132,7 +133,7 @@
     </div>
 
     <div class="content">
-        <p style="color: #8696a0; margin-top: 20px;">Proporciona tu nombre y una foto opcional.</p>
+        <p style="color: #8696a0; margin-top: 20px; font-size: 15px;">Proporciona tu nombre y una foto opcional.</p>
 
         <div class="profile-pic-container" onclick="document.getElementById('fileInput').click()">
             <div class="circle-avatar">
@@ -143,8 +144,8 @@
         
         <input type="file" id="fileInput" accept="image/*" onchange="previewImagen(event)">
 
-        <input type="text" id="userName" class="input-name" placeholder="Tu nombre" maxlength="25">
-        <p class="hint">Este nombre será visible para tus contactos de DNPlus.</p>
+        <input type="text" id="userName" class="input-name" placeholder="Escribe tu nombre aquí" maxlength="25">
+        <p class="hint">Este nombre será visible para tus contactos de DNPlus cuando les escribas.</p>
 
         <button class="btn-confirmar" onclick="guardarPerfil()">
             SIGUIENTE
@@ -152,31 +153,50 @@
     </div>
 
     <script>
+        // Previsualizar y guardar la imagen en Base64
         function previewImagen(event) {
             const reader = new FileReader();
             reader.onload = function(){
                 const output = document.getElementById('imgPerfil');
                 output.src = reader.result;
+                // Guardamos inmediatamente para no perderla
                 localStorage.setItem("user_photo", reader.result);
             };
-            reader.readAsDataURL(event.target.files[0]);
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
         }
 
         function guardarPerfil() {
             const nombre = document.getElementById('userName').value;
-            if(nombre.trim().length >= 2) {
-                document.getElementById('loader-overlay').style.display = 'flex';
-                localStorage.setItem("user_name", nombre);
+            const imagenActual = document.getElementById('imgPerfil').src;
 
+            if(nombre.trim().length >= 2) {
+                // Mostrar Loader
+                document.getElementById('loader-overlay').style.display = 'flex';
+
+                // GUARDAR DATOS CLAVE
+                localStorage.setItem("user_name", nombre.trim());
+                
+                // Si el usuario no cambió la foto, guardamos la de por defecto
+                if(!localStorage.getItem("user_photo")) {
+                    localStorage.setItem("user_photo", imagenActual);
+                }
+
+                // Estado inicial por defecto
+                localStorage.setItem("user_status", "¡Hola! Estoy usando DNPlus.");
+
+                // Conexión con Android (si aplica)
                 if(window.Android && window.Android.guardarNombre) {
                     window.Android.guardarNombre(nombre);
                 }
 
+                // Simular carga para ir al Home
                 setTimeout(function() {
                     window.location.href = 'home.html';
-                }, 2500);
+                }, 2000);
             } else {
-                alert("Por favor, ingresa un nombre válido.");
+                alert("Tu nombre es demasiado corto.");
             }
         }
     </script>
