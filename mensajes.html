@@ -15,36 +15,28 @@
             color: #e9edef;
         }
 
-        /* --- CABECERA CON TU VERDE #085f56 --- */
+        /* --- CABECERA --- */
         .chat-header {
-            background-color: #085f56; /* TU COLOR CLAVE */
-            padding: 12px 15px;
+            background-color: #085f56;
+            padding: 10px 15px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            gap: 10px;
             z-index: 10;
         }
-
         .back-icon { font-size: 22px; cursor: pointer; color: white; }
-        
-        .user-img { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            background: #232d36; 
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
+        .user-img { width: 38px; height: 38px; border-radius: 50%; background: #232d36; }
         .user-info { flex: 1; }
         .user-info span { display: block; font-weight: bold; font-size: 16px; color: white; }
         .user-info small { color: rgba(255,255,255,0.8); font-size: 12px; }
 
-        /* --- ÁREA DE MENSAJES --- */
+        /* --- ÁREA DE MENSAJES (FONDO DINÁMICO) --- */
         .messages-container {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
+            /* Aquí el fondo se puede cambiar por JS */
+            background-color: #0b141a; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             background-blend-mode: overlay;
             display: flex;
@@ -57,108 +49,142 @@
             padding: 8px 12px;
             border-radius: 12px;
             font-size: 15px;
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 1px rgba(0,0,0,0.2);
         }
+        .received { background-color: #202c33; align-self: flex-start; border-top-left-radius: 2px; }
+        .sent { background-color: #085f56; align-self: flex-end; border-top-right-radius: 2px; }
+        .time { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px; }
 
-        /* Mensaje recibido */
-        .received {
-            background-color: #202c33;
-            align-self: flex-start;
-            border-top-left-radius: 2px;
-        }
-
-        /* Mensaje enviado con TU VERDE */
-        .sent {
-            background-color: #085f56; /* TU COLOR CLAVE */
-            align-self: flex-end;
-            border-top-right-radius: 2px;
-        }
-
-        .time {
-            font-size: 10px;
-            color: rgba(255,255,255,0.6);
-            margin-top: 4px;
-            text-align: right;
-        }
-
-        /* --- ENTRADA DE TEXTO --- */
-        .input-area {
-            background-color: #202c33;
-            padding: 10px;
+        /* --- ENTRADA DE TEXTO ESTILO WHATSAPP --- */
+        .input-wrapper {
+            background-color: transparent;
+            padding: 8px;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             gap: 8px;
         }
 
-        .input-box {
+        .input-container {
             flex: 1;
-            background-color: #2a3942;
-            border: none;
+            background-color: #202c33;
             border-radius: 25px;
-            padding: 10px 18px;
-            color: white;
-            outline: none;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 5px 12px;
+            min-height: 40px;
         }
 
-        .send-btn {
-            background-color: #085f56; /* TU COLOR CLAVE */
+        .icon-btn {
+            color: #8696a0;
+            font-size: 22px;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 17px;
+            outline: none;
+            padding: 8px 5px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .action-btn {
+            background-color: #085f56;
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             color: white;
+            cursor: pointer;
+            border: none;
+            flex-shrink: 0;
         }
     </style>
 </head>
-<body>
+<body id="chatBody">
 
     <div class="chat-header">
-        <div class="back-icon" onclick="window.history.back()">←</div>
-        <img class="user-img" src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png">
+        <div class="back-icon" onclick="history.back()">←</div>
+        <img class="user-img" id="headerFoto" src="https://www.w3schools.com/howto/img_avatar.png">
         <div class="user-info">
-            <span>Soporte DNPlus</span>
+            <span id="chatNombre">Nombre</span>
             <small>en línea</small>
         </div>
         <div style="color: white; font-size: 20px;">⋮</div>
     </div>
 
     <div class="messages-container" id="msgContainer">
-        <div class="bubble received">
-            ¡Hola David! Ya aplicamos el verde #085f56 a la cabecera. ¿Cómo lo ves?
-            <div class="time">12:15 PM</div>
         </div>
-        
-        <div class="bubble sent">
-            ¡Excelente bro! Ese es el color que buscábamos. 🔥
-            <div class="time">12:16 PM</div>
-        </div>
-    </div>
 
-    <div class="input-area">
-        <input type="text" id="chatInput" class="input-box" placeholder="Mensaje" autocomplete="off">
-        <button class="send-btn" onclick="enviarMensaje()">
-            <span style="font-size: 22px;">➤</span>
+    <div class="input-wrapper">
+        <div class="input-container">
+            <div class="icon-btn">😊</div>
+            
+            <input type="text" id="chatInput" class="chat-input" placeholder="Mensaje" oninput="toggleIcon()">
+            
+            <div class="icon-btn" onclick="abrirAdjuntos()">📎</div>
+            <div class="icon-btn">📷</div>
+        </div>
+
+        <button class="action-btn" id="mainActionBtn" onclick="handleAction()">
+            <span id="actionIcon" style="font-size: 22px;">🎙️</span>
         </button>
     </div>
 
     <script>
-        function enviarMensaje() {
+        // Cargar datos del contacto
+        window.onload = function() {
+            const nombre = localStorage.getItem("chat_actual") || "Contacto";
+            document.getElementById('chatNombre').innerText = nombre;
+            
+            // Si quieres cambiar el fondo dinámicamente:
+            // document.getElementById('msgContainer').style.backgroundColor = "#176f47";
+        };
+
+        function toggleIcon() {
+            const input = document.getElementById('chatInput');
+            const btn = document.getElementById('actionIcon');
+            
+            if (input.value.trim().length > 0) {
+                btn.innerText = "➤"; // Icono de enviar
+            } else {
+                btn.innerText = "🎙️"; // Icono de micro
+            }
+        }
+
+        function handleAction() {
             const input = document.getElementById('chatInput');
             if (input.value.trim() !== "") {
-                const container = document.getElementById('msgContainer');
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble sent';
-                bubble.innerHTML = input.value + `<div class="time">Justo ahora</div>`;
-                container.appendChild(bubble);
+                enviarMensaje(input.value);
                 input.value = "";
-                container.scrollTop = container.scrollHeight;
+                toggleIcon();
+            } else {
+                alert("Grabando audio...");
             }
+        }
+
+        function enviarMensaje(texto) {
+            const container = document.getElementById('msgContainer');
+            const now = new Date();
+            const time = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble sent';
+            bubble.innerHTML = `${texto} <div class="time">${time}</div>`;
+            
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function abrirAdjuntos() {
+            alert("Galería, Documento, Ubicación...");
         }
     </script>
 </body>
