@@ -1,82 +1,165 @@
-<style>
-    /* El contenedor que corta lo que sobra */
-    .window-container {
-        width: 100%;
-        overflow: hidden; /* Esto es clave para que no se vea lo de al lado */
-        position: relative;
-    }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat DNPlus</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            background-color: #0b141a; 
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: #e9edef;
+        }
 
-    /* La tira larga con las 3 páginas */
-    .view-pager {
-        display: flex;
-        width: 300%; /* Triple del ancho porque son 3 pestañas */
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Movimiento suave */
-    }
+        /* --- CABECERA CON TU VERDE #085f56 --- */
+        .chat-header {
+            background-color: #085f56; /* TU COLOR CLAVE */
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
 
-    .page {
-        width: 100%; /* Cada página ocupa el ancho de la pantalla */
-        height: 80vh;
-        background: white;
-    }
-
-    /* Botón Flotante (FAB) */
-    .fab {
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        background-color: #176F47;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        z-index: 999;
-    }
-</style>
-
-<div class="window-container">
-    <div class="view-pager" id="pager">
+        .back-icon { font-size: 22px; cursor: pointer; color: white; }
         
-        <div class="page">
-            <div class="chat-item" onclick="location.href='mensajes.html'">
-                <div class="avatar-chat"></div>
-                <div>
-                    <strong style="color: #085F56;">David Oviedo</strong>
-                    <p style="margin:2px 0; color:#777;">¡Mira el nuevo ViewPager! 🚀</p>
-                </div>
-            </div>
-        </div>
+        .user-img { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background: #232d36; 
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-        <div class="page">
-            <h3 style="text-align:center; color:#888; margin-top:50px;">No hay estados</h3>
-        </div>
+        .user-info { flex: 1; }
+        .user-info span { display: block; font-weight: bold; font-size: 16px; color: white; }
+        .user-info small { color: rgba(255,255,255,0.8); font-size: 12px; }
 
-        <div class="page">
-            <h3 style="text-align:center; color:#888; margin-top:50px;">Llamadas recientes</h3>
-        </div>
+        /* --- ÁREA DE MENSAJES --- */
+        .messages-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
+        .bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Mensaje recibido */
+        .received {
+            background-color: #202c33;
+            align-self: flex-start;
+            border-top-left-radius: 2px;
+        }
+
+        /* Mensaje enviado con TU VERDE */
+        .sent {
+            background-color: #085f56; /* TU COLOR CLAVE */
+            align-self: flex-end;
+            border-top-right-radius: 2px;
+        }
+
+        .time {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* --- ENTRADA DE TEXTO --- */
+        .input-area {
+            background-color: #202c33;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-box {
+            flex: 1;
+            background-color: #2a3942;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 18px;
+            color: white;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .send-btn {
+            background-color: #085f56; /* TU COLOR CLAVE */
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">
+        <div class="back-icon" onclick="window.history.back()">←</div>
+        <img class="user-img" src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png">
+        <div class="user-info">
+            <span>Soporte DNPlus</span>
+            <small>en línea</small>
+        </div>
+        <div style="color: white; font-size: 20px;">⋮</div>
     </div>
-</div>
 
-<div class="fab" onclick="alert('Próximamente: Lista de contactos')">
-    <span style="color: white; font-size: 24px;">💬</span>
-</div>
-
-<script>
-    function movePage(index) {
-        const pager = document.getElementById('pager');
-        const tabs = document.querySelectorAll('.tab');
+    <div class="messages-container" id="msgContainer">
+        <div class="bubble received">
+            ¡Hola David! Ya aplicamos el verde #085f56 a la cabecera. ¿Cómo lo ves?
+            <div class="time">12:15 PM</div>
+        </div>
         
-        // Mueve la "tira" de páginas
-        // 0 = 0%, 1 = -33.33%, 2 = -66.66%
-        let move = index * (100 / 3);
-        pager.style.transform = `translateX(-${move}%)`;
-        
-        // Actualiza la rayita naranja en la pestaña activa
-        tabs.forEach(t => t.classList.remove('active'));
-        tabs[index].classList.add('active');
-    }
-</script>
+        <div class="bubble sent">
+            ¡Excelente bro! Ese es el color que buscábamos. 🔥
+            <div class="time">12:16 PM</div>
+        </div>
+    </div>
 
+    <div class="input-area">
+        <input type="text" id="chatInput" class="input-box" placeholder="Mensaje" autocomplete="off">
+        <button class="send-btn" onclick="enviarMensaje()">
+            <span style="font-size: 22px;">➤</span>
+        </button>
+    </div>
+
+    <script>
+        function enviarMensaje() {
+            const input = document.getElementById('chatInput');
+            if (input.value.trim() !== "") {
+                const container = document.getElementById('msgContainer');
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble sent';
+                bubble.innerHTML = input.value + `<div class="time">Justo ahora</div>`;
+                container.appendChild(bubble);
+                input.value = "";
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
