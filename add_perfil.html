@@ -13,9 +13,22 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
             height: 100vh;
         }
+
+        /* --- CABECERA OFICIAL #085f56 --- */
+        .header-perfil {
+            background-color: #085f56;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .header-perfil span { font-size: 24px; cursor: pointer; }
+        .header-perfil h2 { margin: 0; font-size: 19px; font-weight: 500; }
 
         /* --- Estilos del Loader --- */
         #loader-overlay {
@@ -29,58 +42,56 @@
             align-items: center;
         }
         .spinner {
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             border: 5px solid rgba(8, 95, 86, 0.2);
-            border-top: 5px solid #085f56; /* Tu verde */
+            border-top: 5px solid #085f56;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- Estilos de Perfil --- */
+        /* --- Contenido --- */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
         .profile-pic-container {
-            margin-top: 40px;
+            margin-top: 30px;
             position: relative;
             display: inline-block;
             cursor: pointer;
         }
         .circle-avatar {
-            width: 150px;
-            height: 150px;
+            width: 150px; height: 150px;
             background-color: #202c33;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             overflow: hidden;
             border: 1px solid rgba(134, 150, 160, 0.2);
         }
-        #imgPerfil {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        #imgPerfil { width: 100%; height: 100%; object-fit: cover; }
+        
         .camera-icon {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: #085f56; /* Tu verde */
+            bottom: 5px; right: 5px;
+            background: #085f56;
             color: white;
-            width: 45px;
-            height: 45px;
+            width: 45px; height: 45px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 20px;
             border: 3px solid #0b141a;
         }
+
         .input-name {
             background: transparent;
             border: none;
             border-bottom: 2px solid #085f56;
-            width: 80%;
+            width: 85%;
             max-width: 300px;
             padding: 10px;
             font-size: 18px;
@@ -89,7 +100,7 @@
             text-align: center;
             color: white;
         }
-        .hint { color: #8696a0; font-size: 13px; margin-top: 15px; padding: 0 40px; }
+        .hint { color: #8696a0; font-size: 13px; margin-top: 15px; padding: 0 30px; line-height: 1.4; }
         
         .btn-confirmar {
             background-color: #085f56;
@@ -99,12 +110,12 @@
             font-weight: bold;
             border: none;
             cursor: pointer;
-            margin-top: 60px;
+            margin-top: auto; /* Empuja el botón hacia abajo */
+            margin-bottom: 40px;
             text-transform: uppercase;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* Input de archivo oculto */
         #fileInput { display: none; }
     </style>
 </head>
@@ -115,33 +126,37 @@
         <p style="margin-top: 20px; color: #085f56; font-weight: bold;">Iniciando DNPlus...</p>
     </div>
 
-    <h2 style="color: #e9edef; margin-top: 50px; font-weight: 500;">Info. de perfil</h2>
-    <p style="color: #8696a0;">Proporciona tu nombre y una foto opcional.</p>
-
-    <div class="profile-pic-container" onclick="document.getElementById('fileInput').click()">
-        <div class="circle-avatar">
-            <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar">
-        </div>
-        <div class="camera-icon">📷</div>
+    <div class="header-perfil">
+        <span onclick="history.back()">←</span>
+        <h2>Info. de perfil</h2>
     </div>
-    
-    <input type="file" id="fileInput" accept="image/*" onchange="previewImagen(event)">
 
-    <input type="text" id="userName" class="input-name" placeholder="Tu nombre" maxlength="25">
-    <p class="hint">Este nombre será visible para tus contactos de DNPlus.</p>
+    <div class="content">
+        <p style="color: #8696a0; margin-top: 20px;">Proporciona tu nombre y una foto opcional.</p>
 
-    <button class="btn-confirmar" onclick="guardarPerfil()">
-        SIGUIENTE
-    </button>
+        <div class="profile-pic-container" onclick="document.getElementById('fileInput').click()">
+            <div class="circle-avatar">
+                <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar">
+            </div>
+            <div class="camera-icon">📷</div>
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*" onchange="previewImagen(event)">
+
+        <input type="text" id="userName" class="input-name" placeholder="Tu nombre" maxlength="25">
+        <p class="hint">Este nombre será visible para tus contactos de DNPlus.</p>
+
+        <button class="btn-confirmar" onclick="guardarPerfil()">
+            SIGUIENTE
+        </button>
+    </div>
 
     <script>
-        // Función para mostrar la foto apenas se elige de la galería
         function previewImagen(event) {
             const reader = new FileReader();
             reader.onload = function(){
                 const output = document.getElementById('imgPerfil');
                 output.src = reader.result;
-                // Guardamos la imagen en base64 para que persista
                 localStorage.setItem("user_photo", reader.result);
             };
             reader.readAsDataURL(event.target.files[0]);
@@ -150,18 +165,13 @@
         function guardarPerfil() {
             const nombre = document.getElementById('userName').value;
             if(nombre.trim().length >= 2) {
-                // Mostramos el loader con tu verde
                 document.getElementById('loader-overlay').style.display = 'flex';
-
-                // Guardar nombre localmente
                 localStorage.setItem("user_name", nombre);
 
-                // Si usas Sketchware/Android
                 if(window.Android && window.Android.guardarNombre) {
                     window.Android.guardarNombre(nombre);
                 }
 
-                // Simular carga y navegar al Home
                 setTimeout(function() {
                     window.location.href = 'home.html';
                 }, 2500);
