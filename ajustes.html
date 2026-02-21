@@ -39,7 +39,7 @@
         .header span { font-size: 24px; cursor: pointer; }
         .header h2 { margin: 0; font-size: 19px; font-weight: 500; }
 
-        /* --- SECCIÓN PERFIL (RECIBE DATOS) --- */
+        /* --- SECCIÓN PERFIL --- */
         .me-section {
             display: flex;
             align-items: center;
@@ -111,7 +111,7 @@
         <h2>Ajustes</h2>
     </div>
 
-    <div class="me-section" onclick="location.href='editar_perfil.html'">
+    <div class="me-section" onclick="location.href='editar_mi_perfil.html'">
         <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar-me" id="myAvatar">
         <div class="me-info">
             <div class="me-name" id="myName">Cargando...</div>
@@ -169,7 +169,6 @@
 
     <script>
         window.onload = function() {
-            // 1. Recuperar el nombre guardado en perfil.html
             const nombreGuardado = localStorage.getItem("user_name");
             if(nombreGuardado) {
                 document.getElementById('myName').innerText = nombreGuardado;
@@ -177,13 +176,11 @@
                 document.getElementById('myName').innerText = "Tu nombre aquí";
             }
 
-            // 2. Recuperar la foto guardada en perfil.html
             const fotoGuardada = localStorage.getItem("user_photo");
             if(fotoGuardada) {
                 document.getElementById('myAvatar').src = fotoGuardada;
             }
 
-            // 3. Recuperar el estado si existe
             const estadoGuardado = localStorage.getItem("user_status");
             if(estadoGuardado) {
                 document.getElementById('myStatus').innerText = estadoGuardado;
