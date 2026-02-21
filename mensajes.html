@@ -1,1 +1,82 @@
+<style>
+    /* El contenedor que corta lo que sobra */
+    .window-container {
+        width: 100%;
+        overflow: hidden; /* Esto es clave para que no se vea lo de al lado */
+        position: relative;
+    }
+
+    /* La tira larga con las 3 páginas */
+    .view-pager {
+        display: flex;
+        width: 300%; /* Triple del ancho porque son 3 pestañas */
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Movimiento suave */
+    }
+
+    .page {
+        width: 100%; /* Cada página ocupa el ancho de la pantalla */
+        height: 80vh;
+        background: white;
+    }
+
+    /* Botón Flotante (FAB) */
+    .fab {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        background-color: #176F47;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        z-index: 999;
+    }
+</style>
+
+<div class="window-container">
+    <div class="view-pager" id="pager">
+        
+        <div class="page">
+            <div class="chat-item" onclick="location.href='mensajes.html'">
+                <div class="avatar-chat"></div>
+                <div>
+                    <strong style="color: #085F56;">David Oviedo</strong>
+                    <p style="margin:2px 0; color:#777;">¡Mira el nuevo ViewPager! 🚀</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="page">
+            <h3 style="text-align:center; color:#888; margin-top:50px;">No hay estados</h3>
+        </div>
+
+        <div class="page">
+            <h3 style="text-align:center; color:#888; margin-top:50px;">Llamadas recientes</h3>
+        </div>
+
+    </div>
+</div>
+
+<div class="fab" onclick="alert('Próximamente: Lista de contactos')">
+    <span style="color: white; font-size: 24px;">💬</span>
+</div>
+
+<script>
+    function movePage(index) {
+        const pager = document.getElementById('pager');
+        const tabs = document.querySelectorAll('.tab');
+        
+        // Mueve la "tira" de páginas
+        // 0 = 0%, 1 = -33.33%, 2 = -66.66%
+        let move = index * (100 / 3);
+        pager.style.transform = `translateX(-${move}%)`;
+        
+        // Actualiza la rayita naranja en la pestaña activa
+        tabs.forEach(t => t.classList.remove('active'));
+        tabs[index].classList.add('active');
+    }
+</script>
 
