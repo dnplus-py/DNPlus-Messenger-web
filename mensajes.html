@@ -137,5 +137,85 @@
             }
         }
     </script>
+
+
+   <script>
+        let grabador;
+    let fragmentos = [];
+
+    // Esta función decide si envía TEXTO o graba AUDIO
+    function enviarOgrabar() {
+        const input = document.getElementById('msg-input');
+        const mensaje = input.value.trim();
+
+        if (mensaje !== "") {
+            // SI HAY TEXTO: Lo envía
+            enviarTexto(mensaje);
+            input.value = ""; // Limpia la barra
+        } else {
+            // SI ESTÁ VACÍO: Activa el micrófono
+            controlarVoz();
+        }
+    }
+
+    function enviarTexto(texto) {
+        const chat = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        
+        // Estilo de burbuja de texto con tu color favorito
+        div.style.alignSelf = "flex-end";
+        div.style.backgroundColor = "#176f47";
+        div.style.color = "white";
+        div.style.padding = "10px 15px";
+        div.style.borderRadius = "15px 0px 15px 15px";
+        div.style.maxWidth = "80%";
+        div.style.marginBottom = "10px";
+        div.style.fontSize = "16px";
+        div.innerText = texto;
+
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight; // Baja el scroll
+    }
+
+    // Tu función de voz que ya funcionaba, pero mejorada
+    async function controlarVoz() {
+        const boton = document.getElementById('btn-audio');
+        if (!grabador || grabador.state === "inactive") {
+            try {
+                const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
+                grabador = new MediaRecorder(flujo);
+                fragmentos = [];
+                grabador.ondataavailable = (e) => fragmentos.push(e.data);
+                grabador.onstop = () => {
+                    const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
+                    const urlAudio = URL.createObjectURL(blobAudio);
+                    const chat = document.getElementById('chat-box');
+                    
+                    // Burbuja de audio verde
+                    const divAudio = document.createElement('div');
+                    divAudio.style.alignSelf = "flex-end";
+                    divAudio.style.backgroundColor = "#176f47";
+                    divAudio.style.padding = "10px";
+                    divAudio.style.borderRadius = "15px 0px 15px 15px";
+                    divAudio.style.marginBottom = "10px";
+                    
+                    const audio = document.createElement('audio');
+                    audio.src = urlAudio;
+                    audio.controls = true;
+                    audio.style.width = "200px";
+                    
+                    divAudio.appendChild(audio);
+                    chat.appendChild(divAudio);
+                    chat.scrollTop = chat.scrollHeight;
+                };
+                grabador.start();
+                boton.innerHTML = "🛑";
+            } catch (error) { alert("Activa el micro, David."); }
+        } else {
+            grabador.stop();
+            boton.innerHTML = "🎙️";
+        }
+    }
+</script>
 </body>
 </html>
