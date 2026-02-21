@@ -19,7 +19,7 @@
 
         /* --- Estilos del Loader --- */
         #loader-overlay {
-            display: none; /* Oculto por defecto */
+            display: none; 
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #0b141a;
@@ -31,8 +31,8 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid rgba(0, 168, 132, 0.2);
-            border-top: 5px solid #00a884;
+            border: 5px solid rgba(8, 95, 86, 0.2);
+            border-top: 5px solid #085f56; /* Tu verde */
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -46,31 +46,40 @@
             cursor: pointer;
         }
         .circle-avatar {
-            width: 140px;
-            height: 140px;
-            background-color: #232d36;
+            width: 150px;
+            height: 150px;
+            background-color: #202c33;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border: 2px solid #00a884;
+            border: 1px solid rgba(134, 150, 160, 0.2);
+        }
+        #imgPerfil {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .camera-icon {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: #00a884;
-            color: #0b141a;
-            padding: 10px;
+            bottom: 5px;
+            right: 5px;
+            background: #085f56; /* Tu verde */
+            color: white;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            font-size: 14px;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border: 3px solid #0b141a;
         }
         .input-name {
             background: transparent;
             border: none;
-            border-bottom: 2px solid #00a884;
+            border-bottom: 2px solid #085f56;
             width: 80%;
             max-width: 300px;
             padding: 10px;
@@ -81,35 +90,42 @@
             color: white;
         }
         .hint { color: #8696a0; font-size: 13px; margin-top: 15px; padding: 0 40px; }
+        
         .btn-confirmar {
-            background-color: #00a884;
-            color: #0b141a;
-            padding: 12px 60px;
+            background-color: #085f56;
+            color: white;
+            padding: 14px 70px;
             border-radius: 30px;
             font-weight: bold;
             border: none;
             cursor: pointer;
             margin-top: 60px;
             text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
+
+        /* Input de archivo oculto */
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
 
     <div id="loader-overlay">
         <div class="spinner"></div>
-        <p style="margin-top: 20px; color: #00a884; font-weight: bold;">Iniciando DNPlus...</p>
+        <p style="margin-top: 20px; color: #085f56; font-weight: bold;">Iniciando DNPlus...</p>
     </div>
 
     <h2 style="color: #e9edef; margin-top: 50px; font-weight: 500;">Info. de perfil</h2>
     <p style="color: #8696a0;">Proporciona tu nombre y una foto opcional.</p>
 
-    <div class="profile-pic-container" onclick="subirFoto()">
+    <div class="profile-pic-container" onclick="document.getElementById('fileInput').click()">
         <div class="circle-avatar">
-            <img id="imgPerfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" width="90" style="filter: invert(0.8);">
+            <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar">
         </div>
         <div class="camera-icon">📷</div>
     </div>
+    
+    <input type="file" id="fileInput" accept="image/*" onchange="previewImagen(event)">
 
     <input type="text" id="userName" class="input-name" placeholder="Tu nombre" maxlength="25">
     <p class="hint">Este nombre será visible para tus contactos de DNPlus.</p>
@@ -119,30 +135,38 @@
     </button>
 
     <script>
-        function subirFoto() {
-            if(window.Android && window.Android.seleccionarFoto) {
-                window.Android.seleccionarFoto();
-            } else {
-                alert("Abriendo galería...");
-            }
+        // Función para mostrar la foto apenas se elige de la galería
+        function previewImagen(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                const output = document.getElementById('imgPerfil');
+                output.src = reader.result;
+                // Guardamos la imagen en base64 para que persista
+                localStorage.setItem("user_photo", reader.result);
+            };
+            reader.readAsDataURL(event.target.files[0]);
         }
 
         function guardarPerfil() {
             const nombre = document.getElementById('userName').value;
-            if(nombre.trim().length > 2) {
-                // Mostramos el loader
+            if(nombre.trim().length >= 2) {
+                // Mostramos el loader con tu verde
                 document.getElementById('loader-overlay').style.display = 'flex';
 
+                // Guardar nombre localmente
+                localStorage.setItem("user_name", nombre);
+
+                // Si usas Sketchware/Android
                 if(window.Android && window.Android.guardarNombre) {
                     window.Android.guardarNombre(nombre);
                 }
 
-                // Esperamos 2 segundos para que se vea el loader y vamos al home
+                // Simular carga y navegar al Home
                 setTimeout(function() {
                     window.location.href = 'home.html';
-                }, 2000);
+                }, 2500);
             } else {
-                alert("Por favor, ingresa tu nombre.");
+                alert("Por favor, ingresa un nombre válido.");
             }
         }
     </script>
