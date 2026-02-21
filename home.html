@@ -40,7 +40,7 @@
             text-transform: uppercase;
         }
         .tab.active {
-            color: #085f56; /* Tu verde */
+            color: #085f56;
             border-bottom: 3px solid #085f56;
         }
 
@@ -52,7 +52,7 @@
         .view-pager {
             display: flex;
             width: 300%;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .page {
             width: 100vw;
@@ -68,32 +68,32 @@
             padding: 15px;
             border-bottom: 1px solid rgba(134, 150, 160, 0.1);
         }
+        .item:active { background-color: #202c33; }
+
         .avatar {
             width: 50px; height: 50px;
             border-radius: 50%;
             background-color: #232d36;
             margin-right: 15px;
             display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #8696a0;
         }
         .details { flex: 1; }
-        .name { font-weight: bold; font-size: 16px; display: block; }
+        .name { font-weight: bold; font-size: 16px; display: block; color: #e9edef; }
         .msg { color: #8696a0; font-size: 14px; }
         .time { font-size: 12px; color: #085f56; }
 
-        /* --- FAB DINÁMICO --- */
+        /* --- FAB --- */
         .fab {
             position: fixed;
             bottom: 25px; right: 25px;
-            background-color: #085f56; /* Tu verde */
+            background-color: #085f56;
             width: 60px; height: 60px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             z-index: 1000;
-            cursor: pointer;
-            transition: transform 0.2s ease;
         }
-        .fab:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -112,17 +112,18 @@
     <div class="window-container">
         <div class="view-pager" id="pager">
             
-            <div class="page">
+            <div class="page" id="chatPage">
                 <div class="item" onclick="location.href='mensajes.html'">
-                    <div class="avatar">🚀</div>
+                    <div class="avatar" style="background-color: #085f56; color: white;">S</div>
                     <div class="details">
                         <div style="display:flex; justify-content: space-between;">
                             <span class="name">Soporte DNPlus</span>
-                            <span class="time">10:45 AM</span>
+                            <span class="time">Ahora</span>
                         </div>
-                        <span class="msg">¡Bienvenido al nuevo ViewPager! 🚀</span>
+                        <span class="msg">¡Bienvenido a DNPlus, David! 🚀</span>
                     </div>
                 </div>
+                <div id="listaChatsDinamica"></div>
             </div>
 
             <div class="page">
@@ -156,6 +157,39 @@
     <script>
         let currentPage = 0;
 
+        window.onload = function() {
+            cargarChats();
+        };
+
+        function cargarChats() {
+            const contenedor = document.getElementById('listaChatsDinamica');
+            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
+            
+            contenedor.innerHTML = "";
+            contacts.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.onclick = function() {
+                    localStorage.setItem("chat_actual", c.nombre);
+                    window.location.href = 'mensajes.html';
+                };
+                
+                const inicial = c.nombre.charAt(0).toUpperCase();
+
+                item.innerHTML = `
+                    <div class="avatar">${inicial}</div>
+                    <div class="details">
+                        <div style="display:flex; justify-content: space-between;">
+                            <span class="name">${c.nombre}</span>
+                            <span class="time">10:00 AM</span>
+                        </div>
+                        <span class="msg">Toca para chatear con ${c.nombre}</span>
+                    </div>
+                `;
+                contenedor.appendChild(item);
+            });
+        }
+
         function movePage(index) {
             currentPage = index;
             const pager = document.getElementById('pager');
@@ -167,34 +201,20 @@
             tabs.forEach(t => t.classList.remove('active'));
             tabs[index].classList.add('active');
 
-            // Cambiar icono del FAB según la página
             if(index === 0) fabIcon.innerText = "💬";
             if(index === 1) fabIcon.innerText = "📷";
             if(index === 2) fabIcon.innerText = "📞";
         }
 
-        // ACCIONES DE LOS BOTONES
         function fabAction() {
-            if(currentPage === 0) {
-                // Chats -> lista_contactos.html
-                window.location.href = 'lista_contactos.html';
-            } 
-            else if(currentPage === 1) {
-                // Estados -> Galería
-                abrirGaleria();
-            } 
-            else if(currentPage === 2) {
-                // Llamadas -> add_contactos.html
-                window.location.href = 'agregar_contacto.html';
-            }
+            if(currentPage === 0) window.location.href = 'lista_contactos.html';
+            else if(currentPage === 1) abrirGaleria();
+            else if(currentPage === 2) window.location.href = 'agregar_contacto.html';
         }
 
         function abrirGaleria() {
-            if(window.Android && window.Android.abrirGaleria) {
-                window.Android.abrirGaleria();
-            } else {
-                alert("Abriendo Galería...");
-            }
+            if(window.Android && window.Android.abrirGaleria) window.Android.abrirGaleria();
+            else alert("Abriendo Galería...");
         }
     </script>
 </body>
