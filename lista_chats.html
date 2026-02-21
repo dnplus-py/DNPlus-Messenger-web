@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #ffffff; }
+        /* Fondo Negro Azulado para toda la lista */
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            background-color: #0b141a; 
+            color: #e9edef;
+        }
 
         .chat-list-container {
             display: flex;
@@ -17,17 +23,19 @@
             padding: 12px 15px;
             gap: 15px;
             cursor: pointer;
-            border-bottom: 1px solid #f2f2f2;
+            border-bottom: 1px solid rgba(134, 150, 160, 0.1); /* Línea muy sutil */
         }
 
-        .chat-row:active { background-color: #ebebeb; }
+        /* Efecto al tocar el chat */
+        .chat-row:active { background-color: #202c33; }
 
         .profile-img {
             width: 55px;
             height: 55px;
             border-radius: 50%;
-            background-color: #ddd;
+            background-color: #232d36;
             object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .chat-details {
@@ -45,13 +53,13 @@
 
         .name {
             font-size: 16px;
-            font-weight: bold;
-            color: #000;
+            font-weight: 500;
+            color: #e9edef;
         }
 
         .time {
             font-size: 12px;
-            color: #176F47; /* Tu verde para la hora de mensajes nuevos */
+            color: #00a884; /* Verde brillante para mensajes nuevos */
             font-weight: 500;
         }
 
@@ -64,17 +72,17 @@
 
         .message {
             font-size: 14px;
-            color: #666;
+            color: #8696a0; /* Gris de WhatsApp para mensajes */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 200px;
+            max-width: 220px;
         }
 
         /* BURBUJA DE MENSAJE NO LEÍDO */
         .unread-badge {
-            background-color: #176F47; /* Tu verde favorito */
-            color: white;
+            background-color: #00a884; /* Tu verde insignia */
+            color: #0b141a; /* Texto oscuro sobre fondo verde */
             font-size: 11px;
             font-weight: bold;
             min-width: 20px;
@@ -83,7 +91,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2px;
         }
     </style>
 </head>
@@ -95,38 +102,11 @@
             <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" class="profile-img">
             <div class="chat-details">
                 <div class="chat-header">
-                    <span class="name">David Oviedo (Tú)</span>
+                    <span class="name">Soporte DNPlus</span>
                     <span class="time">10:45 AM</span>
                 </div>
                 <div class="last-msg-container">
-                    <span class="message">¡El sistema de estados quedó pro! 🔥</span>
-                    <div class="unread-badge">2</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="chat-row" onclick="location.href='mensajes.html'">
-            <img src="https://i.pravatar.cc/150?u=marcos" class="profile-img">
-            <div class="chat-details">
-                <div class="chat-header">
-                    <span class="name">Marcos PY</span>
-                    <span class="time">Ayer</span>
-                </div>
-                <div class="last-msg-container">
-                    <span class="message">Dale bro, avisame cuando lances la APK</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="chat-row" onclick="location.href='mensajes.html'">
-            <img src="https://i.pravatar.cc/150?u=ana" class="profile-img">
-            <div class="chat-details">
-                <div class="chat-header">
-                    <span class="name">Soporte DNPlus</span>
-                    <span class="time">Lunes</span>
-                </div>
-                <div class="last-msg-container">
-                    <span class="message">Bienvenido al nuevo mensajero.</span>
+                    <span class="message">¡Bienvenido a DNPlus Messenger! 🚀</span>
                     <div class="unread-badge">1</div>
                 </div>
             </div>
@@ -136,4 +116,3 @@
 
 </body>
 </html>
-
