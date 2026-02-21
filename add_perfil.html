@@ -3,200 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - DNPlus</title>
+    <title>Perfil DNPlus</title>
     <style>
-        body { 
-            background-color: #0b141a; 
-            color: #e9edef; 
-            text-align: center; 
-            font-family: sans-serif; 
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
+        .header { background-color: #085f56; padding: 20px; text-align: left; font-size: 18px; font-weight: bold; }
+        .container { padding: 20px; }
+        .avatar-circle { 
+            width: 160px; height: 160px; background: #202c33; 
+            border-radius: 50%; margin: 40px auto; overflow: hidden; 
+            border: 2px solid #085f56; cursor: pointer;
         }
-
-        /* --- CABECERA OFICIAL #085f56 --- */
-        .header-perfil {
-            background-color: #085f56;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        img { width: 100%; height: 100%; object-fit: cover; }
+        input { 
+            background: transparent; border: none; border-bottom: 2px solid #085f56; 
+            color: white; width: 85%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px;
         }
-        .header-perfil span { font-size: 24px; cursor: pointer; padding: 0 5px; }
-        .header-perfil h2 { margin: 0; font-size: 19px; font-weight: 500; }
-
-        /* --- Estilos del Loader --- */
-        #loader-overlay {
-            display: none; 
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #0b141a;
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .btn { 
+            background: #085f56; color: white; border: none; padding: 15px; 
+            border-radius: 30px; width: 85%; font-weight: bold; margin-top: 60px; cursor: pointer; 
         }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid rgba(8, 95, 86, 0.2);
-            border-top: 5px solid #085f56;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- Contenido --- */
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .profile-pic-container {
-            margin-top: 30px;
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        .circle-avatar {
-            width: 150px; height: 150px;
-            background-color: #202c33;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-            border: 1px solid rgba(134, 150, 160, 0.2);
-        }
-        #imgPerfil { width: 100%; height: 100%; object-fit: cover; }
-        
-        .camera-icon {
-            position: absolute;
-            bottom: 5px; right: 5px;
-            background: #085f56;
-            color: white;
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            border: 3px solid #0b141a;
-        }
-
-        .input-name {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #085f56;
-            width: 85%;
-            max-width: 300px;
-            padding: 10px;
-            font-size: 18px;
-            margin-top: 40px;
-            outline: none;
-            text-align: center;
-            color: white;
-        }
-        .hint { color: #8696a0; font-size: 13px; margin-top: 15px; padding: 0 30px; line-height: 1.4; }
-        
-        .btn-confirmar {
-            background-color: #085f56;
-            color: white;
-            padding: 14px 70px;
-            border-radius: 30px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            margin-top: auto; 
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        #fileInput { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="loader-overlay">
-        <div class="spinner"></div>
-        <p style="margin-top: 20px; color: #085f56; font-weight: bold; font-family: sans-serif;">Iniciando DNPlus...</p>
-    </div>
+    <div class="header">Info. de perfil</div>
 
-    <div class="header-perfil">
-        <span onclick="history.back()">←</span>
-        <h2>Info. de perfil</h2>
-    </div>
-
-    <div class="content">
-        <p style="color: #8696a0; margin-top: 20px; font-size: 15px;">Proporciona tu nombre y una foto opcional.</p>
-
-        <div class="profile-pic-container" onclick="document.getElementById('fileInput').click()">
-            <div class="circle-avatar">
-                <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar">
-            </div>
-            <div class="camera-icon">📷</div>
+    <div class="container">
+        <div class="avatar-circle" onclick="document.getElementById('inputFoto').click()">
+            <img id="imgVista" src="https://www.w3schools.com/howto/img_avatar.png">
         </div>
+        <input type="file" id="inputFoto" style="display:none" accept="image/*" onchange="cargarFoto(event)">
+
+        <input type="text" id="nombreCaja" placeholder="Escribe tu nombre">
         
-        <input type="file" id="fileInput" accept="image/*" onchange="previewImagen(event)">
-
-        <input type="text" id="userName" class="input-name" placeholder="Escribe tu nombre aquí" maxlength="25">
-        <p class="hint">Este nombre será visible para tus contactos de DNPlus cuando les escribas.</p>
-
-        <button class="btn-confirmar" onclick="guardarPerfil()">
-            SIGUIENTE
-        </button>
+        <button class="btn" onclick="finalizarPerfil()">SIGUIENTE</button>
     </div>
 
     <script>
-        // Previsualizar y guardar la imagen en Base64
-        function previewImagen(event) {
-            const reader = new FileReader();
-            reader.onload = function(){
-                const output = document.getElementById('imgPerfil');
-                output.src = reader.result;
-                // Guardamos inmediatamente para no perderla
-                localStorage.setItem("user_photo", reader.result);
+        // Función para la foto
+        function cargarFoto(e) {
+            const leer = new FileReader();
+            leer.onload = () => {
+                document.getElementById('imgVista').src = leer.result;
+                localStorage.setItem("user_photo", leer.result);
             };
-            if(event.target.files[0]) {
-                reader.readAsDataURL(event.target.files[0]);
-            }
+            leer.readAsDataURL(e.target.files[0]);
         }
 
-        function guardarPerfil() {
-            const nombre = document.getElementById('userName').value;
-            const imagenActual = document.getElementById('imgPerfil').src;
+        // Función para saltar al Home
+        function finalizarPerfil() {
+            const nom = document.getElementById('nombreCaja').value.trim();
 
-            if(nombre.trim().length >= 2) {
-                // Mostrar Loader
-                document.getElementById('loader-overlay').style.display = 'flex';
-
-                // GUARDAR DATOS CLAVE
-                localStorage.setItem("user_name", nombre.trim());
+            if (nom.length >= 2) {
+                // Guardamos el nombre en la memoria
+                localStorage.setItem("user_name", nom);
                 
-                // Si el usuario no cambió la foto, guardamos la de por defecto
-                if(!localStorage.getItem("user_photo")) {
-                    localStorage.setItem("user_photo", imagenActual);
-                }
-
-                // Estado inicial por defecto
-                localStorage.setItem("user_status", "¡Hola! Estoy usando DNPlus.");
-
-                // Conexión con Android (si aplica)
-                if(window.Android && window.Android.guardarNombre) {
-                    window.Android.guardarNombre(nombre);
-                }
-
-                // Simular carga para ir al Home
-                setTimeout(function() {
-                    window.location.href = 'home.html';
-                }, 2000);
+                // Forzamos el salto
+                console.log("Entrando a home...");
+                window.location.href = "home.html";
             } else {
-                alert("Tu nombre es demasiado corto.");
+                alert("David, el nombre es muy corto.");
             }
         }
     </script>
