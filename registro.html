@@ -6,24 +6,51 @@
     <title>Registro - DNPlus</title>
     <style>
         body { 
-            background-color: #0b141a; /* Tu negro azulado */
+            background-color: #0b141a; 
             color: #e9edef; 
             text-align: center; 
             font-family: sans-serif;
             margin: 0;
             padding: 20px;
         }
-        .title { color: #e9edef; font-weight: 500; margin-top: 60px; }
-        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; }
+        .title { color: #e9edef; font-weight: 500; margin-top: 60px; font-size: 22px; }
+        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; line-height: 1.5; }
+        
         .phone-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 40px; }
-        .country-select { border-bottom: 2px solid #00a884; padding: 5px 0; width: 80px; font-size: 18px; color: #e9edef; }
-        .number-input { background: transparent; border: none; border-bottom: 2px solid #00a884; padding: 5px 0; font-size: 18px; width: 180px; outline: none; color: #e9edef; }
-        .btn-confirmar { background-color: #00a884; color: #0b141a; padding: 12px 60px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; }
+        .country-select { border-bottom: 2px solid #085f56; padding: 5px 0; width: 90px; font-size: 18px; color: #e9edef; }
+        .number-input { background: transparent; border: none; border-bottom: 2px solid #085f56; padding: 5px 0; font-size: 18px; width: 180px; outline: none; color: #e9edef; }
+        
+        .btn-confirmar { 
+            background-color: #085f56; 
+            color: white; 
+            padding: 12px 60px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            border: none; 
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
 
         /* Modal DNPlus Oscuro */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; }
-        .modal-box { background: #232d36; width: 85%; max-width: 320px; margin: 50% auto; padding: 25px; border-radius: 10px; text-align: left; }
-        .btn-flat { background: none; border: none; color: #00a884; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.8); 
+            z-index: 1000; 
+        }
+        .modal-box { 
+            background: #232d36; 
+            width: 80%; 
+            max-width: 300px; 
+            margin: 50% auto; 
+            padding: 25px; 
+            border-radius: 4px; 
+            text-align: left;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .btn-flat { background: none; border: none; color: #085f56; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -33,42 +60,51 @@
 
     <div class="phone-container">
         <div class="country-select"><span>🇵🇾 +595</span></div>
-        <input type="tel" id="phoneInput" class="number-input" placeholder="981 123 456" autofocus>
+        <input type="tel" id="phoneInput" class="number-input" placeholder="925 361 84" autofocus>
     </div>
 
-    <button class="btn-confirmar" onclick="abrirConfirmacion()">SIGUIENTE</button>
+    <button class="btn-confirmar" onclick="validarNumero()">SIGUIENTE</button>
 
     <div id="miModal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="margin-top:0;">¿Es este su número?</h3>
-            <p id="numeroMostrado" style="font-size: 18px; font-weight: bold; color: #e9edef;"></p>
-            <p style="color: #8696a0;">Te enviaremos un código de activación por SMS.</p>
-            <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 20px;">
-                <button class="btn-flat" onclick="cerrarModal()">Editar</button>
-                <button class="btn-flat" onclick="confirmarYEnviar()">OK</button>
-            </div>
+            <h3 id="modalTitulo" style="margin-top:0; font-size: 18px;">¿Es correcto?</h3>
+            <p id="modalMensaje" style="font-size: 16px; color: #e9edef;"></p>
+            <div id="modalButtons" style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 25px;">
+                </div>
         </div>
     </div>
 
     <script>
-        function abrirConfirmacion() {
+        const modal = document.getElementById('miModal');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const modalMensaje = document.getElementById('modalMensaje');
+        const modalButtons = document.getElementById('modalButtons');
+
+        function validarNumero() {
             const num = document.getElementById('phoneInput').value;
-            if(num.length >= 9) {
-                document.getElementById('numeroMostrado').innerText = "+595 " + num;
-                document.getElementById('miModal').style.display = 'block';
+            
+            if(num.length >= 8) {
+                // Si el número es válido, mostramos confirmación
+                modalTitulo.innerText = "¿Es este su número?";
+                modalMensaje.innerHTML = `<span style="font-size:20px; font-weight:bold; color:#085f56;">+595 ${num}</span><br><br><span style="color:#8696a0">Te enviaremos un código por SMS.</span>`;
+                modalButtons.innerHTML = `
+                    <button class="btn-flat" onclick="cerrarModal()">EDITAR</button>
+                    <button class="btn-flat" onclick="irAOTP('${num}')">OK</button>
+                `;
+                modal.style.display = 'block';
             } else {
-                alert("Por favor, introduce un número válido.");
+                // Si es corto, mostramos ERROR estilo DNPlus (No el alert blanco)
+                modalTitulo.innerText = "Número no válido";
+                modalMensaje.innerText = "Por favor, introduce un número de teléfono completo para continuar.";
+                modalButtons.innerHTML = `<button class="btn-flat" onclick="cerrarModal()">ACEPTAR</button>`;
+                modal.style.display = 'block';
             }
         }
-        function cerrarModal() { document.getElementById('miModal').style.display = 'none'; }
+
+        function cerrarModal() { modal.style.display = 'none'; }
         
-        // Función actualizada para redirigir a otp.html
-        function confirmarYEnviar() {
-            const num = document.getElementById('phoneInput').value;
-            // Guardamos el número en la memoria del navegador por si lo necesitamos mostrar en la siguiente pantalla
+        function irAOTP(num) {
             localStorage.setItem("telefono_usuario", "+595 " + num);
-            
-            // Redirigimos a la pantalla del código SMS
             window.location.href = 'otp.html';
         }
     </script>
