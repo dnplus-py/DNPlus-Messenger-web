@@ -5,59 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil DNPlus</title>
     <style>
-        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .header { background-color: #085f56; padding: 15px; position: fixed; top: 0; left: 0; width: 100%; text-align: left; }
-        .circle { width: 150px; height: 150px; background: #202c33; border-radius: 50%; margin: 80px auto 20px; overflow: hidden; border: 2px solid #085f56; }
-        img { width: 100%; height: 100%; object-fit: cover; }
-        input { background: transparent; border: none; border-bottom: 2px solid #085f56; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; }
-        button { background: #085f56; color: white; border: none; padding: 15px 50px; border-radius: 30px; font-weight: bold; margin-top: 50px; cursor: pointer; width: 80%; }
+        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .box { padding: 20px; }
+        input { 
+            background: transparent; border: none; border-bottom: 2px solid #085f56; 
+            color: white; width: 80%; padding: 10px; font-size: 20px; outline: none; 
+        }
+        button { 
+            background: #085f56; color: white; border: none; padding: 15px; 
+            border-radius: 30px; width: 80%; font-weight: bold; margin-top: 40px; cursor: pointer; 
+        }
     </style>
 </head>
 <body>
 
-    <div class="header"><strong>Info. de perfil</strong></div>
+    <h2>Info. de perfil</h2>
+    <p style="color: #8696a0;">Introduce tu nombre para empezar</p>
 
-    <div class="circle" onclick="document.getElementById('f').click()">
-        <img id="p" src="https://www.w3schools.com/howto/img_avatar.png">
+    <div class="box">
+        <input type="text" id="nombreInput" placeholder="Tu nombre..." autofocus>
+        <br>
+        <button onclick="validarYSaltar()">SIGUIENTE</button>
     </div>
-    <input type="file" id="f" style="display:none" accept="image/*" onchange="preview(event)">
-
-    <input type="text" id="n" placeholder="Tu nombre">
-    <br>
-    <button onclick="irHome()">SIGUIENTE</button>
 
     <script>
-        // Función para la foto
-        function preview(e) {
-            const r = new FileReader();
-            r.onload = () => { 
-                document.getElementById('p').src = r.result; 
-                localStorage.setItem("user_photo", r.result);
-            };
-            r.readAsDataURL(e.target.files[0]);
-        }
+        function validarYSaltar() {
+            var nombre = document.getElementById('nombreInput').value.trim();
 
-        // Función para ir al Home (REFORZADA)
-        function irHome() {
-            const nombre = document.getElementById('n').value.trim();
-            
             if (nombre.length >= 2) {
-                // Guardamos el nombre
+                // Guardamos el nombre rápido
                 localStorage.setItem("user_name", nombre);
                 
-                console.log("Guardando nombre: " + nombre);
-                alert("Perfil guardado. Entrando a DNPlus...");
-
-                // INTENTO 1: Redirección simple
+                // Intentamos entrar al home de tres formas distintas para asegurar
+                console.log("Intentando entrar a home.html...");
+                
+                // Forma 1
                 window.location.href = "home.html";
-
-                // INTENTO 2: Si el 1 falla después de 1 segundo (por si acaso)
-                setTimeout(() => {
-                    window.location.assign("home.html");
-                }, 1000);
-
+                
+                // Forma 2 (por si la 1 falla)
+                setTimeout(function() {
+                    location.replace("home.html");
+                }, 500);
             } else {
-                alert("Escribe tu nombre, David.");
+                alert("Por favor, David, escribe al menos 2 letras.");
             }
         }
     </script>
