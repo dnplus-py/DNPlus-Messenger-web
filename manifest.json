@@ -1,0 +1,16 @@
+{
+  "name": "DNPlus",
+  "short_name": "DNPlus",
+  "id": "com.dnplus.app", 
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0b141a",
+  "theme_color": "#085f56",
+  "icons": [
+    {
+      "src": "https://www.w3schools.com/howto/img_avatar.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
