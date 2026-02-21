@@ -1,1 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - DNPlus</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background-color: #f8f9fa; }
+        
+        .header-edit {
+            background-color: #085F56;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            background: white;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        .avatar-big {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #ddd;
+        }
+
+        .btn-change-photo {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: #176F47;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .info-list {
+            background: white;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-icon {
+            color: #176F47;
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #000;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 0;
+            background: transparent;
+        }
+
+        .btn-save-profile {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #176F47;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-edit">
+        <span onclick="history.back()" style="font-size: 24px; cursor: pointer;">←</span>
+        <span style="font-size: 18px; font-weight: bold;">Perfil</span>
+    </div>
+
+    <div class="profile-section">
+        <div class="avatar-container">
+            <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" class="avatar-big" id="currentPhoto">
+            <div class="btn-change-photo" onclick="cambiarFoto()">📷</div>
+        </div>
+    </div>
+
+    <div class="info-list">
+        <div class="info-item">
+            <div class="info-icon">👤</div>
+            <div class="info-content">
+                <div class="info-label">Nombre</div>
+                <input type="text" class="info-value" value="David Oviedo" id="editName">
+            </div>
+            <div style="color: #176F47;">✏️</div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-icon">ℹ️</div>
+            <div class="info-content">
+                <div class="info-label">Info.</div>
+                <input type="text" class="info-value" value="¡DNPlus es genial!" id="editStatus">
+            </div>
+            <div style="color: #176F47;">✏️</div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-icon">📞</div>
+            <div class="info-content">
+                <div class="info-label">Teléfono</div>
+                <div class="info-value" style="color: #666;">+595 9xx xxx xxx</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-save-profile" onclick="guardarCambios()">
+        GUARDAR PERFIL
+    </button>
+
+    <script>
+        function cambiarFoto() {
+            alert("Abriendo galería de Sketchware...");
+            // Aquí llamarías al componente FilePicker de Sketchware
+        }
+
+        function guardarCambios() {
+            const nuevoNombre = document.getElementById('editName').value;
+            alert("¡Perfil actualizado, " + nuevoNombre + "!");
+            window.location.href = 'home.html';
+        }
+    </script>
+
+</body>
+</html>
 
