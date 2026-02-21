@@ -4,42 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil - DNPlus</title>
-    <link rel="stylesheet" href="style.css">
     <style>
-        body { background-color: #ffffff; text-align: center; font-family: sans-serif; }
-        
-        .profile-pic-container {
-            margin-top: 50px;
-            position: relative;
-            display: inline-block;
+        body { 
+            background-color: #0b141a; 
+            color: #e9edef; 
+            text-align: center; 
+            font-family: sans-serif; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
         }
 
+        /* --- Estilos del Loader --- */
+        #loader-overlay {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0b141a;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 168, 132, 0.2);
+            border-top: 5px solid #00a884;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Estilos de Perfil --- */
+        .profile-pic-container {
+            margin-top: 40px;
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
         .circle-avatar {
-            width: 120px;
-            height: 120px;
-            background-color: #e1e1e1;
+            width: 140px;
+            height: 140px;
+            background-color: #232d36;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border: 2px solid #176F47;
+            border: 2px solid #00a884;
         }
-
         .camera-icon {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: #176F47;
-            color: white;
-            padding: 8px;
+            bottom: 8px;
+            right: 8px;
+            background: #00a884;
+            color: #0b141a;
+            padding: 10px;
             border-radius: 50%;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: bold;
         }
-
         .input-name {
+            background: transparent;
             border: none;
-            border-bottom: 2px solid #176F47;
+            border-bottom: 2px solid #00a884;
             width: 80%;
             max-width: 300px;
             padding: 10px;
@@ -47,41 +78,48 @@
             margin-top: 40px;
             outline: none;
             text-align: center;
+            color: white;
         }
-
-        .hint {
-            color: #888;
-            font-size: 13px;
-            margin-top: 10px;
+        .hint { color: #8696a0; font-size: 13px; margin-top: 15px; padding: 0 40px; }
+        .btn-confirmar {
+            background-color: #00a884;
+            color: #0b141a;
+            padding: 12px 60px;
+            border-radius: 30px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 60px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <h2 style="color: #085F56; margin-top: 40px;">Info. de perfil</h2>
-    <p style="color: #666;">Por favor, proporciona tu nombre y una foto de perfil opcional.</p>
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: #00a884; font-weight: bold;">Iniciando DNPlus...</p>
+    </div>
+
+    <h2 style="color: #e9edef; margin-top: 50px; font-weight: 500;">Info. de perfil</h2>
+    <p style="color: #8696a0;">Proporciona tu nombre y una foto opcional.</p>
 
     <div class="profile-pic-container" onclick="subirFoto()">
         <div class="circle-avatar">
-            <img id="imgPerfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" width="80">
+            <img id="imgPerfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" width="90" style="filter: invert(0.8);">
         </div>
         <div class="camera-icon">📷</div>
     </div>
 
-    <div>
-        <input type="text" id="userName" class="input-name" placeholder="Tu nombre aquí" maxlength="25">
-        <p class="hint">Este nombre será visible para tus contactos de DNPlus.</p>
-    </div>
+    <input type="text" id="userName" class="input-name" placeholder="Tu nombre" maxlength="25">
+    <p class="hint">Este nombre será visible para tus contactos de DNPlus.</p>
 
-    <div style="margin-top: 50px;">
-        <button class="btn-confirmar" onclick="guardarPerfil()" style="padding: 12px 60px;">
-            SIGUIENTE
-        </button>
-    </div>
+    <button class="btn-confirmar" onclick="guardarPerfil()">
+        SIGUIENTE
+    </button>
 
     <script>
         function subirFoto() {
-            // Aquí puedes llamar a la galería de Sketchware
             if(window.Android && window.Android.seleccionarFoto) {
                 window.Android.seleccionarFoto();
             } else {
@@ -92,11 +130,17 @@
         function guardarPerfil() {
             const nombre = document.getElementById('userName').value;
             if(nombre.trim().length > 2) {
+                // Mostramos el loader
+                document.getElementById('loader-overlay').style.display = 'flex';
+
                 if(window.Android && window.Android.guardarNombre) {
                     window.Android.guardarNombre(nombre);
                 }
-                // Una vez guardado, vamos al chat final
-                window.location.href = 'mensajes.html';
+
+                // Esperamos 2 segundos para que se vea el loader y vamos al home
+                setTimeout(function() {
+                    window.location.href = 'home.html';
+                }, 2000);
             } else {
                 alert("Por favor, ingresa tu nombre.");
             }
@@ -104,4 +148,3 @@
     </script>
 </body>
 </html>
-
