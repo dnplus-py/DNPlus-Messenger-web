@@ -1,1 +1,167 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Contacto - DNPlus</title>
+    <style>
+        body { 
+            background-color: #0b141a; 
+            color: #e9edef; 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #00a884;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #8696a0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #00a884;
+            color: white;
+            font-size: 18px;
+            padding: 8px 0;
+            outline: none;
+        }
+
+        .btn-guardar {
+            width: 100%;
+            background-color: #00a884;
+            color: #0b141a;
+            padding: 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        /* Lista de contactos guardados */
+        .contacts-list {
+            margin-top: 40px;
+            border-top: 1px solid rgba(134, 150, 160, 0.2);
+            padding-top: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(134, 150, 160, 0.1);
+            cursor: pointer;
+        }
+
+        .contact-info strong { display: block; font-size: 16px; }
+        .contact-info span { color: #8696a0; font-size: 14px; }
+
+        .chat-icon { color: #00a884; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="back-btn" onclick="window.history.back()">←</span>
+        <h2 style="margin:0; font-weight: 500;">Nuevo contacto</h2>
+    </div>
+
+    <div class="input-group">
+        <label>Nombre del contacto</label>
+        <input type="text" id="contactName" class="input-field" placeholder="Ej. Juan Pérez">
+    </div>
+
+    <div class="input-group">
+        <label>Número de teléfono</label>
+        <input type="tel" id="contactPhone" class="input-field" placeholder="+595 9xx xxx xxx">
+    </div>
+
+    <button class="btn-guardar" onclick="guardarContacto()">GUARDAR CONTACTO</button>
+
+    <div class="contacts-list" id="listaContactos">
+        <h3 style="color: #8696a0; font-size: 14px; text-transform: uppercase;">Tus contactos</h3>
+        </div>
+
+    <script>
+        // Cargar contactos al abrir la página
+        window.onload = mostrarContactos;
+
+        function guardarContacto() {
+            const name = document.getElementById('contactName').value;
+            const phone = document.getElementById('contactPhone').value;
+
+            if (name.trim() === "" || phone.trim() === "") {
+                alert("Por favor, completa todos los campos.");
+                return;
+            }
+
+            // Obtener contactos actuales de SharedPreferences (LocalStorage)
+            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
+
+            // Agregar nuevo contacto
+            contacts.push({ nombre: name, telefono: phone });
+
+            // Guardar de nuevo
+            localStorage.setItem("dnplus_contacts", JSON.stringify(contacts));
+
+            // Limpiar campos y actualizar lista
+            document.getElementById('contactName').value = "";
+            document.getElementById('contactPhone').value = "";
+            mostrarContactos();
+            alert("Contacto guardado con éxito.");
+        }
+
+        function mostrarContactos() {
+            const lista = document.getElementById('listaContactos');
+            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
+            
+            // Limpiar lista antes de mostrar (manteniendo el título)
+            lista.innerHTML = '<h3 style="color: #8696a0; font-size: 14px; text-transform: uppercase;">Tus contactos</h3>';
+
+            contacts.forEach((c, index) => {
+                const item = document.createElement('div');
+                item.className = 'contact-item';
+                // Al hacer clic, enviamos al usuario a mensajes.html
+                item.onclick = function() {
+                    localStorage.setItem("chat_actual", c.nombre);
+                    window.location.href = 'mensajes.html';
+                };
+
+                item.innerHTML = `
+                    <div class="contact-info">
+                        <strong>${c.nombre}</strong>
+                        <span>${c.telefono}</span>
+                    </div>
+                    <div class="chat-icon">💬</div>
+                `;
+                lista.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
