@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - DNPlus</title>
     <style>
-        /* Paleta de colores Dark */
         body { 
             background-color: #0b141a; 
             color: #e9edef; 
@@ -14,100 +13,22 @@
             margin: 0;
             padding: 20px;
         }
-        
         .title { color: #e9edef; font-weight: 500; margin-top: 50px; }
-        
-        .instruccion { 
-            color: #8696a0; 
-            font-size: 14px; 
-            margin-bottom: 30px; 
-            padding: 0 30px; 
-            line-height: 1.4;
-        }
+        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 30px; line-height: 1.4; }
+        .phone-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 40px; }
+        .country-select { border-bottom: 2px solid #00a884; padding: 5px 0; width: 80px; font-size: 18px; color: #e9edef; }
+        .number-input { background: transparent; border: none; border-bottom: 2px solid #00a884; padding: 5px 0; font-size: 18px; width: 180px; outline: none; color: #e9edef; }
+        .btn-confirmar { background-color: #00a884; color: #0b141a; padding: 12px 40px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 14px; }
 
-        .phone-container { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 15px; 
-            margin-bottom: 40px; 
-        }
-
-        .country-select { 
-            border-bottom: 2px solid #00a884; 
-            padding: 5px 0; 
-            width: 80px; 
-            font-size: 18px; 
-            color: #e9edef; 
-        }
-
-        .number-input { 
-            background: transparent;
-            border: none; 
-            border-bottom: 2px solid #00a884; 
-            padding: 5px 0; 
-            font-size: 18px; 
-            width: 180px; 
-            outline: none; 
-            color: #e9edef;
-        }
-
-        .btn-confirmar {
-            background-color: #00a884;
-            color: #0b141a;
-            padding: 12px 40px;
-            border-radius: 30px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* Estilos del Modal DNPlus Oscuro */
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0, 0, 0, 0.7); 
-            z-index: 1000; 
-        }
-        .modal-box { 
-            background: #232d36; /* Gris azulado oscuro del modal */
-            width: 85%; 
-            max-width: 320px; 
-            margin: 50% auto; 
-            padding: 25px; 
-            border-radius: 5px; 
-            text-align: left; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .modal-box h3 { color: #e9edef; font-size: 18px; margin-top: 0; }
-        .modal-box p { color: #8696a0; font-size: 15px; }
-        
-        .modal-btns { 
-            display: flex; 
-            justify-content: flex-end; 
-            gap: 25px; 
-            margin-top: 25px; 
-        }
-        .btn-flat { 
-            background: none; 
-            border: none; 
-            color: #00a884; 
-            font-weight: bold; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 14px;
-        }
+        /* Modal Oscuro */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; }
+        .modal-box { background: #232d36; width: 85%; max-width: 320px; margin: 50% auto; padding: 25px; border-radius: 5px; text-align: left; }
+        .btn-flat { background: none; border: none; color: #00a884; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <h2 class="title">Verifica tu número</h2>
-    
     <p class="instruccion">DNPlus Messenger enviará un SMS para verificar tu número de teléfono.</p>
 
     <div class="phone-container">
@@ -119,10 +40,10 @@
 
     <div id="miModal" class="modal-overlay">
         <div class="modal-box">
-            <h3>¿Es este su número?</h3>
+            <h3 style="margin-top:0;">¿Es este su número?</h3>
             <p id="numeroMostrado" style="color: #e9edef; font-size: 17px; margin: 15px 0;"></p>
-            <p>Te enviaremos un código de activación por SMS.</p>
-            <div class="modal-btns">
+            <p style="color: #8696a0;">Te enviaremos un código de activación por SMS.</p>
+            <div style="display:flex; justify-content: flex-end; gap:25px; margin-top:25px;">
                 <button class="btn-flat" onclick="cerrarModal()">Editar</button>
                 <button class="btn-flat" onclick="confirmarYEnviar()">OK</button>
             </div>
@@ -136,19 +57,14 @@
                 document.getElementById('numeroMostrado').innerText = "+595 " + num;
                 document.getElementById('miModal').style.display = 'block';
             } else {
-                alert("Por favor, introduce un número válido.");
+                alert("Introduce un número válido.");
             }
         }
-        function cerrarModal() { 
-            document.getElementById('miModal').style.display = 'none'; 
-        }
+        function cerrarModal() { document.getElementById('miModal').style.display = 'none'; }
         function confirmarYEnviar() {
-            const num = document.getElementById('phoneInput').value;
-            // Aquí podrías guardar el número en localStorage para usarlo después
-            localStorage.setItem("userPhone", "+595" + num);
-            
-            window.location.href = 'otp.html';
+            window.location.href = 'home.html'; // Aquí podés poner la siguiente pantalla
         }
     </script>
 </body>
 </html>
+
