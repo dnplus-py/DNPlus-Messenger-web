@@ -1,1 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones - DNPlus</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos específicos para que el texto legal se lea bien */
+        .terminos-container {
+            text-align: left;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: 70vh;
+            overflow-y: scroll;
+        }
+        h2 { color: #085F56; }
+        .footer-buttons {
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" alt="Logo" style="width: 80px;"> 
+    </div>
+
+    <h2>Términos y Condiciones</h2>
+
+    <div class="terminos-container">
+        <p><strong>1. Uso de la Aplicación:</strong> DNPlus Messenger es una plataforma de mensajería para conectar personas de forma segura.</p>
+        <p><strong>2. Privacidad:</strong> Tus datos son gestionados a través de Firebase con altos estándares de seguridad.</p>
+        <p><strong>3. Responsabilidad:</strong> El usuario es responsable del contenido compartido en la plataforma.</p>
+        <p><strong>4. Actualizaciones:</strong> Nos reservamos el derecho de mejorar las funciones para el beneficio de la comunidad OVIEDO DEV.</p>
+        <p>Continuando con el uso de esta app, aceptas que tus mensajes se sincronicen en tiempo real.</p>
+    </div>
+
+    <div class="footer-buttons">
+        <button class="btn-confirmar" onclick="aceptarTerminos()">He leído y acepto</button>
+    </div>
+
+    <script>
+        function aceptarTerminos() {
+            // Guardamos que aceptó y volvemos al inicio o registro
+            if(window.Android && window.Android.terminosAceptados){
+                window.Android.terminosAceptados();
+            } else {
+                window.location.href = 'inicio.html';
+            }
+        }
+    </script>
+</body>
+</html>
 
