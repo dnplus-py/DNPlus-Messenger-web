@@ -200,5 +200,50 @@
             }
         }
     </script>
+  
+    <script>
+    // Función para la imagen
+    function previewImagen(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            const output = document.getElementById('imgPerfil');
+            output.src = reader.result;
+            localStorage.setItem("user_photo", reader.result);
+        };
+        if(event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+
+    // Función para guardar y saltar al Home
+    function guardarPerfil() {
+        const nombreInput = document.getElementById('userName');
+        const nombre = nombreInput.value.trim();
+
+        if(nombre.length >= 2) {
+            // Activar el círculo de carga
+            document.getElementById('loader-overlay').style.display = 'flex';
+
+            // Guardar en la memoria del celular
+            localStorage.setItem("user_name", nombre);
+            
+            // Si no subió foto, guardamos la que está puesta por defecto
+            const fotoActual = document.getElementById('imgPerfil').src;
+            if(!localStorage.getItem("user_photo")) {
+                localStorage.setItem("user_photo", fotoActual);
+            }
+
+            // Redirección forzada al home
+            setTimeout(function() {
+                // Importante: Asegurate que tu archivo se llame home.html en minúsculas
+                window.location.assign("home.html");
+            }, 1500);
+
+        } else {
+            alert("Escribe un nombre de al menos 2 letras, bro.");
+        }
+    }
+</script>
+
 </body>
 </html>
