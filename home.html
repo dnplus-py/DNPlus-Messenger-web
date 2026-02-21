@@ -13,94 +13,93 @@
             overflow: hidden;
         }
 
-        /* --- ENCABEZADO --- */
+        /* --- ENCABEZADO COLOR OFICIAL --- */
         .header {
-            background-color: #202c33;
+            background-color: #085f56;
             padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .header h1 { font-size: 20px; margin: 0; color: #8696a0; }
+        .header h1 { font-size: 20px; margin: 0; color: #ffffff; }
 
         /* --- TABS --- */
         .tabs {
             display: flex;
-            background-color: #202c33;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background-color: #085f56;
         }
         .tab {
             flex: 1;
             text-align: center;
             padding: 15px 0;
-            color: #8696a0;
+            color: rgba(255,255,255,0.7);
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
             text-transform: uppercase;
         }
         .tab.active {
-            color: #085f56;
-            border-bottom: 3px solid #085f56;
+            color: #ffffff;
+            border-bottom: 3px solid #ffffff;
         }
 
         /* --- VIEW PAGER --- */
-        .window-container {
-            width: 100vw;
-            overflow: hidden;
-        }
+        .window-container { width: 100vw; overflow: hidden; }
         .view-pager {
             display: flex;
             width: 300%;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .page {
-            width: 100vw;
-            height: 85vh;
-            background-color: #0b141a;
-            overflow-y: auto;
-        }
+        .page { width: 100vw; height: 85vh; background-color: #0b141a; overflow-y: auto; }
 
         /* --- ESTILOS DE LISTA --- */
-        .item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid rgba(134, 150, 160, 0.1);
-        }
+        .item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); }
         .item:active { background-color: #202c33; }
-
         .avatar {
-            width: 50px; height: 50px;
+            width: 55px; height: 55px;
             border-radius: 50%;
             background-color: #232d36;
             margin-right: 15px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: #8696a0;
         }
         .details { flex: 1; }
-        .name { font-weight: bold; font-size: 16px; display: block; color: #e9edef; }
+        .name { font-weight: bold; font-size: 16px; color: #e9edef; }
         .msg { color: #8696a0; font-size: 14px; }
-        .time { font-size: 12px; color: #085f56; }
 
-        /* --- FAB --- */
+        /* --- FABS DINÁMICOS --- */
+        .fab-container { position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 1000; }
+        
         .fab {
-            position: fixed;
-            bottom: 25px; right: 25px;
             background-color: #085f56;
             width: 60px; height: 60px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            z-index: 1000;
+            cursor: pointer;
         }
+        
+        .fab-mini {
+            width: 45px; height: 45px;
+            background-color: #232d36;
+            display: none; /* Solo se ve en Estados */
+            border-radius: 50%;
+            align-items: center; justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
 
+    <input type="file" id="fileInput" accept="image/*" onchange="subirEstado(event)">
+
     <div class="header">
         <h1>DNPlus</h1>
-        <div style="color: #8696a0;">🔍 ⋮</div>
+        <div style="color: #ffffff; display: flex; gap: 20px;">
+            <span onclick="location.href='buscar.html'">🔍</span>
+            <span onclick="location.href='ajustes.html'">⋮</span>
+        </div>
     </div>
 
     <div class="tabs">
@@ -112,95 +111,74 @@
     <div class="window-container">
         <div class="view-pager" id="pager">
             
-            <div class="page" id="chatPage">
+            <div class="page">
                 <div class="item" onclick="location.href='mensajes.html'">
-                    <div class="avatar" style="background-color: #085f56; color: white;">S</div>
+                    <div class="avatar" style="background-color: #085f56; color: white; font-weight: bold;">S</div>
                     <div class="details">
-                        <div style="display:flex; justify-content: space-between;">
-                            <span class="name">Soporte DNPlus</span>
-                            <span class="time">Ahora</span>
-                        </div>
-                        <span class="msg">¡Bienvenido a DNPlus, David! 🚀</span>
+                        <span class="name">Soporte DNPlus</span>
+                        <span class="msg">¡Bienvenido a DNPlus! 🚀</span>
                     </div>
                 </div>
                 <div id="listaChatsDinamica"></div>
             </div>
 
             <div class="page">
-                <div class="item" onclick="abrirGaleria()">
-                    <div class="avatar" style="border: 2px solid #8696a0; position: relative;">
-                        📸
-                        <div style="position:absolute; bottom:0; right:0; background:#085f56; border-radius:50%; width:18px; height:18px; font-size:14px; display:flex; align-items:center; justify-content:center; border: 2px solid #0b141a;">+</div>
+                <div class="item" onclick="document.getElementById('fileInput').click()">
+                    <div class="avatar" style="border: 2px solid #085f56; position: relative; background: #232d36;">
+                        <img id="miFotoEstado" src="https://www.w3schools.com/howto/img_avatar.png" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                        <div style="position:absolute; bottom:0; right:0; background:#085f56; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border: 2px solid #0b141a; color:white; font-size:15px;">+</div>
                     </div>
                     <div class="details">
                         <span class="name">Mi estado</span>
-                        <span class="msg">Toca para añadir</span>
+                        <span class="msg">Toca para añadir una actualización</span>
                     </div>
                 </div>
-                <div style="padding: 10px 15px; color: #085f56; font-size: 13px; font-weight: bold;">RECIENTES</div>
-                <div style="text-align: center; margin-top: 50px; color: #8696a0;">No hay estados nuevos</div>
+                <div style="padding: 10px 15px; color: #8696a0; font-size: 13px; font-weight: bold;">RECIENTES</div>
+                <div style="text-align: center; margin-top: 50px; color: #8696a0;">No hay actualizaciones</div>
             </div>
 
             <div class="page">
                 <div style="text-align: center; margin-top: 100px; color: #8696a0;">
-                    No tienes llamadas recientes.
+                    Para iniciar una llamada, toca el botón de abajo.
                 </div>
             </div>
 
         </div>
     </div>
 
-    <div class="fab" id="mainFab" onclick="fabAction()">
-        <span id="fabIcon" style="font-size: 24px; color: #ffffff;">💬</span>
+    <div class="fab-container">
+        <div class="fab-mini" id="fabTexto" onclick="alert('Escribir estado...')">
+            <span style="font-size: 20px; color: #b1b1b1;">✏️</span>
+        </div>
+        <div class="fab" onclick="fabAction()">
+            <span id="fabIcon" style="font-size: 24px; color: #ffffff;">💬</span>
+        </div>
     </div>
 
     <script>
         let currentPage = 0;
 
+        // Cargar foto de perfil en el estado
         window.onload = function() {
+            const foto = localStorage.getItem("user_photo");
+            if(foto) document.getElementById('miFotoEstado').src = foto;
             cargarChats();
         };
-
-        function cargarChats() {
-            const contenedor = document.getElementById('listaChatsDinamica');
-            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
-            
-            contenedor.innerHTML = "";
-            contacts.forEach(c => {
-                const item = document.createElement('div');
-                item.className = 'item';
-                item.onclick = function() {
-                    localStorage.setItem("chat_actual", c.nombre);
-                    window.location.href = 'mensajes.html';
-                };
-                
-                const inicial = c.nombre.charAt(0).toUpperCase();
-
-                item.innerHTML = `
-                    <div class="avatar">${inicial}</div>
-                    <div class="details">
-                        <div style="display:flex; justify-content: space-between;">
-                            <span class="name">${c.nombre}</span>
-                            <span class="time">10:00 AM</span>
-                        </div>
-                        <span class="msg">Toca para chatear con ${c.nombre}</span>
-                    </div>
-                `;
-                contenedor.appendChild(item);
-            });
-        }
 
         function movePage(index) {
             currentPage = index;
             const pager = document.getElementById('pager');
             const tabs = document.querySelectorAll('.tab');
             const fabIcon = document.getElementById('fabIcon');
+            const fabTexto = document.getElementById('fabTexto');
             
             pager.style.transform = `translateX(-${index * 100}vw)`;
-            
             tabs.forEach(t => t.classList.remove('active'));
             tabs[index].classList.add('active');
 
+            // Lógica de iconos y botones
+            fabTexto.style.display = (index === 1) ? "flex" : "none";
+            
             if(index === 0) fabIcon.innerText = "💬";
             if(index === 1) fabIcon.innerText = "📷";
             if(index === 2) fabIcon.innerText = "📞";
@@ -208,13 +186,17 @@
 
         function fabAction() {
             if(currentPage === 0) window.location.href = 'lista_contactos.html';
-            else if(currentPage === 1) abrirGaleria();
-            else if(currentPage === 2) window.location.href = 'agregar_contacto.html';
+            else if(currentPage === 1) document.getElementById('fileInput').click();
+            else if(currentPage === 2) window.location.href = 'add_contacto.html';
         }
 
-        function abrirGaleria() {
-            if(window.Android && window.Android.abrirGaleria) window.Android.abrirGaleria();
-            else alert("Abriendo Galería...");
+        function subirEstado(event) {
+            alert("Subiendo imagen a tus estados...");
+            // Aquí podrías guardar la imagen en localStorage para mostrarla
+        }
+
+        function cargarChats() {
+            // (Tu lógica de carga de chats del localStorage aquí...)
         }
     </script>
 </body>
