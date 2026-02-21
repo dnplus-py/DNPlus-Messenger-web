@@ -1,12 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificar DNPlus</title>
-    <link rel="stylesheet" href="style.css">
     <style>
+        body { 
+            background-color: #0b141a; /* Tu negro azulado */
+            color: #e9edef; 
+            text-align: center; 
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .title { color: #e9edef; font-weight: 500; margin-top: 60px; }
+        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; }
+        
         .otp-inputs {
             display: flex;
             justify-content: center;
@@ -17,28 +26,48 @@
             width: 40px;
             height: 50px;
             border: none;
-            border-bottom: 3px solid #176F47; /* Tu verde */
+            border-bottom: 3px solid #00a884; /* Verde brillante */
             text-align: center;
             font-size: 24px;
             font-weight: bold;
-            color: #085F56;
+            color: #e9edef;
             background: transparent;
             outline: none;
         }
-        .resend-text {
-            color: #176F47;
-            font-weight: bold;
+        /* Color cuando el cuadrito está seleccionado */
+        .otp-box:focus {
+            border-bottom: 3px solid #53bdeb; /* Azul clarito al escribir */
+        }
+        
+        .btn-confirmar { 
+            background-color: #00a884; 
+            color: #0b141a; 
+            padding: 12px 60px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            border: none; 
             cursor: pointer;
             margin-top: 20px;
+        }
+        
+        .resend-text {
+            color: #8696a0;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 30px;
             display: block;
+        }
+        .resend-text span {
+            color: #00a884;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div style="margin-top: 60px; text-align: center;">
-        <h2 style="color: #085F56;">Verifica tu número</h2>
-        <p style="color: #666; padding: 0 30px;">Introduce el código de 6 dígitos que enviamos a tu dispositivo.</p>
+    <div style="margin-top: 40px;">
+        <h2 class="title">Verifica tu número</h2>
+        <p class="instruccion">Introduce el código de 6 dígitos que enviamos a tu dispositivo.</p>
     </div>
 
     <div class="otp-inputs">
@@ -50,11 +79,11 @@
         <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 6)">
     </div>
 
-    <button class="btn-confirmar" onclick="validarYEntrar()" style="padding: 12px 60px;">
+    <button class="btn-confirmar" onclick="validarYEntrar()">
         VERIFICAR
     </button>
 
-    <span class="resend-text">¿No recibiste el código?</span>
+    <span class="resend-text">¿No recibiste el código? <span>Reenviar</span></span>
 
     <script>
         // Función para saltar de cuadrito en cuadrito automáticamente
@@ -65,11 +94,12 @@
         }
 
         function validarYEntrar() {
-            // Aquí conectamos con tu lógica de Sketchware
+            // Animación de carga o lógica de Sketchware
             if(window.Android && window.Android.verificarCodigo) {
                 window.Android.verificarCodigo();
             } else {
-                window.location.href = 'mensajes.html'; // Si todo está bien, vamos al chat
+                // Si todo está bien, nos dirigimos a crear el perfil
+                window.location.href = 'add_perfil.html'; 
             }
         }
     </script>
