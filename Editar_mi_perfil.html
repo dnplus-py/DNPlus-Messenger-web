@@ -15,7 +15,7 @@
         .info-icon { color: #8696a0; font-size: 20px; width: 30px; text-align: center; }
         .info-label { font-size: 13px; color: #8696a0; margin-bottom: 2px; }
         .info-value { font-size: 16px; color: #e9edef; border: none; outline: none; width: 100%; background: transparent; }
-        .btn-save-profile { position: fixed; bottom: 25px; right: 25px; background-color: #085f56; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: none; font-size: 24px; }
+        .btn-save-profile { position: fixed; bottom: 25px; right: 25px; background-color: #085f56; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: none; font-size: 24px; cursor: pointer; }
         #fileInput { display: none; }
     </style>
 </head>
@@ -46,29 +46,66 @@
 
     <button class="btn-save-profile" onclick="guardarTodo()">✓</button>
 
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            authDomain: "dnplus-messenger-pro.firebaseapp.com",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+            messagingSenderId: "625573378436",
+            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         window.onload = function() {
-            // Cargar datos al entrar
-            const nombre = localStorage.getItem("user_name") || "Usuario";
-            const foto = localStorage.getItem("user_photo") || "https://www.w3schools.com/howto/img_avatar.png";
+            // Cargamos desde LocalStorage para rapidez, pero actualizamos desde Firebase
+            const nombreLocal = localStorage.getItem("user_name") || "Usuario";
+            const fotoLocal = localStorage.getItem("user_photo") || "https://www.w3schools.com/howto/img_avatar.png";
             
-            document.getElementById('editName').value = nombre;
-            document.getElementById('currentPhoto').src = foto;
+            document.getElementById('editName').value = nombreLocal;
+            document.getElementById('currentPhoto').src = fotoLocal;
+
+            // Sincronizar con Firebase por si cambió en otro lado
+            db.ref("usuarios/mi_perfil").once("value", (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    document.getElementById('editName').value = data.nombre;
+                    document.getElementById('currentPhoto').src = data.foto;
+                }
+            });
         }
 
         function actualizarFoto(event) {
             const reader = new FileReader();
             reader.onload = function(){
                 document.getElementById('currentPhoto').src = reader.result;
-                localStorage.setItem("user_photo", reader.result); // Actualizamos la memoria
             };
             reader.readAsDataURL(event.target.files[0]);
         }
 
         function guardarTodo() {
             const nuevoNombre = document.getElementById('editName').value;
-            localStorage.setItem("user_name", nuevoNombre);
-            window.location.href = 'ajustes.html';
+            const nuevaFoto = document.getElementById('currentPhoto').src;
+
+            // Guardar en Firebase
+            db.ref("usuarios/mi_perfil").update({
+                nombre: nuevoNombre,
+                foto: nuevaFoto,
+                ultimaActualizacion: Date.now()
+            }).then(() => {
+                // Guardar en LocalStorage
+                localStorage.setItem("user_name", nuevoNombre);
+                localStorage.setItem("user_photo", nuevaFoto);
+                
+                window.location.href = 'ajustes.html';
+            }).catch((e) => {
+                alert("Error al guardar: " + e.message);
+            });
         }
     </script>
 </body>
