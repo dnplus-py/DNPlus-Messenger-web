@@ -1,161 +1,36 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Home</title>
+    <title>DNPlus</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; overflow: hidden; }
-        .header { background-color: #085f56; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 20px; margin: 0; color: #ffffff; }
-        .tabs { display: flex; background-color: #085f56; }
-        .tab { flex: 1; text-align: center; padding: 15px 0; color: rgba(255,255,255,0.7); font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-        .tab.active { color: #ffffff; border-bottom: 3px solid #ffffff; }
-        .window-container { width: 100vw; overflow: hidden; }
-        .view-pager { display: flex; width: 300%; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .page { width: 100vw; height: 85vh; background-color: #0b141a; overflow-y: auto; }
-        .item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); cursor: pointer; }
-        .item:active { background-color: #202c33; }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; margin-right: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .details { flex: 1; }
-        .name { font-weight: bold; font-size: 16px; color: #e9edef; }
-        .msg { color: #8696a0; font-size: 14px; display: block; }
-        .fab-container { position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 1000; }
-        .fab { background-color: #00a884; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer; }
-        .fab:active { transform: scale(0.9); }
-        .fab-mini { width: 45px; height: 45px; background-color: #232d36; display: none; border-radius: 50%; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; }
-        #fileInput { display: none; }
+        body { margin: 0; background-color: #0b141a; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: white; }
+        .logo { width: 80px; height: 80px; background-color: #00a884; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0, 168, 132, 0.3); }
+        .from { position: absolute; bottom: 40px; color: #8696a0; font-size: 12px; letter-spacing: 2px; text-align: center; }
+        .author { color: white; font-weight: bold; font-size: 16px; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <input type="file" id="fileInput" accept="image/*" onchange="subirEstado(event)">
+    <div class="logo">DN</div>
+    <h2 style="margin:0; letter-spacing: 1px;">DNPlus</h2>
 
-    <div class="header">
-        <h1>DNPlus</h1>
-        <div style="color: #ffffff; display: flex; gap: 20px;">
-            <span onclick="location.href='buscar.html'">🔍</span>
-            <span onclick="location.href='ajustes.html'">⋮</span>
-        </div>
+    <div class="from">
+        from<br>
+        <div class="author">DAVID OVIEDO</div>
     </div>
-
-    <div class="tabs">
-        <div class="tab active" onclick="movePage(0)">Chats</div>
-        <div class="tab" onclick="movePage(1)">Estados</div>
-        <div class="tab" onclick="movePage(2)">Llamadas</div>
-    </div>
-
-    <div class="window-container">
-        <div class="view-pager" id="pager">
-            
-            <div class="page" id="listaChats">
-                <div class="item" onclick="location.href='mensajes.html?nombre=Soporte%20DNPlus'">
-                    <div class="avatar" style="background-color: #085f56; color: white; font-weight: bold;">S</div>
-                    <div class="details">
-                        <span class="name">Soporte DNPlus</span>
-                        <span class="msg">¡Bienvenido a DNPlus! 🚀</span>
-                    </div>
-                </div>
-                <div id="chatsDinamicos"></div>
-            </div>
-
-            <div class="page">
-                <div class="item" onclick="document.getElementById('fileInput').click()">
-                    <div class="avatar" style="border: 2px solid #00a884; position: relative;">
-                        <img id="miFotoEstado" src="https://www.w3schools.com/howto/img_avatar.png">
-                        <div style="position:absolute; bottom:0; right:0; background:#00a884; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border: 2px solid #0b141a; color:white; font-size:15px;">+</div>
-                    </div>
-                    <div class="details">
-                        <span class="name">Mi estado</span>
-                        <span class="msg">Toca para añadir una actualización</span>
-                    </div>
-                </div>
-                <div style="padding: 10px 15px; color: #8696a0; font-size: 13px; font-weight: bold;">RECIENTES</div>
-                <div id="listaEstados" style="text-align: center; margin-top: 50px; color: #8696a0;">No hay actualizaciones</div>
-            </div>
-
-            <div class="page">
-                <div style="text-align: center; margin-top: 100px; color: #8696a0;">
-                    No tienes llamadas recientes.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="fab-container">
-        <div class="fab-mini" id="fabTexto" onclick="alert('Escribir estado...')">
-            <span style="font-size: 20px; color: #b1b1b1;">✏️</span>
-        </div>
-        <div class="fab" onclick="fabAction()">
-            <span id="fabIcon" style="font-size: 24px; color: #ffffff;">💬</span>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let currentPage = 0;
-
-        window.onload = function() {
-            const foto = localStorage.getItem("user_photo");
-            if(foto) document.getElementById('miFotoEstado').src = foto;
-            escucharMensajes();
-        };
-
-        function movePage(index) {
-            currentPage = index;
-            document.getElementById('pager').style.transform = `translateX(-${index * 100}vw)`;
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            tabs[index].classList.add('active');
-
-            document.getElementById('fabTexto').style.display = (index === 1) ? "flex" : "none";
-            const fabIcon = document.getElementById('fabIcon');
-            if(index === 0) fabIcon.innerText = "💬";
-            if(index === 1) fabIcon.innerText = "📷";
-            if(index === 2) fabIcon.innerText = "➕";
-        }
-
-        // CORRECCIÓN DE LAS REFERENCIAS REALES
-        function fabAction() {
-            if(currentPage === 0) {
-                // En Chats, vamos a elegir a quién escribir
-                window.location.href = 'lista_contactos.html';
-            } 
-            else if(currentPage === 1) {
-                // Estados: cámara
-                document.getElementById('fileInput').click();
-            } 
-            else if(currentPage === 2) {
-                // CORREGIDO: En Llamadas, vamos a agregar contacto nuevo
-                window.location.href = 'add_contactos.html';
+        setTimeout(() => {
+            const userStored = localStorage.getItem("user_name");
+            // Si ya existe el usuario, va al Home, si no, a crear perfil
+            if (userStored) {
+                window.location.href = 'home.html';
+            } else {
+                window.location.href = 'add_perfil.html';
             }
-        }
-
-        function escucharMensajes() {
-            db.ref("mensajes").limitToLast(1).on("child_added", (snap) => {
-                const data = snap.val();
-            });
-        }
-
-        function subirEstado(event) {
-            alert("Subiendo estado a DNPlus...");
-        }
+        }, 2500);
     </script>
 </body>
 </html>
-          
