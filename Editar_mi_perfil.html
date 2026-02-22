@@ -15,14 +15,14 @@
         .info-icon { color: #8696a0; font-size: 20px; width: 30px; text-align: center; }
         .info-label { font-size: 13px; color: #8696a0; margin-bottom: 2px; }
         .info-value { font-size: 16px; color: #e9edef; border: none; outline: none; width: 100%; background: transparent; }
-        .btn-save-profile { position: fixed; bottom: 25px; right: 25px; background-color: #085f56; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: none; font-size: 24px; cursor: pointer; }
+        .btn-save-profile { position: fixed; bottom: 25px; right: 25px; background-color: #00a884; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: none; font-size: 24px; cursor: pointer; }
         #fileInput { display: none; }
     </style>
 </head>
 <body>
 
     <div class="header-edit">
-        <span onclick="history.back()" style="font-size: 24px; cursor: pointer;">←</span>
+        <span onclick="location.href='ajustes.html'" style="font-size: 24px; cursor: pointer;">←</span>
         <span style="font-size: 18px; font-weight: bold;">Perfil</span>
     </div>
 
@@ -39,9 +39,26 @@
         <div class="info-icon">👤</div>
         <div style="flex: 1;">
             <div class="info-label">Nombre</div>
-            <input type="text" class="info-value" id="editName">
+            <input type="text" class="info-value" id="editName" placeholder="Tu nombre">
         </div>
-        <div style="color: #085f56;">✏️</div>
+        <div style="color: #00a884;">✏️</div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-icon">ℹ️</div>
+        <div style="flex: 1;">
+            <div class="info-label">Info.</div>
+            <input type="text" class="info-value" id="editStatus" value="Hola, estoy usando DNPlus">
+        </div>
+        <div style="color: #00a884;">✏️</div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-icon">📞</div>
+        <div style="flex: 1;">
+            <div class="info-label">Teléfono</div>
+            <input type="text" class="info-value" id="editPhone" placeholder="+00 000 000000">
+        </div>
     </div>
 
     <button class="btn-save-profile" onclick="guardarTodo()">✓</button>
@@ -63,19 +80,14 @@
         const db = firebase.database();
 
         window.onload = function() {
-            // Cargamos desde LocalStorage para rapidez, pero actualizamos desde Firebase
-            const nombreLocal = localStorage.getItem("user_name") || "Usuario";
-            const fotoLocal = localStorage.getItem("user_photo") || "https://www.w3schools.com/howto/img_avatar.png";
-            
-            document.getElementById('editName').value = nombreLocal;
-            document.getElementById('currentPhoto').src = fotoLocal;
-
-            // Sincronizar con Firebase por si cambió en otro lado
+            // Cargar datos actuales
             db.ref("usuarios/mi_perfil").once("value", (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    document.getElementById('editName').value = data.nombre;
-                    document.getElementById('currentPhoto').src = data.foto;
+                    document.getElementById('editName').value = data.nombre || localStorage.getItem("user_name");
+                    document.getElementById('currentPhoto').src = data.foto || localStorage.getItem("user_photo");
+                    document.getElementById('editStatus').value = data.estado || "Hola, estoy usando DNPlus";
+                    document.getElementById('editPhone').value = data.telefono || "";
                 }
             });
         }
@@ -91,20 +103,24 @@
         function guardarTodo() {
             const nuevoNombre = document.getElementById('editName').value;
             const nuevaFoto = document.getElementById('currentPhoto').src;
+            const nuevoEstado = document.getElementById('editStatus').value;
+            const nuevoTelefono = document.getElementById('editPhone').value;
 
             // Guardar en Firebase
             db.ref("usuarios/mi_perfil").update({
                 nombre: nuevoNombre,
                 foto: nuevaFoto,
+                estado: nuevoEstado,
+                telefono: nuevoTelefono,
                 ultimaActualizacion: Date.now()
             }).then(() => {
-                // Guardar en LocalStorage
+                // Actualizar LocalStorage
                 localStorage.setItem("user_name", nuevoNombre);
                 localStorage.setItem("user_photo", nuevaFoto);
                 
                 window.location.href = 'ajustes.html';
             }).catch((e) => {
-                alert("Error al guardar: " + e.message);
+                alert("Error: " + e.message);
             });
         }
     </script>
