@@ -1,8 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat DNPlus</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; color: white; }
+        
+        /* ENCABEZADO */
+        .header { background-color: #075e54; padding: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; }
+
+        /* BANDEJA DE CHAT */
+        #chat-box { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); /* Fondo oficial */
+            background-size: contain;
+        }
+
+        /* BURBUJA VERDE DAVID (#176F47) */
+        .msg-mio { 
+            align-self: flex-end; 
+            background-color: #176f47; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 15px 15px 0px 15px; 
+            max-width: 85%; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            word-wrap: break-word;
+        }
+
+        /* FOOTER / ENTRADA */
+        .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        input { 
+            flex: 1; 
+            background-color: #2a3942; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 25px; 
+            color: white; 
+            outline: none; 
+        }
+
+        .btn-accion { 
+            background-color: #00a884; 
+            border: none; 
+            width: 48px; height: 48px; 
+            border-radius: 50%; 
+            color: white; 
+            font-size: 22px; 
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span onclick="window.history.back()" style="cursor:pointer">←</span>
+        <span>Soporte DNPlus</span>
+    </div>
+
+    <div id="chat-box">
+        </div>
+
+    <div class="footer">
+        <input type="text" id="msg-input" placeholder="Mensaje">
+        <button class="btn-accion" id="btn-main" onclick="ejecutarAccion()">🎙️</button>
+    </div>
+
 <script>
     let grabador;
     let fragmentos = [];
 
-    // Esta función detecta si enviar texto o grabar
+    // Función principal: Texto o Audio
     function ejecutarAccion() {
         const input = document.getElementById('msg-input');
         const mensaje = input.value.trim();
@@ -10,17 +86,17 @@
         if (mensaje !== "") {
             enviarTexto(mensaje);
             input.value = ""; 
-            document.getElementById('btn-main').innerHTML = "🎙️"; // Vuelve al micro
+            document.getElementById('btn-main').innerHTML = "🎙️";
         } else {
             controlarVoz();
         }
     }
 
-    // Cambia el icono en tiempo real mientras escribes
+    // Cambia icono al escribir
     document.getElementById('msg-input').addEventListener('input', function() {
         const boton = document.getElementById('btn-main');
         if (this.value.trim() !== "") {
-            boton.innerHTML = "🕊️"; // Icono de enviar
+            boton.innerHTML = "🕊️"; 
         } else {
             boton.innerHTML = "🎙️";
         }
@@ -29,7 +105,7 @@
     function enviarTexto(texto) {
         const chat = document.getElementById('chat-box');
         const div = document.createElement('div');
-        div.className = "msg-mio"; // Usa tu estilo con color #176f47
+        div.className = "msg-mio";
         div.innerText = texto;
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
@@ -47,21 +123,23 @@
                 grabador.onstop = () => {
                     const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
                     const urlAudio = URL.createObjectURL(blobAudio);
-                    
                     const chat = document.getElementById('chat-box');
+                    
                     const divAudio = document.createElement('div');
                     divAudio.className = "msg-mio";
-                    divAudio.style.display = "flex";
-                    divAudio.style.alignItems = "center";
-                    divAudio.style.gap = "10px";
+                    divAudio.style.minWidth = "180px";
 
-                    // DISEÑO SIN "RADIO": Solo icono y audio oculto
+                    // REPRODUCTOR PERSONALIZADO (PLAY + TIEMPO)
                     divAudio.innerHTML = `
-                        <span style="cursor:pointer; font-size:20px;" onclick="this.nextElementSibling.play()">▶️</span>
-                        <audio src="${urlAudio}"></audio>
-                        <div style="width:100px; height:3px; background:rgba(255,255,255,0.3); border-radius:2px;"></div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button onclick="reproducirAudio(this)" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">▶️</button>
+                            <audio src="${urlAudio}" ontimeupdate="actualizarTiempo(this)"></audio>
+                            <span class="tiempo" style="font-size: 12px; font-family: monospace;">0:00</span>
+                            <div style="flex:1; height:3px; background: rgba(255,255,255,0.2); border-radius:2px; position:relative;">
+                                <div class="progreso" style="width:0%; height:100%; background:white; border-radius:2px;"></div>
+                            </div>
+                        </div>
                     `;
-                    
                     chat.appendChild(divAudio);
                     chat.scrollTop = chat.scrollHeight;
                 };
@@ -69,11 +147,62 @@
                 grabador.start();
                 boton.innerHTML = "🛑";
                 boton.style.backgroundColor = "#ff3b30";
-            } catch (error) { alert("David, activa el permiso del micro."); }
+            } catch (error) { alert("David, activa el micro."); }
         } else {
             grabador.stop();
             boton.innerHTML = "🎙️";
             boton.style.backgroundColor = "#00a884";
         }
     }
+
+    // Funciones del Reproductor
+    function reproducirAudio(btn) {
+        const audio = btn.nextElementSibling;
+        if (audio.paused) {
+            audio.play();
+            btn.innerText = "⏸️";
+        } else {
+            audio.pause();
+            btn.innerText = "▶️";
+        }
+        audio.onended = () => { btn.innerText = "▶️"; };
+    }
+
+    function actualizarTiempo(audio) {
+        const spanTiempo = audio.parentElement.querySelector('.tiempo');
+        const barra = audio.parentElement.querySelector('.progreso');
+        let seg = Math.floor(audio.currentTime);
+        let min = Math.floor(seg / 60);
+        seg = seg % 60;
+        spanTiempo.innerText = min + ":" + (seg < 10 ? "0" + seg : seg);
+        const porcentaje = (audio.currentTime / audio.duration) * 100;
+        barra.style.width = porcentaje + "%";
+    }
+    
+    function enviarImagen(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const chat = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = "msg-mio";
+            div.style.padding = "5px"; // Menos espacio para la foto
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = "100%";
+            img.style.borderRadius = "10px";
+            img.style.display = "block";
+
+            div.appendChild(img);
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
 </script>
+</body>
+</html>
