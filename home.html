@@ -13,7 +13,12 @@
         .tab.active { color: #ffffff; border-bottom: 3px solid #ffffff; }
         .view-pager { display: flex; width: 300%; transition: transform 0.3s ease; }
         .page { width: 100vw; height: 85vh; background-color: #0b141a; overflow-y: auto; }
-        .item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); cursor: pointer; }
+        
+        /* Estilo de los items con efecto de selección */
+        .item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); cursor: pointer; transition: background 0.2s; -webkit-user-select: none; user-select: none; }
+        .item:active { background-color: #202c33; }
+        .item.selected { background-color: #1a3a3a; } /* Color cuando mantienes presionado */
+
         .avatar { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; margin-right: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
         .fab { position: fixed; bottom: 25px; right: 25px; background-color: #00a884; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer; z-index: 1000; }
@@ -39,15 +44,23 @@
     </div>
 
     <div class="view-pager" id="pager">
-        <div class="page">
-            <div class="item" onclick="location.href='lista_contactos.html'">
+        <div class="page" id="pageChats">
+            <div class="item" 
+                 id="chat_soporte"
+                 onclick="abrirChat('Soporte DNPlus')" 
+                 onmousedown="startPress('chat_soporte')" 
+                 onmouseup="endPress()" 
+                 ontouchstart="startPress('chat_soporte')" 
+                 ontouchend="endPress()">
                 <div class="avatar" style="background-color: #085f56; color: white;">S</div>
                 <div style="flex:1">
                     <div style="font-weight:bold">Soporte DNPlus</div>
                     <div style="color:#8696a0; font-size:14px">Toca para ver tus contactos</div>
                 </div>
             </div>
+            <div id="listaDinamicaChats"></div>
         </div>
+
         <div class="page"><div style="text-align:center; margin-top:50px; color:#8696a0;">No hay estados</div></div>
         <div class="page"><div style="text-align:center; margin-top:50px; color:#8696a0;">No hay llamadas</div></div>
     </div>
@@ -58,6 +71,8 @@
 
     <script>
         let currentPage = 0;
+        let pressTimer;
+
         function movePage(index) {
             currentPage = index;
             document.getElementById('pager').style.transform = `translateX(-${index * 100}vw)`;
@@ -72,6 +87,42 @@
             if(currentPage === 0) window.location.href = 'lista_contactos.html';
             else if(currentPage === 1) document.getElementById('fileInput').click();
             else if(currentPage === 2) window.location.href = 'add_contacto.html';
+        }
+
+        function abrirChat(nombre) {
+            window.location.href = 'mensajes.html?nombre=' + encodeURIComponent(nombre);
+        }
+
+        // --- LÓGICA DE BORRADO (LONG PRESS) ---
+        
+        function startPress(id) {
+            const el = document.getElementById(id);
+            // Iniciamos el temporizador (800ms para detectar presión larga)
+            pressTimer = window.setTimeout(function() {
+                confirmarBorrado(id);
+            }, 800);
+        }
+
+        function endPress() {
+            // Si sueltas el botón antes de tiempo, se cancela el borrado
+            clearTimeout(pressTimer);
+        }
+
+        function confirmarBorrado(id) {
+            // Vibración ligera (si el dispositivo lo soporta)
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            const item = document.getElementById(id);
+            item.classList.add('selected'); // Marcamos visualmente
+
+            setTimeout(() => {
+                const respuesta = confirm("¿Deseas eliminar este chat?");
+                if (respuesta) {
+                    item.style.display = 'none'; // Lo ocultamos de la vista
+                    // Aquí podrías agregar: db.ref('chats/' + id).remove(); para Firebase
+                }
+                item.classList.remove('selected');
+            }, 100);
         }
     </script>
 </body>
