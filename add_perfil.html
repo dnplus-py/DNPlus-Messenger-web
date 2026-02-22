@@ -39,31 +39,39 @@
         <button class="btn" onclick="finalizarPerfil()">SIGUIENTE</button>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <script>
-        // Función para la foto
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            authDomain: "dnplus-messenger-pro.firebaseapp.com",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+            messagingSenderId: "625573378436",
+            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         function cargarFoto(e) {
             const leer = new FileReader();
-            leer.onload = () => {
-                document.getElementById('imgVista').src = leer.result;
-                localStorage.setItem("user_photo", leer.result);
-            };
+            leer.onload = () => { document.getElementById('imgVista').src = leer.result; };
             leer.readAsDataURL(e.target.files[0]);
         }
 
-        // Función para saltar al Home
         function finalizarPerfil() {
             const nom = document.getElementById('nombreCaja').value.trim();
-
+            const foto = document.getElementById('imgVista').src;
             if (nom.length >= 2) {
-                // Guardamos el nombre en la memoria
-                localStorage.setItem("user_name", nom);
-                
-                // Forzamos el salto
-                console.log("Entrando a home...");
-                window.location.href = "home.html";
-            } else {
-                alert("David, el nombre es muy corto.");
-            }
+                db.ref("usuarios/mi_perfil").set({ nombre: nom, foto: foto, fecha: Date.now() })
+                .then(() => {
+                    localStorage.setItem("user_name", nom);
+                    localStorage.setItem("user_photo", foto);
+                    window.location.href = "home.html";
+                });
+            } else { alert("Nombre muy corto"); }
         }
     </script>
 </body>
