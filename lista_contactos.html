@@ -5,65 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contactos - DNPlus</title>
     <style>
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: #0b141a; 
-            color: #e9edef;
-        }
-
-        /* CABECERA CON TU VERDE #085f56 */
-        .header-c {
-            background-color: #085f56; 
-            color: white;
-            padding: 15px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
+        .header-c { background-color: #085f56; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100; }
         .header-c span { font-size: 24px; cursor: pointer; }
-
-        /* FILAS DE CONTACTO */
-        .contact-row {
-            display: flex; 
-            align-items: center; 
-            padding: 12px 20px;
-            gap: 15px; 
-            border-bottom: 1px solid rgba(134, 150, 160, 0.1);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .contact-row:active { background-color: #202c33; }
-
-        /* AVATAR CIRCULAR */
-        .img-avatar {
-            width: 45px; 
-            height: 45px; 
-            border-radius: 50%;
-            background-color: #232d36;
-            display: flex;
-            align-items: center; 
-            justify-content: center; 
-            color: #8696a0;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
+        .contact-row { display: flex; align-items: center; padding: 12px 20px; gap: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); cursor: pointer; }
+        .img-avatar { width: 45px; height: 45px; border-radius: 50%; background-color: #232d36; display: flex; align-items: center; justify-content: center; color: #8696a0; font-weight: bold; font-size: 18px; }
         .contact-name { font-weight: 500; font-size: 16px; color: #e9edef; }
         .contact-status { font-size: 13px; color: #8696a0; }
-
-        /* Estilo para el botón "Nuevo Contacto" */
-        .btn-new-contact {
-            color: #00a884; 
-            font-weight: bold;
-            font-size: 16px;
-        }
+        .btn-new-contact { color: #00a884; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -84,16 +33,12 @@
     <div id="listaDinamica"></div>
 
     <script>
-        window.onload = function() {
-            renderContactos();
-        };
+        window.onload = function() { renderContactos(); };
 
         function renderContactos() {
             const container = document.getElementById('listaDinamica');
             const label = document.getElementById('countLabel');
-            
             let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
-            
             label.innerText = contacts.length + " contactos";
 
             if (contacts.length === 0) {
@@ -105,13 +50,13 @@
             contacts.forEach(c => {
                 const row = document.createElement('div');
                 row.className = 'contact-row';
+                
+                // CORRECCIÓN: Pasamos el nombre por la URL para que mensajes.html lo reciba
                 row.onclick = function() {
-                    localStorage.setItem("chat_actual", c.nombre);
-                    window.location.href = 'mensajes.html';
+                    window.location.href = 'mensajes.html?nombre=' + encodeURIComponent(c.nombre);
                 };
 
                 const inicial = c.nombre.charAt(0).toUpperCase();
-
                 row.innerHTML = `
                     <div class="img-avatar">${inicial}</div>
                     <div style="flex: 1;">
