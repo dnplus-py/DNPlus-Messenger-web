@@ -48,7 +48,7 @@
         <h2>Ajustes</h2>
     </div>
 
-    <div class="me-section" onclick="location.href='add_perfil.html'">
+    <div class="me-section" onclick="location.href='editar_mi_perfil.html'">
         <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar-me" id="myAvatar">
         <div class="me-info">
             <div class="me-name" id="myName">Cargando...</div>
@@ -103,7 +103,6 @@
         const db = firebase.database();
 
         window.onload = function() {
-            // Intentar cargar primero de Firebase para estar actualizados
             db.ref("usuarios/mi_perfil").once("value", (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -111,7 +110,6 @@
                     document.getElementById('myAvatar').src = data.foto || "https://www.w3schools.com/howto/img_avatar.png";
                     if (data.estado) document.getElementById('myStatus').innerText = data.estado;
                 } else {
-                    // Si no hay en Firebase, usar LocalStorage
                     const nombre = localStorage.getItem("user_name");
                     const foto = localStorage.getItem("user_photo");
                     if(nombre) document.getElementById('myName').innerText = nombre;
