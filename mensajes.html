@@ -40,16 +40,18 @@
 
     <div id="chat-box"></div>
 
-    <div class="footer">
-        <span class="iconos-extra">😊</span>
+       <div class="footer">
+        <span style="font-size: 22px; cursor: pointer; color: #8696a0; margin-right: 5px;">😊</span>
         
-        <span class="iconos-extra" onclick="document.getElementById('file-input').click()">📎</span>
+        <span onclick="document.getElementById('file-input').click()" style="font-size: 22px; cursor: pointer; color: #8696a0; margin-right: 10px; transform: rotate(-45deg); display: inline-block;">📎</span>
+        
         <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="enviarImagen(event)">
 
         <input type="text" id="msg-input" placeholder="Mensaje" oninput="cambiarIcono()">
         
         <button class="btn-accion" id="btn-main" onclick="ejecutarAccion()">🎙️</button>
     </div>
+
 
 <script>
     let grabador;
