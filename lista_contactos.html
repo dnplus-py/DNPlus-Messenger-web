@@ -32,39 +32,65 @@
 
     <div id="listaDinamica"></div>
 
-    <script>
-        window.onload = function() { renderContactos(); };
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
-        function renderContactos() {
+    <script>
+        // Configuración DNPlus
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            authDomain: "dnplus-messenger-pro.firebaseapp.com",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+            messagingSenderId: "625573378436",
+            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        window.onload = function() {
+            escucharContactos();
+        };
+
+        function escucharContactos() {
             const container = document.getElementById('listaDinamica');
             const label = document.getElementById('countLabel');
-            let contacts = JSON.parse(localStorage.getItem("dnplus_contacts")) || [];
-            label.innerText = contacts.length + " contactos";
-
-            if (contacts.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay contactos guardados</div>';
-                return;
-            }
-
-            container.innerHTML = "";
-            contacts.forEach(c => {
-                const row = document.createElement('div');
-                row.className = 'contact-row';
+            
+            // Referencia a la carpeta "contactos" en Firebase
+            db.ref("contactos").on("value", (snapshot) => {
+                const data = snapshot.val();
+                container.innerHTML = "";
                 
-                // CORRECCIÓN: Pasamos el nombre por la URL para que mensajes.html lo reciba
-                row.onclick = function() {
-                    window.location.href = 'mensajes.html?nombre=' + encodeURIComponent(c.nombre);
-                };
+                if (!data) {
+                    label.innerText = "0 contactos";
+                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay contactos guardados</div>';
+                    return;
+                }
 
-                const inicial = c.nombre.charAt(0).toUpperCase();
-                row.innerHTML = `
-                    <div class="img-avatar">${inicial}</div>
-                    <div style="flex: 1;">
-                        <div class="contact-name">${c.nombre}</div>
-                        <div class="contact-status">${c.telefono}</div>
-                    </div>
-                `;
-                container.appendChild(row);
+                const lista = Object.values(data);
+                label.innerText = lista.length + " contactos";
+
+                lista.forEach(c => {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    
+                    row.onclick = function() {
+                        window.location.href = 'mensajes.html?nombre=' + encodeURIComponent(c.nombre);
+                    };
+
+                    const inicial = c.nombre.charAt(0).toUpperCase();
+                    row.innerHTML = `
+                        <div class="img-avatar">${inicial}</div>
+                        <div style="flex: 1;">
+                            <div class="contact-name">${c.nombre}</div>
+                            <div class="contact-status">${c.telefono || 'Sin número'}</div>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
             });
         }
     </script>
