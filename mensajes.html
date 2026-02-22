@@ -6,10 +6,9 @@
     <title>DNPlus Chat</title>
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; }
-        
         .header { background-color: #075e54; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
-
-        /* BANDEJA DE CHAT: No se tapa y tiene scroll */
+        
+        /* BANDEJA DE CHAT */
         #chat-box { 
             flex: 1; 
             overflow-y: auto; 
@@ -20,15 +19,16 @@
             background-color: #0b141a;
         }
 
-        /* Burbuja de tus mensajes/audios con TU COLOR FAVORITO */
+        /* Burbuja de mensajes y audios */
         .msg-mio { 
             align-self: flex-end; 
-            background-color: #176f47; /* Tu verde #176f47 */
+            background-color: #176f47; 
             color: white; 
-            padding: 8px; 
-            border-radius: 10px 0px 10px 10px; 
+            padding: 10px; 
+            border-radius: 15px 15px 0px 15px; 
             max-width: 80%;
             box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            word-wrap: break-word;
         }
 
         .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
@@ -43,7 +43,7 @@
             outline: none; 
         }
 
-        .btn-mic { 
+        .btn-accion { 
             background-color: #00a884; 
             border: none; 
             width: 50px; height: 50px; 
@@ -51,30 +51,63 @@
             color: white; 
             font-size: 22px; 
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="window.history.back()">←</span>
+        <span onclick="window.history.back()" style="cursor:pointer">←</span>
         <strong>Soporte DNPlus</strong>
     </div>
 
-    <div id="chat-box">
-        </div>
+    <div id="chat-box"></div>
 
     <div class="footer">
-        <input type="text" id="msg-input" placeholder="Mensaje">
-        <button class="btn-mic" id="btn-audio" onclick="controlarVoz()">🎙️</button>
+        <input type="text" id="msg-input" placeholder="Mensaje" oninput="cambiarIcono()">
+        <button class="btn-accion" id="btn-main" onclick="ejecutarAccion()">🎙️</button>
     </div>
 
     <script>
         let grabador;
         let fragmentos = [];
 
+        // Cambia el icono si el usuario escribe
+        function cambiarIcono() {
+            const input = document.getElementById('msg-input');
+            const boton = document.getElementById('btn-main');
+            if (input.value.trim() !== "") {
+                boton.innerHTML = "🕊️"; // Icono de enviar
+            } else {
+                boton.innerHTML = "🎙️"; // Icono de micro
+            }
+        }
+
+        function ejecutarAccion() {
+            const input = document.getElementById('msg-input');
+            if (input.value.trim() !== "") {
+                enviarTexto(input.value);
+                input.value = "";
+                cambiarIcono();
+            } else {
+                controlarVoz();
+            }
+        }
+
+        function enviarTexto(texto) {
+            const chat = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = "msg-mio";
+            div.innerText = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
         async function controlarVoz() {
-            const boton = document.getElementById('btn-audio');
+            const boton = document.getElementById('btn-main');
             
             if (!grabador || grabador.state === "inactive") {
                 try {
@@ -86,21 +119,15 @@
                     grabador.onstop = () => {
                         const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
                         const urlAudio = URL.createObjectURL(blobAudio);
-                        
                         const chat = document.getElementById('chat-box');
                         
-                        // Crear burbuja verde para el audio
                         const divMensaje = document.createElement('div');
                         divMensaje.className = "msg-mio";
                         
-                        const nuevoAudio = document.createElement('audio');
-                        nuevoAudio.src = urlAudio;
-                        nuevoAudio.controls = true;
-                        nuevoAudio.style.width = "200px"; // Ajuste para que no sea gigante
+                        // Diseño de audio más limpio
+                        divMensaje.innerHTML = `<audio src="${urlAudio}" controls style="width:200px; height:30px;"></audio>`;
                         
-                        divMensaje.appendChild(nuevoAudio);
                         chat.appendChild(divMensaje);
-                        
                         chat.scrollTop = chat.scrollHeight;
                     };
 
