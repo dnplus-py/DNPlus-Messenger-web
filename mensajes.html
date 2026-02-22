@@ -77,3 +77,111 @@
         }
     }
 </script>
+
+<script>
+    let grabador;
+    let fragmentos = [];
+
+    // 1. FUNCIÓN PARA ENVIAR TEXTO O GRABAR VOZ
+    function ejecutarAccion() {
+        const input = document.getElementById('msg-input');
+        const mensaje = input.value.trim();
+
+        if (mensaje !== "") {
+            enviarTexto(mensaje);
+            input.value = ""; 
+            document.getElementById('btn-audio').innerHTML = "🎙️";
+        } else {
+            controlarVoz();
+        }
+    }
+
+    // Cambia el icono si David escribe algo
+    document.getElementById('msg-input').addEventListener('input', function() {
+        const boton = document.getElementById('btn-audio');
+        if (this.value.trim() !== "") {
+            boton.innerHTML = "🕊️"; 
+        } else {
+            boton.innerHTML = "🎙️";
+        }
+    });
+
+    function enviarTexto(texto) {
+        const chat = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.className = "msg-mio"; // Usa tu color favorito #176f47
+        div.innerText = texto;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    // 2. FUNCIÓN PARA CONTROLAR EL MICRÓFONO
+    async function controlarVoz() {
+        const boton = document.getElementById('btn-audio');
+        if (!grabador || grabador.state === "inactive") {
+            try {
+                const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
+                grabador = new MediaRecorder(flujo);
+                fragmentos = [];
+                grabador.ondataavailable = (e) => fragmentos.push(e.data);
+                
+                // AQUÍ VA EL CÓDIGO QUE ME PASASTE (PROCESAR EL AUDIO)
+                grabador.onstop = () => {
+                    const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
+                    const urlAudio = URL.createObjectURL(blobAudio);
+                    const chat = document.getElementById('chat-box');
+                    
+                    const divAudio = document.createElement('div');
+                    divAudio.className = "msg-mio";
+                    divAudio.style.minWidth = "180px";
+
+                    divAudio.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button onclick="reproducirAudio(this)" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">▶️</button>
+                            <audio src="${urlAudio}" ontimeupdate="actualizarTiempo(this)"></audio>
+                            <span class="tiempo" style="font-size: 12px; font-family: monospace;">0:00</span>
+                            <div style="flex:1; height:3px; background: rgba(255,255,255,0.2); border-radius:2px; position:relative;">
+                                <div class="progreso" style="width:0%; height:100%; background:white; border-radius:2px;"></div>
+                            </div>
+                        </div>
+                    `;
+                    chat.appendChild(divAudio);
+                    chat.scrollTop = chat.scrollHeight;
+                };
+
+                grabador.start();
+                boton.innerHTML = "🛑";
+                boton.style.backgroundColor = "#ff3b30";
+            } catch (error) { alert("Activa el micro, David."); }
+        } else {
+            grabador.stop();
+            boton.innerHTML = "🎙️";
+            boton.style.backgroundColor = "#00a884";
+        }
+    }
+
+    // 3. FUNCIONES PARA EL REPRODUCTOR (PLAY/PAUSE Y CRONÓMETRO)
+    function reproducirAudio(btn) {
+        const audio = btn.nextElementSibling;
+        if (audio.paused) {
+            audio.play();
+            btn.innerText = "⏸️";
+        } else {
+            audio.pause();
+            btn.innerText = "▶️";
+        }
+        audio.onended = () => { btn.innerText = "▶️"; };
+    }
+
+    function actualizarTiempo(audio) {
+        const spanTiempo = audio.parentElement.querySelector('.tiempo');
+        const barra = audio.parentElement.querySelector('.progreso');
+        let seg = Math.floor(audio.currentTime);
+        let min = Math.floor(seg / 60);
+        seg = seg % 60;
+        spanTiempo.innerText = min + ":" + (seg < 10 ? "0" + seg : seg);
+        const porcentaje = (audio.currentTime / audio.duration) * 100;
+        barra.style.width = porcentaje + "%";
+    }
+</script>
+
