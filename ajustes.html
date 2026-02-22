@@ -1,174 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustes - DNPlus</title>
-    <style>
-        /* --- COLORES OFICIALES DNPLUS --- */
-        :root {
-            --fondo: #0b141a;
-            --verde-dn: #085f56;
-            --verde-brillante: #00a884;
-            --gris-texto: #8696a0;
-            --blanco-suave: #e9edef;
-            --hover: #202c33;
-        }
-
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: var(--fondo); 
-            color: var(--blanco-suave); 
-        }
-
-        /* --- CABECERA --- */
-        .header {
-            background-color: var(--verde-dn);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .header span { font-size: 24px; cursor: pointer; }
-        .header h2 { margin: 0; font-size: 19px; font-weight: 500; }
-
-        /* --- SECCIÓN PERFIL --- */
-        .me-section {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            gap: 15px;
-            border-bottom: 1px solid rgba(134, 150, 160, 0.1);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .me-section:active { background-color: var(--hover); }
-        
-        .avatar-me {
-            width: 65px; 
-            height: 65px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #232d36;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .me-info { flex: 1; }
-        .me-name { font-size: 18px; font-weight: bold; color: var(--blanco-suave); }
-        .me-status { font-size: 14px; color: var(--gris-texto); margin-top: 4px; }
-
-        .qr-icon { color: var(--verde-brillante); font-size: 20px; }
-
-        /* --- LISTA DE OPCIONES --- */
-        .options-list { margin-top: 10px; }
-
-        .option-item {
-            display: flex;
-            align-items: center;
-            padding: 18px 20px;
-            gap: 25px;
-            cursor: pointer;
-        }
-        .option-item:active { background-color: var(--hover); }
-
-        .option-icon { 
-            color: var(--gris-texto); 
-            font-size: 22px; 
-            width: 30px; 
-            text-align: center; 
-        }
-
-        .option-text { flex: 1; }
-        .option-title { font-size: 16px; color: var(--blanco-suave); }
-        .option-desc { font-size: 13px; color: var(--gris-texto); margin-top: 4px; }
-
-        /* --- FOOTER --- */
-        .footer-logo {
-            text-align: center;
-            margin-top: 40px;
-            padding-bottom: 30px;
-        }
-        .footer-logo div { color: var(--gris-texto); font-size: 12px; }
-        .footer-logo span { 
-            color: var(--blanco-suave); 
-            font-weight: bold; 
-            letter-spacing: 1px;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <span onclick="location.href='home.html'">←</span>
-        <h2>Ajustes</h2>
-    </div>
-
-    <div class="me-section" onclick="location.href='editar_mi_perfil.html'">
+    <div class="me-section" onclick="location.href='editar_mi_perfil.html'" style="cursor: pointer;">
         <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar-me" id="myAvatar">
         <div class="me-info">
             <div class="me-name" id="myName">Cargando...</div>
             <div class="me-status" id="myStatus">¡DNPlus es genial!</div>
         </div>
-        <div class="qr-icon">🔳</div>
-    </div>
-
-    <div class="options-list">
-        <div class="option-item">
-            <div class="option-icon">🔑</div>
-            <div class="option-text">
-                <div class="option-title">Cuenta</div>
-                <div class="option-desc">Notificaciones de seguridad, cambiar número</div>
-            </div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-icon">💬</div>
-            <div class="option-text">
-                <div class="option-title">Chats</div>
-                <div class="option-desc">Tema, fondos de pantalla, historial</div>
-            </div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-icon">🔔</div>
-            <div class="option-text">
-                <div class="option-title">Notificaciones</div>
-                <div class="option-desc">Tonos de mensajes, grupos y llamadas</div>
-            </div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-icon">⌛</div>
-            <div class="option-text">
-                <div class="option-title">Almacenamiento y datos</div>
-                <div class="option-desc">Uso de red, descarga automática</div>
-            </div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-icon">❓</div>
-            <div class="option-text">
-                <div class="option-title">Ayuda</div>
-                <div class="option-desc">Centro de ayuda, contáctanos</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-logo">
-        <div>from</div>
-        <span>DAVID OVIEDO</span>
+        <div class="qr-icon" style="color: #00a884; font-size: 20px;">🔳</div>
     </div>
 
     <script>
         window.onload = function() {
+            // Cargar Nombre
             const nombreGuardado = localStorage.getItem("user_name");
             if(nombreGuardado) {
                 document.getElementById('myName').innerText = nombreGuardado;
@@ -176,16 +17,16 @@
                 document.getElementById('myName').innerText = "Tu nombre aquí";
             }
 
+            // Cargar Foto
             const fotoGuardada = localStorage.getItem("user_photo");
             if(fotoGuardada) {
                 document.getElementById('myAvatar').src = fotoGuardada;
             }
 
+            // Cargar Estado
             const estadoGuardado = localStorage.getItem("user_status");
             if(estadoGuardado) {
                 document.getElementById('myStatus').innerText = estadoGuardado;
             }
         }
     </script>
-</body>
-</html>
