@@ -130,23 +130,30 @@
             if(index === 2) fabIcon.innerText = "➕";
         }
 
+        // CORRECCIÓN DE LAS REFERENCIAS REALES
         function fabAction() {
-            if(currentPage === 0) window.location.href = 'lista_contactos.html';
-            else if(currentPage === 1) document.getElementById('fileInput').click();
-            else if(currentPage === 2) window.location.href = 'add_contactos.html';
+            if(currentPage === 0) {
+                // En Chats, vamos a elegir a quién escribir
+                window.location.href = 'lista_contactos.html';
+            } 
+            else if(currentPage === 1) {
+                // Estados: cámara
+                document.getElementById('fileInput').click();
+            } 
+            else if(currentPage === 2) {
+                // CORREGIDO: En Llamadas, vamos a agregar contacto nuevo
+                window.location.href = 'add_contactos.html';
+            }
         }
 
         function escucharMensajes() {
-            // Esta función lee el último mensaje de Firebase para mostrarlo en la lista de chats
             db.ref("mensajes").limitToLast(1).on("child_added", (snap) => {
                 const data = snap.val();
-                // Aquí podrías crear una lógica para que cada contacto aparezca en la lista
             });
         }
 
         function subirEstado(event) {
             alert("Subiendo estado a DNPlus...");
-            // Lógica para subir a Firebase Storage/Database
         }
     </script>
 </body>
