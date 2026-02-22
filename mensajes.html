@@ -54,6 +54,16 @@
 
 
 <script>
+   // Leer el nombre desde la URL
+const urlParams = new URLSearchParams(window.location.search);
+const nombreContacto = urlParams.get('nombre');
+
+// Si hay un nombre, ponerlo en el encabezado
+if (nombreContacto) {
+    document.querySelector('.header span:last-child').innerText = nombreContacto;
+}
+
+    
     let grabador;
     let fragmentos = [];
 
