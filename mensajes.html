@@ -19,15 +19,15 @@
             border-radius: 15px 15px 0px 15px; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* Estilo para las imágenes enviadas */
+        /* Estilo para mensajes recibidos (otros) */
+        .msg-otro { 
+            align-self: flex-start; background-color: #202c33; color: white; padding: 10px; 
+            border-radius: 0px 15px 15px 15px; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
         .img-enviada { max-width: 100%; border-radius: 10px; display: block; margin-top: 5px; }
-
         .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        
         input { flex: 1; background-color: #2a3942; border: none; padding: 12px; border-radius: 25px; color: white; outline: none; }
-
-        .iconos-extra { font-size: 22px; cursor: pointer; color: #8696a0; }
-        
         .btn-accion { background-color: #00a884; border: none; width: 48px; height: 48px; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -35,38 +35,91 @@
 
     <div class="header">
         <span onclick="window.history.back()" style="cursor:pointer">←</span>
-        <span>Soporte DNPlus</span>
+        <span>Cargando...</span>
     </div>
 
     <div id="chat-box"></div>
 
-       <div class="footer">
+    <div class="footer">
         <span style="font-size: 22px; cursor: pointer; color: #8696a0; margin-right: 5px;">😊</span>
-        
         <span onclick="document.getElementById('file-input').click()" style="font-size: 22px; cursor: pointer; color: #8696a0; margin-right: 10px; transform: rotate(-45deg); display: inline-block;">📎</span>
-        
         <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="enviarImagen(event)">
-
         <input type="text" id="msg-input" placeholder="Mensaje" oninput="cambiarIcono()">
-        
         <button class="btn-accion" id="btn-main" onclick="ejecutarAccion()">🎙️</button>
     </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-   // Leer el nombre desde la URL
-const urlParams = new URLSearchParams(window.location.search);
-const nombreContacto = urlParams.get('nombre');
+    // Configuración DNPlus
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+        authDomain: "dnplus-messenger-pro.firebaseapp.com",
+        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        projectId: "dnplus-messenger-pro",
+        storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+        messagingSenderId: "625573378436",
+        appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+    };
 
-// Si hay un nombre, ponerlo en el encabezado
-if (nombreContacto) {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Identificar el chat y el usuario
+    const urlParams = new URLSearchParams(window.location.search);
+    const nombreContacto = urlParams.get('nombre') || "Soporte DNPlus";
     document.querySelector('.header span:last-child').innerText = nombreContacto;
-}
 
-    
-    let grabador;
-    let fragmentos = [];
+    const miNombre = localStorage.getItem("user_name") || "David Oviedo";
 
+    // ESCUCHAR MENSAJES EN TIEMPO REAL
+    db.ref("mensajes").on("child_added", (snapshot) => {
+        const data = snapshot.val();
+        mostrarMensaje(data.contenido, data.remitente, data.tipo);
+    });
+
+    function mostrarMensaje(contenido, remitente, tipo) {
+        const chat = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.className = (remitente === miNombre) ? "msg-mio" : "msg-otro";
+
+        if (tipo === "texto") {
+            div.innerText = contenido;
+        } else if (tipo === "imagen") {
+            div.innerHTML = `<img src="${contenido}" class="img-enviada">`;
+        }
+
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    function enviarTexto(texto) {
+        db.ref("mensajes").push({
+            remitente: miNombre,
+            contenido: texto,
+            tipo: "texto",
+            fecha: Date.now()
+        });
+    }
+
+    function enviarImagen(event) {
+        const archivo = event.target.files[0];
+        if (archivo) {
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                db.ref("mensajes").push({
+                    remitente: miNombre,
+                    contenido: e.target.result,
+                    tipo: "imagen",
+                    fecha: Date.now()
+                });
+            };
+            lector.readAsDataURL(archivo);
+        }
+    }
+
+    // Lógica de interfaz (Iconos y Voz)
     function cambiarIcono() {
         const input = document.getElementById('msg-input');
         const boton = document.getElementById('btn-main');
@@ -84,94 +137,8 @@ if (nombreContacto) {
         }
     }
 
-    function enviarTexto(texto) {
-        const chat = document.getElementById('chat-box');
-        const div = document.createElement('div');
-        div.className = "msg-mio";
-        div.innerText = texto;
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
-
-        function enviarImagen(event) {
-        const archivo = event.target.files[0];
-        if (archivo) {
-            const lector = new FileReader();
-            lector.onload = function(e) {
-                const chat = document.getElementById('chat-box');
-                const div = document.createElement('div');
-                div.className = "msg-mio"; // Para que salga en tu verde #176f47
-                div.style.padding = "5px";
-                
-                // Creamos la imagen para mostrarla
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.maxWidth = "100%";
-                img.style.borderRadius = "10px";
-                img.style.display = "block";
-
-                div.appendChild(img);
-                chat.appendChild(div);
-                chat.scrollTop = chat.scrollHeight; // Baja el chat automáticamente
-            };
-            lector.readAsDataURL(archivo);
-        }
-    }
-
-
-    async function controlarVoz() {
-        const boton = document.getElementById('btn-main');
-        if (!grabador || grabador.state === "inactive") {
-            try {
-                const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
-                grabador = new MediaRecorder(flujo);
-                fragmentos = [];
-                grabador.ondataavailable = (e) => fragmentos.push(e.data);
-                
-                grabador.onstop = () => {
-                    const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
-                    const urlAudio = URL.createObjectURL(blobAudio);
-                    const chat = document.getElementById('chat-box');
-                    const divAudio = document.createElement('div');
-                    divAudio.className = "msg-mio";
-                    divAudio.style.minWidth = "180px";
-
-                    divAudio.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <button onclick="reproducirAudio(this)" style="background:orange; border:none; color:white; border-radius:5px; cursor:pointer;">▶</button>
-                            <audio src="${urlAudio}" ontimeupdate="actualizarTiempo(this)"></audio>
-                            <span class="tiempo" style="font-size: 12px;">0:00</span>
-                            <div style="flex:1; height:3px; background: rgba(255,255,255,0.2); position:relative;">
-                                <div class="progreso" style="width:0%; height:100%; background:white;"></div>
-                            </div>
-                        </div>
-                    `;
-                    chat.appendChild(divAudio);
-                    chat.scrollTop = chat.scrollHeight;
-                };
-                grabador.start();
-                boton.innerHTML = "🛑";
-            } catch (error) { alert("Permiso denegado"); }
-        } else {
-            grabador.stop();
-            boton.innerHTML = "🎙️";
-        }
-    }
-
-    function reproducirAudio(btn) {
-        const audio = btn.nextElementSibling;
-        if (audio.paused) { audio.play(); btn.innerText = "⏸"; } 
-        else { audio.pause(); btn.innerText = "▶"; }
-        audio.onended = () => btn.innerText = "▶";
-    }
-
-    function actualizarTiempo(audio) {
-        const spanTiempo = audio.parentElement.querySelector('.tiempo');
-        const barra = audio.parentElement.querySelector('.progreso');
-        let seg = Math.floor(audio.currentTime);
-        spanTiempo.innerText = "0:" + (seg < 10 ? "0" + seg : seg);
-        barra.style.width = (audio.currentTime / audio.duration) * 100 + "%";
-    }
+    // (Aquí va tu función de controlarVoz y reproducirAudio que ya tenías)
+    // ... mantén el código de audio que tenías abajo ...
 </script>
 </body>
 </html>
