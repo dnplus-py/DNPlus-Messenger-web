@@ -5,117 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajustes - DNPlus</title>
     <style>
-        :root {
-            --fondo: #0b141a;
-            --verde-dn: #085f56;
-            --verde-brillante: #00a884;
-            --gris-texto: #8696a0;
-            --blanco-suave: #e9edef;
-            --hover: #202c33;
-        }
-        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); color: var(--blanco-suave); }
-
-        /* --- CABECERA --- */
-        .header { background-color: var(--verde-dn); color: white; padding: 15px 20px; display: flex; align-items: center; gap: 25px; position: sticky; top: 0; z-index: 100; }
-        .header span { font-size: 24px; cursor: pointer; }
-        .header h2 { margin: 0; font-size: 19px; font-weight: 500; }
-
-        /* --- SECCIÓN PERFIL --- */
-        .me-section { display: flex; align-items: center; padding: 20px; gap: 15px; border-bottom: 1px solid rgba(134, 150, 160, 0.1); cursor: pointer; }
-        .me-section:active { background-color: var(--hover); }
-        .avatar-me { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; background-color: #232d36; }
-        .me-info { flex: 1; }
-        .me-name { font-size: 18px; font-weight: bold; }
-        .me-status { font-size: 14px; color: var(--gris-texto); margin-top: 4px; }
-        .qr-icon { color: var(--verde-brillante); font-size: 20px; }
-
-        /* --- LISTA DE OPCIONES --- */
-        .option-item { display: flex; align-items: center; padding: 18px 20px; gap: 25px; cursor: pointer; }
-        .option-item:active { background-color: var(--hover); }
-        .option-icon { color: var(--gris-texto); font-size: 22px; width: 30px; text-align: center; }
-        .option-title { font-size: 16px; }
-        .option-desc { font-size: 13px; color: var(--gris-texto); margin-top: 4px; }
-
-        .footer-logo { text-align: center; margin-top: 40px; padding-bottom: 30px; }
-        .footer-logo div { color: var(--gris-texto); font-size: 12px; }
-        .footer-logo span { color: var(--blanco-suave); font-weight: bold; font-size: 14px; }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
+        .header { background-color: #085f56; padding: 15px; display: flex; align-items: center; gap: 20px; }
+        .profile-card { display: flex; align-items: center; padding: 20px; gap: 15px; border-bottom: 1px solid #232d36; cursor: pointer; }
+        .avatar { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; }
+        .option { display: flex; align-items: center; padding: 20px; gap: 20px; cursor: pointer; }
+        .logout { color: #f15c5c; font-weight: bold; border-top: 1px solid #232d36; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="location.href='home.html'">←</span>
-        <h2>Ajustes</h2>
+        <span onclick="location.href='home.html'" style="cursor:pointer; font-size:24px;">←</span>
+        <h2 style="margin:0; font-size:19px;">Ajustes</h2>
     </div>
 
-    <div class="me-section" onclick="location.href='editar_mi_perfil.html'">
-        <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar-me" id="myAvatar">
-        <div class="me-info">
-            <div class="me-name" id="myName">Cargando...</div>
-            <div class="me-status" id="myStatus">¡DNPlus es genial!</div>
-        </div>
-        <div class="qr-icon">🔳</div>
-    </div>
-
-    <div class="options-list">
-        <div class="option-item">
-            <div class="option-icon">🔑</div>
-            <div class="option-text">
-                <div class="option-title">Cuenta</div>
-                <div class="option-desc">Seguridad, cambiar número</div>
-            </div>
-        </div>
-        <div class="option-item">
-            <div class="option-icon">💬</div>
-            <div class="option-text">
-                <div class="option-title">Chats</div>
-                <div class="option-desc">Tema, fondos, historial</div>
-            </div>
-        </div>
-        <div class="option-item" onclick="location.href='ayuda.html'">
-            <div class="option-icon">❓</div>
-            <div class="option-text">
-                <div class="option-title">Ayuda</div>
-                <div class="option-desc">Centro de ayuda, contáctanos</div>
-            </div>
+    <div class="profile-card" onclick="location.href='editar_mi_perfil.html'">
+        <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar" id="myAvatar">
+        <div>
+            <div id="myName" style="font-size:18px; font-weight:bold;">Usuario</div>
+            <div style="color:#8696a0; font-size:14px;">Toca para editar perfil</div>
         </div>
     </div>
 
-    <div class="footer-logo">
-        <div>from</div>
-        <span>DAVID OVIEDO</span>
+    <div class="option" onclick="cerrarSesion()">
+        <span style="font-size:20px;">🚪</span>
+        <div>
+            <div style="color:#f15c5c; font-weight:bold;">Cerrar sesión</div>
+            <div style="color:#8696a0; font-size:12px;">Salir de la aplicación</div>
+        </div>
     </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
         window.onload = function() {
-            db.ref("usuarios/mi_perfil").once("value", (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    document.getElementById('myName').innerText = data.nombre;
-                    document.getElementById('myAvatar').src = data.foto || "https://www.w3schools.com/howto/img_avatar.png";
-                    if (data.estado) document.getElementById('myStatus').innerText = data.estado;
-                } else {
-                    const nombre = localStorage.getItem("user_name");
-                    const foto = localStorage.getItem("user_photo");
-                    if(nombre) document.getElementById('myName').innerText = nombre;
-                    if(foto) document.getElementById('myAvatar').src = foto;
-                }
-            });
+            const nombre = localStorage.getItem("user_name");
+            const foto = localStorage.getItem("user_photo");
+            if(nombre) document.getElementById('myName').innerText = nombre;
+            if(foto) document.getElementById('myAvatar').src = foto;
+        }
+
+        function cerrarSesion() {
+            if(confirm("¿Quieres cerrar sesión?")) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
         }
     </script>
 </body>
