@@ -1,148 +1,79 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Chat</title>
-    <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; }
-        .header { background-color: #075e54; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
-        
-        /* BANDEJA DE CHAT */
-        #chat-box { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px;
-            background-color: #0b141a;
+<script>
+    let grabador;
+    let fragmentos = [];
+
+    // Esta función detecta si enviar texto o grabar
+    function ejecutarAccion() {
+        const input = document.getElementById('msg-input');
+        const mensaje = input.value.trim();
+
+        if (mensaje !== "") {
+            enviarTexto(mensaje);
+            input.value = ""; 
+            document.getElementById('btn-main').innerHTML = "🎙️"; // Vuelve al micro
+        } else {
+            controlarVoz();
         }
+    }
 
-        /* Burbuja de mensajes y audios */
-        .msg-mio { 
-            align-self: flex-end; 
-            background-color: #176f47; 
-            color: white; 
-            padding: 10px; 
-            border-radius: 15px 15px 0px 15px; 
-            max-width: 80%;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            word-wrap: break-word;
+    // Cambia el icono en tiempo real mientras escribes
+    document.getElementById('msg-input').addEventListener('input', function() {
+        const boton = document.getElementById('btn-main');
+        if (this.value.trim() !== "") {
+            boton.innerHTML = "🕊️"; // Icono de enviar
+        } else {
+            boton.innerHTML = "🎙️";
         }
+    });
 
-        .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
-        
-        input { 
-            flex: 1; 
-            background-color: #2a3942; 
-            border: none; 
-            padding: 12px; 
-            border-radius: 25px; 
-            color: white; 
-            outline: none; 
-        }
+    function enviarTexto(texto) {
+        const chat = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.className = "msg-mio"; // Usa tu estilo con color #176f47
+        div.innerText = texto;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
 
-        .btn-accion { 
-            background-color: #00a884; 
-            border: none; 
-            width: 50px; height: 50px; 
-            border-radius: 50%; 
-            color: white; 
-            font-size: 22px; 
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <span onclick="window.history.back()" style="cursor:pointer">←</span>
-        <strong>Soporte DNPlus</strong>
-    </div>
-
-    <div id="chat-box"></div>
-
-    <div class="footer">
-        <input type="text" id="msg-input" placeholder="Mensaje" oninput="cambiarIcono()">
-        <button class="btn-accion" id="btn-main" onclick="ejecutarAccion()">🎙️</button>
-    </div>
-
-    <script>
-        let grabador;
-        let fragmentos = [];
-
-        // Cambia el icono si el usuario escribe
-        function cambiarIcono() {
-            const input = document.getElementById('msg-input');
-            const boton = document.getElementById('btn-main');
-            if (input.value.trim() !== "") {
-                boton.innerHTML = "🕊️"; // Icono de enviar
-            } else {
-                boton.innerHTML = "🎙️"; // Icono de micro
-            }
-        }
-
-        function ejecutarAccion() {
-            const input = document.getElementById('msg-input');
-            if (input.value.trim() !== "") {
-                enviarTexto(input.value);
-                input.value = "";
-                cambiarIcono();
-            } else {
-                controlarVoz();
-            }
-        }
-
-        function enviarTexto(texto) {
-            const chat = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            div.className = "msg-mio";
-            div.innerText = texto;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        async function controlarVoz() {
-            const boton = document.getElementById('btn-main');
-            
-            if (!grabador || grabador.state === "inactive") {
-                try {
-                    const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    grabador = new MediaRecorder(flujo);
-                    fragmentos = [];
-                    grabador.ondataavailable = (e) => fragmentos.push(e.data);
+    async function controlarVoz() {
+        const boton = document.getElementById('btn-main');
+        if (!grabador || grabador.state === "inactive") {
+            try {
+                const flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
+                grabador = new MediaRecorder(flujo);
+                fragmentos = [];
+                grabador.ondataavailable = (e) => fragmentos.push(e.data);
+                
+                grabador.onstop = () => {
+                    const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
+                    const urlAudio = URL.createObjectURL(blobAudio);
                     
-                    grabador.onstop = () => {
-                        const blobAudio = new Blob(fragmentos, { type: 'audio/mp3' });
-                        const urlAudio = URL.createObjectURL(blobAudio);
-                        const chat = document.getElementById('chat-box');
-                        
-                        const divMensaje = document.createElement('div');
-                        divMensaje.className = "msg-mio";
-                        
-                        // Diseño de audio más limpio
-                        divMensaje.innerHTML = `<audio src="${urlAudio}" controls style="width:200px; height:30px;"></audio>`;
-                        
-                        chat.appendChild(divMensaje);
-                        chat.scrollTop = chat.scrollHeight;
-                    };
+                    const chat = document.getElementById('chat-box');
+                    const divAudio = document.createElement('div');
+                    divAudio.className = "msg-mio";
+                    divAudio.style.display = "flex";
+                    divAudio.style.alignItems = "center";
+                    divAudio.style.gap = "10px";
 
-                    grabador.start();
-                    boton.innerHTML = "🛑";
-                    boton.style.backgroundColor = "#ff3b30";
-                } catch (error) {
-                    alert("David, activa el permiso del micro.");
-                }
-            } else {
-                grabador.stop();
-                boton.innerHTML = "🎙️";
-                boton.style.backgroundColor = "#00a884";
-            }
+                    // DISEÑO SIN "RADIO": Solo icono y audio oculto
+                    divAudio.innerHTML = `
+                        <span style="cursor:pointer; font-size:20px;" onclick="this.nextElementSibling.play()">▶️</span>
+                        <audio src="${urlAudio}"></audio>
+                        <div style="width:100px; height:3px; background:rgba(255,255,255,0.3); border-radius:2px;"></div>
+                    `;
+                    
+                    chat.appendChild(divAudio);
+                    chat.scrollTop = chat.scrollHeight;
+                };
+
+                grabador.start();
+                boton.innerHTML = "🛑";
+                boton.style.backgroundColor = "#ff3b30";
+            } catch (error) { alert("David, activa el permiso del micro."); }
+        } else {
+            grabador.stop();
+            boton.innerHTML = "🎙️";
+            boton.style.backgroundColor = "#00a884";
         }
-    </script>
-</body>
-</html>
+    }
+</script>
