@@ -3,46 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil DNPlus</title>
+    <title>Perfil - DNPlus</title>
     <style>
-        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        .header { background-color: #085f56; padding: 20px; text-align: left; font-size: 18px; font-weight: bold; }
-        .container { padding: 20px; }
-        .avatar-circle { 
-            width: 160px; height: 160px; background: #202c33; 
-            border-radius: 50%; margin: 40px auto; overflow: hidden; 
-            border: 2px solid #085f56; cursor: pointer;
-        }
-        img { width: 100%; height: 100%; object-fit: cover; }
-        input { 
-            background: transparent; border: none; border-bottom: 2px solid #085f56; 
-            color: white; width: 85%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px;
-        }
-        .btn { 
-            background: #085f56; color: white; border: none; padding: 15px; 
-            border-radius: 30px; width: 85%; font-weight: bold; margin-top: 60px; cursor: pointer; 
-        }
+        body { background-color: #0b141a; color: #e9edef; text-align: center; font-family: sans-serif; padding: 20px; }
+        .title { color: #00a884; margin-top: 30px; font-size: 20px; }
+        .avatar-container { margin: 40px auto; position: relative; width: 120px; }
+        #fotoPerfil { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: #232d36; }
+        .btn-foto { position: absolute; bottom: 0; right: 0; background: #00a884; border-radius: 50%; padding: 8px; cursor: pointer; }
+        .input-nombre { background: transparent; border: none; border-bottom: 2px solid #00a884; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px; }
+        .btn-sig { background: #00a884; color: white; padding: 12px 40px; border-radius: 30px; border: none; margin-top: 50px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="header">Info. de perfil</div>
+    <h2 class="title">Info. de perfil</h2>
+    <p style="color: #8696a0; font-size: 14px;">Por favor, proporciona tu nombre y una foto de perfil opcional.</p>
 
-    <div class="container">
-        <div class="avatar-circle" onclick="document.getElementById('inputFoto').click()">
-            <img id="imgVista" src="https://www.w3schools.com/howto/img_avatar.png">
-        </div>
-        <input type="file" id="inputFoto" style="display:none" accept="image/*" onchange="cargarFoto(event)">
-
-        <input type="text" id="nombreCaja" placeholder="Escribe tu nombre">
-        
-        <button class="btn" onclick="finalizarPerfil()">SIGUIENTE</button>
+    <div class="avatar-container" onclick="document.getElementById('fileInput').click()">
+        <img id="fotoPerfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+        <div class="btn-foto">📷</div>
+        <input type="file" id="fileInput" hidden accept="image/*" onchange="previsualizar(this)">
     </div>
+
+    <input type="text" id="userName" class="input-nombre" placeholder="Escribe tu nombre aquí">
+
+    <br>
+    <button class="btn-sig" onclick="finalizarRegistro()">SIGUIENTE</button>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -55,23 +47,47 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function cargarFoto(e) {
-            const leer = new FileReader();
-            leer.onload = () => { document.getElementById('imgVista').src = leer.result; };
-            leer.readAsDataURL(e.target.files[0]);
+        let fotoBase64 = "";
+
+        function previsualizar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('fotoPerfil').src = e.target.result;
+                    fotoBase64 = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
-        function finalizarPerfil() {
-            const nom = document.getElementById('nombreCaja').value.trim();
-            const foto = document.getElementById('imgVista').src;
-            if (nom.length >= 2) {
-                db.ref("usuarios/mi_perfil").set({ nombre: nom, foto: foto, fecha: Date.now() })
-                .then(() => {
-                    localStorage.setItem("user_name", nom);
-                    localStorage.setItem("user_photo", foto);
-                    window.location.href = "home.html";
-                });
-            } else { alert("Nombre muy corto"); }
+        function finalizarRegistro() {
+            const nombre = document.getElementById('userName').value.trim();
+            const tempId = localStorage.getItem("user_temp_id");
+
+            if (!nombre) {
+                alert("Por favor, ingresa tu nombre.");
+                return;
+            }
+
+            if (!tempId) {
+                alert("Error de sesión. Por favor, vuelve a empezar.");
+                window.location.href = 'registro.html';
+                return;
+            }
+
+            // GUARDAR DATOS REALES
+            db.ref("usuarios_registrados/" + tempId).update({
+                nombre: nombre,
+                foto: fotoBase64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                estado: "¡Hola! Estoy usando DNPlus",
+                ultimaVez: Date.now()
+            }).then(() => {
+                // Guardamos en Local para uso rápido en la app
+                localStorage.setItem("user_name", nombre);
+                localStorage.setItem("user_photo", fotoBase64);
+                
+                window.location.href = 'home.html';
+            }).catch(e => alert("Error al guardar: " + e.message));
         }
     </script>
 </body>
