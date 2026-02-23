@@ -5,38 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus - Home</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* CABECERA PRINCIPAL */
-        .header { background-color: #085f56; padding: 15px 15px 5px 15px; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .header-top h1 { margin: 0; font-size: 22px; color: #e9edef; }
+        /* CABECERA SIN EL ICONO DE COMUNIDAD */
+        .header { background-color: #085f56; padding: 10px 15px 0 15px; flex-shrink: 0; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
+        .header-top h1 { margin: 0; font-size: 22px; color: #e9edef; font-weight: 500; }
         
-        /* PESTAÑAS (TABS) */
-        .tabs { display: flex; text-align: center; text-transform: uppercase; font-weight: bold; font-size: 14px; color: #8696a0; }
-        .tab { flex: 1; padding: 12px 0; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tabs { display: flex; text-align: center; font-weight: bold; font-size: 14px; color: #8696a0; }
+        .tab { flex: 1; padding: 12px 0; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
         .tab.active { color: #00a884; border-bottom: 3px solid #00a884; }
 
-        /* CONTENEDORES DE CONTENIDO */
-        .content-section { flex: 1; overflow-y: auto; display: none; }
+        /* SECCIONES CON SCROLL SUAVE */
+        .content-section { 
+            flex: 1; 
+            overflow-y: scroll; 
+            -webkit-overflow-scrolling: touch; 
+            display: none; 
+            padding-bottom: 100px; /* Para que el botón no tape el último item */
+        }
         .content-section.active { display: block; }
 
-        /* LISTAS (Chats/Llamadas) */
+        /* ESTILO DE ITEMS (CHATS/ESTADOS) */
         .item { display: flex; align-items: center; padding: 15px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #2a3942; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .avatar-circle { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #2a3942; }
         .info { flex: 1; }
-        .nombre { font-size: 16px; font-weight: bold; }
+        .nombre { font-size: 16px; font-weight: bold; margin-bottom: 3px; }
         .subtext { font-size: 14px; color: #8696a0; }
 
-        /* SECCIÓN ESTADOS */
-        .status-container { padding: 15px; }
-        .my-status { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .add-status { position: relative; }
-        .plus-icon { position: absolute; bottom: 0; right: 0; background: #00a884; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #0b141a; font-size: 14px; }
+        /* ESTADOS */
+        .my-status { display: flex; align-items: center; padding: 15px; gap: 15px; position: relative; }
+        .add-status-btn { position: absolute; bottom: 12px; left: 48px; background: #00a884; border: 2px solid #0b141a; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: bold; }
 
         /* BOTONES FLOTANTES */
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #00a884; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer; }
-        .fab-edit { bottom: 90px; background: #232d36; width: 45px; height: 45px; right: 25px; font-size: 20px; }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #00a884; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 999; }
+        .fab-text { bottom: 90px; right: 25px; background: #232d36; width: 45px; height: 45px; font-size: 20px; }
     </style>
 </head>
 <body>
@@ -44,117 +47,64 @@
     <div class="header">
         <div class="header-top">
             <h1>DNPlus</h1>
-            <div style="display: flex; gap: 20px; font-size: 20px;"><span>🔍</span><span>⋮</span></div>
+            <div style="display: flex; gap: 20px; font-size: 18px;"><span>🔍</span><span>⋮</span></div>
         </div>
         <div class="tabs">
-            <div class="tab" onclick="switchTab('comu')">👥</div>
-            <div class="tab active" onclick="switchTab('chats')">Chats</div>
-            <div class="tab" onclick="switchTab('estados')">Estados</div>
-            <div class="tab" id="tab-llamadas" onclick="switchTab('llamadas')">Llamadas</div>
+            <div class="tab active" onclick="switchTab('chats', this)">CHATS</div>
+            <div class="tab" onclick="switchTab('estados', this)">ESTADOS</div>
+            <div class="tab" onclick="switchTab('llamadas', this)">LLAMADAS</div>
         </div>
     </div>
 
     <div id="sec-chats" class="content-section active">
-        <div id="lista-chats"></div>
+        <div id="lista-chats-fb"></div>
         <div class="fab" onclick="location.href='lista_contactos.html'">💬</div>
     </div>
 
     <div id="sec-estados" class="content-section">
-        <div class="status-container">
-            <div class="my-status">
-                <div class="add-status">
-                    <div class="avatar">👤</div>
-                    <div class="plus-icon">+</div>
-                </div>
-                <div class="info">
-                    <div class="nombre">Mi estado</div>
-                    <div class="subtext">Toca para añadir un estado</div>
-                </div>
+        <div class="my-status">
+            <div style="position: relative;">
+                <img id="mi-foto-estado" class="avatar-circle" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+                <div class="add-status-btn">+</div>
             </div>
-            <div class="subtext" style="margin-bottom: 10px;">Recientes</div>
-            <div id="lista-estados"></div>
+            <div class="info">
+                <div class="nombre" id="mi-nombre-estado">Mi estado</div>
+                <div class="subtext">Toca para añadir un estado</div>
+            </div>
         </div>
-        <div class="fab fab-edit" onclick="crearEstadoTexto()">✏️</div>
-        <div class="fab" onclick="document.getElementById('status-file').click()">📷</div>
-        <input type="file" id="status-file" hidden accept="image/*,video/*">
+        <div class="subtext" style="padding: 10px 15px; background: rgba(255,255,255,0.03);">Recientes</div>
+        <div id="lista-estados-fb"></div>
+        
+        <div class="fab fab-text" onclick="crearEstadoTexto()">✏️</div>
+        <div class="fab" onclick="document.getElementById('file-status').click()">📷</div>
+        <input type="file" id="file-status" hidden accept="image/*">
     </div>
 
     <div id="sec-llamadas" class="content-section">
-        <div id="lista-llamadas">
-            <div style="padding: 40px; text-align: center; color: #8696a0;">No hay llamadas recientes</div>
-        </div>
+        <div style="padding: 50px; text-align: center; color: #8696a0;">No hay llamadas recientes</div>
         <div class="fab" onclick="location.href='crear_new_contact.html'">📞</div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+<script>
+    // Recuperar datos de registro para los Estados
+    const miNombre = localStorage.getItem("user_name") || "Usuario";
+    const miFoto = localStorage.getItem("user_photo") || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-    <script>
-        // CONFIGURACIÓN FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    // Aplicar a la interfaz de Estados
+    document.getElementById('mi-nombre-estado').innerText = miNombre;
+    document.getElementById('mi-foto-estado').src = miFoto;
 
-        // CAMBIO DE PESTAÑAS
-        function switchTab(section) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            
-            if(section === 'chats') {
-                document.getElementById('sec-chats').classList.add('active');
-                document.querySelectorAll('.tab')[1].classList.add('active');
-            } else if(section === 'estados') {
-                document.getElementById('sec-estados').classList.add('active');
-                document.querySelectorAll('.tab')[2].classList.add('active');
-            } else if(section === 'llamadas') {
-                document.getElementById('sec-llamadas').classList.add('active');
-                document.getElementById('tab-llamadas').classList.add('active');
-            }
-        }
+    function switchTab(section, element) {
+        // Quitar active de todos
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        
+        // Activar el seleccionado
+        element.classList.add('active');
+        document.getElementById('sec-' + section).classList.add('active');
+    }
 
-        // CARGAR CHATS REALES
-        db.ref("contactos").on("value", snap => {
-            const list = document.getElementById('lista-chats');
-            list.innerHTML = "";
-            snap.forEach(child => {
-                const c = child.val();
-                const div = document.createElement('div');
-                div.className = "item";
-                div.onclick = () => location.href = `mensajes.html?nombre=${encodeURIComponent(c.nombre)}`;
-                div.innerHTML = `
-                    <div class="avatar">${c.nombre.charAt(0)}</div>
-                    <div class="info">
-                        <div class="nombre">${c.nombre}</div>
-                        <div class="subtext">Toca para chatear</div>
-                    </div>`;
-                list.appendChild(div);
-            });
-        });
-
-        // FUNCIÓN PARA ESTADOS DE TEXTO CON COLORES
-        function crearEstadoTexto() {
-            const texto = prompt("¿Qué estás pensando?");
-            if(texto) {
-                const colores = ['#8E44AD', '#2E86C1', '#E67E22', '#C0392B', '#16A085'];
-                const colorAzar = colores[Math.floor(Math.random() * colores.length)];
-                
-                db.ref("estados").push({
-                    tipo: "texto",
-                    contenido: texto,
-                    fondo: colorAzar,
-                    user: "David Oviedo",
-                    fecha: Date.now()
-                });
-            }
-        }
-    </script>
+    // El resto de tu lógica de Firebase aquí...
+</script>
 </body>
 </html>
