@@ -39,7 +39,7 @@
         <div class="info-icon">👤</div>
         <div style="flex: 1;">
             <div class="info-label">Nombre</div>
-            <input type="text" class="info-value" id="editName" placeholder="Tu nombre">
+            <input type="text" class="info-value" id="editName" placeholder="David Oviedo">
         </div>
         <div style="color: #00a884;">✏️</div>
     </div>
@@ -48,7 +48,7 @@
         <div class="info-icon">ℹ️</div>
         <div style="flex: 1;">
             <div class="info-label">Info.</div>
-            <input type="text" class="info-value" id="editStatus" value="Hola, estoy usando DNPlus">
+            <input type="text" class="info-value" id="editStatus" placeholder="Hola, estoy usando DNPlus">
         </div>
         <div style="color: #00a884;">✏️</div>
     </div>
@@ -57,7 +57,7 @@
         <div class="info-icon">📞</div>
         <div style="flex: 1;">
             <div class="info-label">Teléfono</div>
-            <input type="text" class="info-value" id="editPhone" placeholder="+00 000 000000">
+            <input type="text" class="info-value" id="editPhone" placeholder="Tu número">
         </div>
     </div>
 
@@ -79,15 +79,26 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // VALORES POR DEFECTO REALES
+        const DEFAULT_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
+        const DEFAULT_STATUS = "Hola, estoy usando DNPlus";
+
         window.onload = function() {
-            // Cargar datos actuales
+            // Referencia directa a la carpeta del perfil en Firebase
             db.ref("usuarios/mi_perfil").once("value", (snapshot) => {
                 const data = snapshot.val();
+                
+                // Si hay datos en Firebase, úsalos; si no, usa el default
                 if(data) {
-                    document.getElementById('editName').value = data.nombre || localStorage.getItem("user_name");
-                    document.getElementById('currentPhoto').src = data.foto || localStorage.getItem("user_photo");
-                    document.getElementById('editStatus').value = data.estado || "Hola, estoy usando DNPlus";
+                    document.getElementById('editName').value = data.nombre || "David Oviedo";
+                    document.getElementById('currentPhoto').src = data.foto || DEFAULT_AVATAR;
+                    document.getElementById('editStatus').value = data.estado || DEFAULT_STATUS;
                     document.getElementById('editPhone').value = data.telefono || "";
+                } else {
+                    // Si no hay datos en Firebase, intentamos LocalStorage o mostramos default puro
+                    document.getElementById('editName').value = localStorage.getItem("user_name") || "David Oviedo";
+                    document.getElementById('currentPhoto').src = localStorage.getItem("user_photo") || DEFAULT_AVATAR;
+                    document.getElementById('editStatus').value = DEFAULT_STATUS;
                 }
             });
         }
@@ -97,16 +108,18 @@
             reader.onload = function(){
                 document.getElementById('currentPhoto').src = reader.result;
             };
-            reader.readAsDataURL(event.target.files[0]);
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
         }
 
         function guardarTodo() {
-            const nuevoNombre = document.getElementById('editName').value;
+            const nuevoNombre = document.getElementById('editName').value || "David Oviedo";
             const nuevaFoto = document.getElementById('currentPhoto').src;
-            const nuevoEstado = document.getElementById('editStatus').value;
-            const nuevoTelefono = document.getElementById('editPhone').value;
+            const nuevoEstado = document.getElementById('editStatus').value || DEFAULT_STATUS;
+            const nuevoTelefono = document.getElementById('editPhone').value || "";
 
-            // Guardar en Firebase
+            // Guardar en Firebase para que sea "real" y no se pierda
             db.ref("usuarios/mi_perfil").update({
                 nombre: nuevoNombre,
                 foto: nuevaFoto,
@@ -114,13 +127,13 @@
                 telefono: nuevoTelefono,
                 ultimaActualizacion: Date.now()
             }).then(() => {
-                // Actualizar LocalStorage
+                // Sincronizar LocalStorage para navegación rápida
                 localStorage.setItem("user_name", nuevoNombre);
                 localStorage.setItem("user_photo", nuevaFoto);
                 
                 window.location.href = 'ajustes.html';
             }).catch((e) => {
-                alert("Error: " + e.message);
+                alert("Error al sincronizar: " + e.message);
             });
         }
     </script>
