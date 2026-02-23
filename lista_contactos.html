@@ -7,13 +7,11 @@
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
         .header-c { background-color: #085f56; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100; }
-        
         .seccion-nuevo-contacto { display: flex; align-items: center; padding: 20px 25px; gap: 20px; cursor: pointer; }
-        .icono-plus { color: #00a884; font-size: 24px; font-weight: bold; width: 40px; height: 40px; background: #00a884; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icono-plus { width: 40px; height: 40px; background: #00a884; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .texto-enlace { color: #e9edef; font-weight: 500; font-size: 16px; }
-
         .contact-item { display: flex; align-items: center; padding: 12px 25px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; }
+        .avatar-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; }
         .info-contact { flex: 1; }
         .name-contact { font-weight: bold; font-size: 16px; }
         .status-contact { color: #8696a0; font-size: 13px; margin-top: 2px; }
@@ -25,11 +23,11 @@
         <span onclick="location.href='home.html'" style="font-size: 24px; cursor: pointer;">←</span>
         <div>
             <div style="font-weight: bold; font-size: 18px;">Seleccionar contacto</div>
-            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando usuarios...</div>
+            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando...</div>
         </div>
     </div>
 
-    <div class="seccion-nuevo-contacto" onclick="location.href='crear_new_contact.html'">
+    <div class="seccion-nuevo-contacto">
         <div class="icono-plus">+</div>
         <div class="texto-enlace">Nuevo contacto</div>
     </div>
@@ -53,32 +51,37 @@
         const db = firebase.database();
 
         window.onload = function() {
-            // CAMBIO CLAVE: Leemos de 'usuarios_registrados' para ver a la gente real
+            const miId = localStorage.getItem("user_temp_id");
+
             db.ref("usuarios_registrados").on("value", (snapshot) => {
                 const container = document.getElementById('listaDinamica');
                 const label = document.getElementById('countLabel');
-                const data = snapshot.val();
                 container.innerHTML = "";
                 
-                if (data) {
-                    const usuarios = Object.values(data);
-                    // Filtramos para no aparecer nosotros mismos en la lista (opcional)
-                    const miNombre = localStorage.getItem("user_name");
-                    const listaFiltrada = usuarios.filter(u => u.nombre !== miNombre);
-                    
-                    label.innerText = listaFiltrada.length + " contactos";
-                    
-                    listaFiltrada.forEach(u => {
-                        const foto = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-                        container.innerHTML += `
-                            <div class="contact-item" onclick="irAlChat('${u.nombre}', '${foto}')">
-                                <img src="${foto}" class="avatar-img">
-                                <div class="info-contact">
-                                    <div class="name-contact">${u.nombre}</div>
-                                    <div class="status-contact">¡Hola! Estoy usando DNPlus</div>
-                                </div>
-                            </div>`;
+                if (snapshot.exists()) {
+                    let contador = 0;
+                    snapshot.forEach((childSnapshot) => {
+                        const u = childSnapshot.val();
+                        const userId = childSnapshot.key;
+
+                        // No te muestras a ti mismo en la lista
+                        if (userId !== miId) {
+                            contador++;
+                            const nombre = u.nombre || "Usuario de DNPlus";
+                            const foto = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                            const estado = u.estado || "¡Hola! Estoy usando DNPlus";
+
+                            container.innerHTML += `
+                                <div class="contact-item" onclick="irAlChat('${userId}', '${nombre}', '${foto}')">
+                                    <img src="${foto}" class="avatar-img">
+                                    <div class="info-contact">
+                                        <div class="name-contact">${nombre}</div>
+                                        <div class="status-contact">${estado}</div>
+                                    </div>
+                                </div>`;
+                        }
                     });
+                    label.innerText = contador + " contactos";
                 } else {
                     label.innerText = "0 contactos";
                     container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">Nadie se ha registrado aún</div>';
@@ -86,9 +89,13 @@
             });
         };
 
-        function irAlChat(nombre, foto) {
-            // Al hacer clic, enviamos nombre y foto a la pantalla de mensajes
-            location.href = `mensajes.html?nombre=${encodeURIComponent(nombre)}&foto=${encodeURIComponent(foto)}`;
+        function irAlChat(id, nombre, foto) {
+            // Guardamos los datos del receptor para que la pantalla de chat sepa con quién hablas
+            localStorage.setItem("chat_destinatario_id", id);
+            localStorage.setItem("chat_destinatario_nombre", nombre);
+            localStorage.setItem("chat_destinatario_foto", foto);
+            
+            location.href = "mensajes.html";
         }
     </script>
 </body>
