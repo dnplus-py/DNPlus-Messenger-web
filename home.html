@@ -7,44 +7,44 @@
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* CABECERA CON TRES PUNTOS */
-        .header { background-color: #085f56; padding: 10px 15px 0 15px; flex-shrink: 0; position: relative; }
+        /* HEADER Y TABS */
+        .header { background-color: #085f56; padding: 10px 15px 0 15px; flex-shrink: 0; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
         .header-top h1 { margin: 0; font-size: 22px; color: #e9edef; }
-        
         .tabs { display: flex; text-align: center; font-weight: bold; font-size: 14px; color: #8696a0; }
         .tab { flex: 1; padding: 12px 0; cursor: pointer; border-bottom: 3px solid transparent; }
         .tab.active { color: #00a884; border-bottom: 3px solid #00a884; }
 
-        /* MENU TRES PUNTOS */
-        #menu-top { 
-            display: none; position: absolute; right: 10px; top: 45px; 
-            background: #232d36; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-            border-radius: 5px; padding: 10px 0; z-index: 2000; width: 150px;
-        }
-        .menu-item { padding: 12px 20px; font-size: 16px; cursor: pointer; }
-        .menu-item:active { background: #2a3942; }
-
-        /* SECCIONES SCROLLABLE */
+        /* CONTENIDO */
         .content-section { flex: 1; overflow-y: scroll; -webkit-overflow-scrolling: touch; display: none; padding-bottom: 100px; }
         .content-section.active { display: block; }
 
-        /* ITEMS */
+        /* ESTILO ITEMS */
         .item { display: flex; align-items: center; padding: 15px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .avatar { width: 50px; height: 50px; border-radius: 50%; background: #2a3942; object-fit: cover; }
         .info { flex: 1; }
         .nombre { font-size: 16px; font-weight: bold; }
         .subtext { font-size: 14px; color: #8696a0; }
 
-        /* MODAL BORRAR CHAT */
-        #modal-borrar-chat {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 3000; align-items: center; justify-content: center;
-        }
-        .modal-box { background: #232d36; padding: 25px; border-radius: 5px; width: 80%; }
-        .modal-btn { color: #00a884; font-weight: bold; text-align: right; margin-top: 20px; cursor: pointer; }
+        /* CIRCULO VERDE EN ESTADO */
+        .status-circle { border: 2.5px solid #00a884; border-radius: 50%; padding: 2px; display: flex; align-items: center; justify-content: center; }
 
+        /* VISOR DE ESTADOS FULLSCREEN */
+        #status-viewer {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 5000; flex-direction: column;
+        }
+        .status-progress-bar { display: flex; gap: 5px; padding: 10px; position: absolute; top: 0; width: 100%; box-sizing: border-box; }
+        .progress-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: white; width: 0%; }
+        .status-header { display: flex; align-items: center; gap: 10px; padding: 20px 15px; margin-top: 10px; z-index: 10; }
+        .status-content { flex: 1; display: flex; align-items: center; justify-content: center; }
+        .status-content img, .status-content video { max-width: 100%; max-height: 100%; }
+        .status-text-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 32px; padding: 30px; text-align: center; }
+
+        /* BOTONES */
         .fab { position: fixed; bottom: 20px; right: 20px; background: #00a884; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 999; }
+        .fab-text { bottom: 90px; right: 25px; background: #232d36; width: 45px; height: 45px; font-size: 20px; }
     </style>
 </head>
 <body>
@@ -52,16 +52,8 @@
     <div class="header">
         <div class="header-top">
             <h1>DNPlus</h1>
-            <div style="display: flex; gap: 20px; font-size: 18px;">
-                <span>🔍</span>
-                <span onclick="toggleMenu()" style="cursor:pointer">⋮</span>
-            </div>
+            <div style="display: flex; gap: 20px; font-size: 18px;"><span>🔍</span><span onclick="toggleMenu()">⋮</span></div>
         </div>
-        <div id="menu-top">
-            <div class="menu-item">Nuevo grupo</div>
-            <div class="menu-item" onclick="location.href='ajustes.html'">Ajustes</div>
-        </div>
-
         <div class="tabs">
             <div class="tab active" onclick="switchTab('chats', this)">CHATS</div>
             <div class="tab" onclick="switchTab('estados', this)">ESTADOS</div>
@@ -69,94 +61,59 @@
         </div>
     </div>
 
-    <div id="sec-chats" class="content-section active">
-        <div id="lista-chats-fb"></div>
-        <div class="fab" onclick="location.href='lista_contactos.html'">💬</div>
-    </div>
-
     <div id="sec-estados" class="content-section">
-        <div class="item">
-            <img id="mi-foto-estado" class="avatar" src="">
+        <div class="item" onclick="document.getElementById('file-status').click()">
+            <div style="position: relative;">
+                <img id="mi-foto-est" class="avatar" src="">
+                <div style="position:absolute; bottom:0; right:0; background:#00a884; border-radius:50%; width:18px; height:18px; border:2px solid #0b141a; font-size:14px; text-align:center;">+</div>
+            </div>
             <div class="info">
-                <div class="nombre" id="mi-nombre-estado">Mi estado</div>
+                <div class="nombre">Mi estado</div>
                 <div class="subtext">Toca para añadir un estado</div>
             </div>
         </div>
         <div class="subtext" style="padding: 10px 15px; background: rgba(255,255,255,0.03);">RECIENTES</div>
         <div id="lista-estados-fb"></div>
+        
+        <div class="fab fab-text" onclick="crearEstadoTexto()">✏️</div>
+        <div class="fab" onclick="document.getElementById('file-status').click()">📷</div>
+        <input type="file" id="file-status" hidden accept="image/*,video/*" onchange="subirArchivoEstado(event)">
     </div>
 
-    <div id="sec-llamadas" class="content-section">
-        <div style="padding: 50px; text-align: center; color: #8696a0;">No hay llamadas recientes</div>
-        <div class="fab" onclick="location.href='crear_new_contact.html'">📞</div>
-    </div>
-
-    <div id="modal-borrar-chat" onclick="cerrarModalBorrar()">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div style="font-size: 18px;">¿Deseas eliminar este chat?</div>
-            <div class="modal-btn" id="confirmar-borrado">ELIMINAR CHAT</div>
+    <div id="status-viewer">
+        <div class="status-progress-bar"><div class="progress-bg"><div id="p-fill" class="progress-fill"></div></div></div>
+        <div class="status-header">
+            <span onclick="cerrarVisor()" style="font-size:24px;">←</span>
+            <img id="v-avatar" class="avatar" style="width:40px; height:40px;">
+            <div class="nombre" id="v-nombre">Nombre</div>
         </div>
+        <div class="status-content" id="v-content"></div>
     </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-    // Tu Configuración de Firebase (David, pon la tuya aquí)
-    const firebaseConfig = {
-        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-        authDomain: "dnplus-messenger-pro.firebaseapp.com",
-        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        projectId: "dnplus-messenger-pro",
-        storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-        messagingSenderId: "625573378436",
-        appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
-    };
-    firebase.initializeApp(firebaseConfig);
+    // Tu Configuración de Firebase...
     const db = firebase.database();
 
-    // 1. MENU TOP
-    function toggleMenu() {
-        const menu = document.getElementById('menu-top');
-        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-    }
-    window.onclick = (e) => { if(!e.target.innerText.includes('⋮')) document.getElementById('menu-top').style.display='none'; }
-
-    // 2. CARGAR CHATS Y BORRAR
-    db.ref("contactos").on("value", snap => {
-        const list = document.getElementById('lista-chats-fb');
-        list.innerHTML = "";
-        snap.forEach(child => {
-            const c = child.val();
-            const div = document.createElement('div');
-            div.className = "item";
-            // Click normal: ir al chat
-            div.onclick = () => location.href = `mensajes.html?nombre=${encodeURIComponent(c.nombre)}`;
-            // Click largo: Borrar
-            div.oncontextmenu = (e) => {
-                e.preventDefault();
-                abrirModalBorrar(child.key);
-            };
-
-            div.innerHTML = `<img class="avatar" src="${c.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
-                <div class="info">
-                    <div class="nombre">${c.nombre}</div>
-                    <div class="subtext">${c.telefono}</div>
-                </div>`;
-            list.appendChild(div);
-        });
-    });
-
-    function abrirModalBorrar(id) {
-        document.getElementById('modal-borrar-chat').style.display = 'flex';
-        document.getElementById('confirmar-borrado').onclick = () => {
-            db.ref("contactos").child(id).remove();
-            cerrarModalBorrar();
+    // SUBIR FOTO/VIDEO A ESTADO
+    function subirArchivoEstado(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            db.ref("estados").push({
+                user: localStorage.getItem("user_name") || "David",
+                fotoUser: localStorage.getItem("user_photo") || "",
+                tipo: file.type.includes("video") ? "video" : "imagen",
+                contenido: reader.result,
+                fecha: Date.now()
+            });
         };
     }
-    function cerrarModalBorrar() { document.getElementById('modal-borrar-chat').style.display = 'none'; }
 
-    // 3. CARGAR ESTADOS REALES
+    // CARGAR ESTADOS CON VISOR
     db.ref("estados").on("value", snap => {
         const list = document.getElementById('lista-estados-fb');
         list.innerHTML = "";
@@ -164,8 +121,9 @@
             const est = child.val();
             const div = document.createElement('div');
             div.className = "item";
+            div.onclick = () => abrirVisor(est);
             div.innerHTML = `
-                <div style="border: 2px solid #00a884; border-radius: 50%; padding: 2px;">
+                <div class="status-circle">
                     <img class="avatar" src="${est.fotoUser || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" style="width:45px; height:45px;">
                 </div>
                 <div class="info">
@@ -176,17 +134,41 @@
         });
     });
 
-    // Pestañas
-    function switchTab(section, el) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('sec-' + section).classList.add('active');
+    let stInterval;
+    function abrirVisor(est) {
+        const visor = document.getElementById('status-viewer');
+        const content = document.getElementById('v-content');
+        const fill = document.getElementById('p-fill');
+        
+        document.getElementById('v-nombre').innerText = est.user;
+        document.getElementById('v-avatar').src = est.fotoUser;
+        
+        content.innerHTML = "";
+        if(est.tipo === "texto") {
+            content.innerHTML = `<div class="status-text-bg" style="background:${est.fondo}">${est.contenido}</div>`;
+        } else if(est.tipo === "video") {
+            content.innerHTML = `<video src="${est.contenido}" autoplay></video>`;
+        } else {
+            content.innerHTML = `<img src="${est.contenido}">`;
+        }
+
+        visor.style.display = 'flex';
+        fill.style.width = '0%';
+        let p = 0;
+        stInterval = setInterval(() => {
+            p += 1;
+            fill.style.width = p + '%';
+            if(p >= 100) cerrarVisor();
+        }, 50); // 5 segundos aprox
     }
 
-    // Datos mi perfil
-    document.getElementById('mi-nombre-estado').innerText = localStorage.getItem("user_name") || "Mi estado";
-    document.getElementById('mi-foto-estado').src = localStorage.getItem("user_photo") || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    function cerrarVisor() {
+        document.getElementById('status-viewer').style.display = 'none';
+        clearInterval(stInterval);
+    }
+    
+    // Al cargar, poner tu foto de perfil
+    document.getElementById('mi-foto-est').src = localStorage.getItem("user_photo") || "";
 </script>
 </body>
 </html>
