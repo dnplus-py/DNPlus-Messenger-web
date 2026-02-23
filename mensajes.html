@@ -5,54 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus Chat</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; color: white; }
-        .header { background-color: #075e54; padding: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; }
-        
+        /* FONDO NOCHE TOTAL */
+        body { 
+            margin: 0; font-family: sans-serif; 
+            background-color: #0b141a; /* Negro azulado WhatsApp */
+            display: flex; flex-direction: column; height: 100vh; color: white; 
+        }
+
+        .header { 
+            background-color: #202c33; padding: 10px 15px; 
+            display: flex; align-items: center; gap: 10px; 
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .header-info { display: flex; flex-direction: column; }
+        .header-info .nombre { font-size: 16px; font-weight: bold; }
+        .header-info .estado { font-size: 11px; color: #00a884; }
+
+        /* CHAT BOX CON FONDO DE DOODLES OSCURO */
         #chat-box { 
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; 
+            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: contain;
+            background-blend-mode: multiply; background-color: #0b141a;
         }
 
-        .msg-mio { 
-            align-self: flex-end; background-color: #176f47; color: white; padding: 10px; 
-            border-radius: 15px 15px 0px 15px; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        /* BURBUJAS */
+        .msg { padding: 8px 12px; border-radius: 10px; max-width: 75%; font-size: 15px; position: relative; cursor: pointer; }
+        .msg-mio { align-self: flex-end; background-color: #005c4b; border-bottom-right-radius: 2px; }
+        .msg-otro { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
+
+        /* CONTENEDOR DE FOTO FIJO 240x180 */
+        .img-wrapper { 
+            width: 240px; height: 180px; 
+            border-radius: 8px; overflow: hidden; 
+            margin: 2px 0; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+
+        /* MODAL ZOOM */
+        #zoom-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; 
+        }
+        #zoom-modal img { max-width: 95%; max-height: 85%; border-radius: 5px; }
+
+        /* FOOTER */
+        .footer { background-color: #202c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        .input-container { flex: 1; background-color: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 5px 12px; }
+        input[type="text"] { flex: 1; background: transparent; border: none; padding: 10px; color: white; outline: none; font-size: 16px; }
+        
+        .btn-accion { 
+            background-color: #00a884; border: none; width: 45px; height: 45px; 
+            border-radius: 50%; color: white; display: flex; align-items: center; 
+            justify-content: center; font-size: 20px; cursor: pointer; 
         }
 
-        /* Estilo para mensajes recibidos (otros) */
-        .msg-otro { 
-            align-self: flex-start; background-color: #202c33; color: white; padding: 10px; 
-            border-radius: 0px 15px 15px 15px; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        /* MODAL OPCIONES */
+        #modal-opciones {
+            display: none; position: fixed; bottom: 0; width: 100%; background: #232d36;
+            border-radius: 20px 20px 0 0; padding: 15px 0; z-index: 999;
         }
-
-        .img-enviada { max-width: 100%; border-radius: 10px; display: block; margin-top: 5px; }
-        .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        input { flex: 1; background-color: #2a3942; border: none; padding: 12px; border-radius: 25px; color: white; outline: none; }
-        .btn-accion { background-color: #00a884; border: none; width: 48px; height: 48px; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .opt-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-size: 16px; }
+        .opt-item:active { background: #2a3942; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="window.history.back()" style="cursor:pointer">←</span>
-        <span>Cargando...</span>
+        <span onclick="window.history.back()" style="cursor:pointer; font-size: 20px;">←</span>
+        <div class="header-info">
+            <span class="nombre" id="nombreChat">Cargando...</span>
+            <span class="estado" id="estadoChat">últ. vez hoy 10:45</span>
+        </div>
     </div>
 
     <div id="chat-box"></div>
 
     <div class="footer">
-        <span style="font-size: 22px; cursor: pointer; color: #8696a0; margin-right: 5px;">😊</span>
-        <span onclick="document.getElementById('file-input').click()" style="font-size: 22px; cursor: pointer; color: #8696a0; margin-right: 10px; transform: rotate(-45deg); display: inline-block;">📎</span>
+        <div class="input-container">
+            <span style="font-size: 22px; cursor: pointer; color: #8696a0;">😊</span>
+            <input type="text" id="msg-input" placeholder="Mensaje" oninput="cambiarIcono()">
+            <span onclick="document.getElementById('file-input').click()" style="font-size: 22px; cursor: pointer; color: #8696a0; transform: rotate(-45deg);">📎</span>
+        </div>
         <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="enviarImagen(event)">
-        <input type="text" id="msg-input" placeholder="Mensaje" oninput="cambiarIcono()">
         <button class="btn-accion" id="btn-main" onclick="ejecutarAccion()">🎙️</button>
+    </div>
+
+    <div id="zoom-modal" onclick="this.style.display='none'">
+        <img id="zoom-img" src="">
+    </div>
+
+    <div id="modal-opciones" onclick="this.style.display='none'">
+        <div class="opt-item">🗑️ Borrar chat</div>
+        <div class="opt-item">↩️ Responder</div>
+        <div class="opt-item">➡️ Reenviar</div>
     </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-    // Configuración DNPlus
     const firebaseConfig = {
         apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
         authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -62,83 +114,89 @@
         messagingSenderId: "625573378436",
         appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Identificar el chat y el usuario
     const urlParams = new URLSearchParams(window.location.search);
-    const nombreContacto = urlParams.get('nombre') || "Soporte DNPlus";
-    document.querySelector('.header span:last-child').innerText = nombreContacto;
+    const contacto = urlParams.get('nombre') || "Amigo";
+    document.getElementById('nombreChat').innerText = contacto;
+    const miUser = localStorage.getItem("user_name") || "David";
 
-    const miNombre = localStorage.getItem("user_name") || "David Oviedo";
-
-    // ESCUCHAR MENSAJES EN TIEMPO REAL
-    db.ref("mensajes").on("child_added", (snapshot) => {
-        const data = snapshot.val();
-        mostrarMensaje(data.contenido, data.remitente, data.tipo);
+    // ESCUCHAR MENSAJES
+    db.ref("mensajes").on("child_added", (snap) => {
+        const m = snap.val();
+        renderMessage(m.contenido, m.remitente, m.tipo, snap.key);
     });
 
-    function mostrarMensaje(contenido, remitente, tipo) {
+    function renderMessage(cont, rem, tipo, key) {
         const chat = document.getElementById('chat-box');
         const div = document.createElement('div');
-        div.className = (remitente === miNombre) ? "msg-mio" : "msg-otro";
+        div.className = (rem === miUser) ? "msg msg-mio" : "msg msg-otro";
+        
+        // Al pulsar largo o click, mostrar modal
+        div.onclick = () => document.getElementById('modal-opciones').style.display = 'block';
 
         if (tipo === "texto") {
-            div.innerText = contenido;
+            div.innerText = cont;
         } else if (tipo === "imagen") {
-            div.innerHTML = `<img src="${contenido}" class="img-enviada">`;
+            div.innerHTML = `<div class="img-wrapper" onclick="openZoom('${cont}')"><img src="${cont}"></div>`;
+            updateEstado("enviando foto...");
         }
 
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
     }
 
-    function enviarTexto(texto) {
-        db.ref("mensajes").push({
-            remitente: miNombre,
-            contenido: texto,
-            tipo: "texto",
-            fecha: Date.now()
-        });
-    }
-
-    function enviarImagen(event) {
-        const archivo = event.target.files[0];
-        if (archivo) {
-            const lector = new FileReader();
-            lector.onload = function(e) {
-                db.ref("mensajes").push({
-                    remitente: miNombre,
-                    contenido: e.target.result,
-                    tipo: "imagen",
-                    fecha: Date.now()
-                });
-            };
-            lector.readAsDataURL(archivo);
+    function cambiarIcono() {
+        const val = document.getElementById('msg-input').value;
+        const btn = document.getElementById('btn-main');
+        if(val.length > 0) {
+            btn.innerHTML = "🕊️";
+            updateEstado("escribiendo...");
+        } else {
+            btn.innerHTML = "🎙️";
+            updateEstado("en línea");
         }
     }
 
-    // Lógica de interfaz (Iconos y Voz)
-    function cambiarIcono() {
-        const input = document.getElementById('msg-input');
-        const boton = document.getElementById('btn-main');
-        boton.innerHTML = input.value.trim() !== "" ? "🕊️" : "🎙️";
+    function updateEstado(txt) {
+        const est = document.getElementById('estadoChat');
+        est.innerText = txt;
+        if(txt !== "en línea") setTimeout(() => est.innerText = "en línea", 3000);
     }
 
     function ejecutarAccion() {
         const input = document.getElementById('msg-input');
-        if (input.value.trim() !== "") {
-            enviarTexto(input.value);
-            input.value = ""; 
+        if(input.value.trim() !== "") {
+            db.ref("mensajes").push({ remitente: miUser, contenido: input.value, tipo: "texto" });
+            input.value = "";
             cambiarIcono();
         } else {
-            controlarVoz();
+            // SIMULACIÓN AUDIO
+            updateEstado("grabando audio... 🎙️");
+            setTimeout(() => {
+                db.ref("mensajes").push({ remitente: miUser, contenido: "🎤 Audio enviado", tipo: "texto" });
+                updateEstado("en línea");
+            }, 2000);
         }
     }
 
-    // (Aquí va tu función de controlarVoz y reproducirAudio que ya tenías)
-    // ... mantén el código de audio que tenías abajo ...
+    function enviarImagen(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                db.ref("mensajes").push({ remitente: miUser, contenido: ev.target.result, tipo: "imagen" });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function openZoom(src) {
+        event.stopPropagation(); // Evita que se abra el modal de borrar
+        document.getElementById('zoom-img').src = src;
+        document.getElementById('zoom-modal').style.display = 'flex';
+    }
 </script>
 </body>
 </html>
