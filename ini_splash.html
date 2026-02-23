@@ -6,14 +6,14 @@
     <title>DNPlus Messenger</title>
     <style>
         body {
-            background-color: #176F47; /* Tu verde favorito #176F47 */
+            background-color: #176F47; /* Tu verde favorito */
             margin: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: white;
+            color: #F089273; /* Tu color de texto personalizado */
             font-family: sans-serif;
             overflow: hidden;
         }
@@ -59,6 +59,7 @@
             letter-spacing: 3px;
             color: rgba(255,255,255,0.8);
             font-weight: bold;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -74,18 +75,19 @@
     </div>
 
     <script>
-        // Lógica de redirección inteligente
+        // Lógica de redirección inteligente corregida
         setTimeout(() => {
+            // Verificamos si existe el nombre del usuario en el almacenamiento local
             const yaRegistrado = localStorage.getItem("user_name");
 
             if (yaRegistrado) {
-                // Si el usuario ya existe, va directo a los chats
+                // Si ya tiene datos, va directo al Home
                 window.location.href = 'home.html';
             } else {
-                // Si es la primera vez, va a los términos
-                window.location.href = 'terminos.html';
+                // Si es la primera vez (o tras desinstalar), va a Bienvenida
+                window.location.href = 'bienvenida.html';
             }
-        }, 2500); // 2.5 segundos de carga
+        }, 3000); // 3 segundos para que luzca el splash
     </script>
 
 </body>
