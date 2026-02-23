@@ -3,38 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - DNPlus</title>
+    <title>Perfil DNPlus</title>
     <style>
-        body { background-color: #0b141a; color: #e9edef; text-align: center; font-family: sans-serif; padding: 20px; }
-        .title { color: #00a884; margin-top: 30px; font-size: 20px; }
-        .avatar-container { margin: 40px auto; position: relative; width: 120px; }
-        #fotoPerfil { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: #232d36; }
-        .btn-foto { position: absolute; bottom: 0; right: 0; background: #00a884; border-radius: 50%; padding: 8px; cursor: pointer; }
-        .input-nombre { background: transparent; border: none; border-bottom: 2px solid #00a884; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; margin-top: 20px; }
-        .btn-sig { background: #00a884; color: white; padding: 12px 40px; border-radius: 30px; border: none; margin-top: 50px; font-weight: bold; cursor: pointer; }
+        body { background-color: #0b141a; color: white; text-align: center; font-family: sans-serif; padding: 20px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: #232d36; margin: 30px auto; display: block; }
+        .input-name { background: transparent; border: none; border-bottom: 2px solid #00a884; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; }
+        .btn-ready { background: #00a884; color: white; padding: 12px 40px; border-radius: 30px; border: none; margin-top: 40px; font-weight: bold; }
     </style>
 </head>
 <body>
+    <h2 style="color:#00a884">Info. de perfil</h2>
+    <p style="color:#8696a0">Ingresa tu nombre y elige una foto.</p>
 
-    <h2 class="title">Info. de perfil</h2>
-    <p style="color: #8696a0; font-size: 14px;">Por favor, proporciona tu nombre y una foto de perfil opcional.</p>
-
-    <div class="avatar-container" onclick="document.getElementById('fileInput').click()">
-        <img id="fotoPerfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-        <div class="btn-foto">📷</div>
-        <input type="file" id="fileInput" hidden accept="image/*" onchange="previsualizar(this)">
+    <div onclick="document.getElementById('imgInp').click()">
+        <img id="preview" class="avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+        <input type="file" id="imgInp" hidden accept="image/*" onchange="readImg(this)">
     </div>
 
-    <input type="text" id="userName" class="input-nombre" placeholder="Escribe tu nombre aquí">
-
+    <input type="text" id="nameInp" class="input-name" placeholder="Tu nombre">
     <br>
-    <button class="btn-sig" onclick="finalizarRegistro()">SIGUIENTE</button>
+    <button class="btn-ready" onclick="saveProfile()">SIGUIENTE</button>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -47,47 +40,34 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let fotoBase64 = "";
+        let base64 = "";
 
-        function previsualizar(input) {
+        function readImg(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('fotoPerfil').src = e.target.result;
-                    fotoBase64 = e.target.result;
-                }
+                reader.onload = (e) => {
+                    document.getElementById('preview').src = e.target.result;
+                    base64 = e.target.result;
+                };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function finalizarRegistro() {
-            const nombre = document.getElementById('userName').value.trim();
-            const tempId = localStorage.getItem("user_temp_id");
+        function saveProfile() {
+            const nom = document.getElementById('nameInp').value;
+            const tid = localStorage.getItem("user_temp_id");
 
-            if (!nombre) {
-                alert("Por favor, ingresa tu nombre.");
-                return;
-            }
+            if(!nom) return alert("Pon tu nombre, bro");
+            if(!tid) return window.location.href="registro.html";
 
-            if (!tempId) {
-                alert("Error de sesión. Por favor, vuelve a empezar.");
-                window.location.href = 'registro.html';
-                return;
-            }
-
-            // GUARDAR DATOS REALES
-            db.ref("usuarios_registrados/" + tempId).update({
-                nombre: nombre,
-                foto: fotoBase64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                estado: "¡Hola! Estoy usando DNPlus",
-                ultimaVez: Date.now()
+            db.ref("usuarios_registrados/" + tid).update({
+                nombre: nom,
+                foto: base64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png"
             }).then(() => {
-                // Guardamos en Local para uso rápido en la app
-                localStorage.setItem("user_name", nombre);
-                localStorage.setItem("user_photo", fotoBase64);
-                
-                window.location.href = 'home.html';
-            }).catch(e => alert("Error al guardar: " + e.message));
+                localStorage.setItem("user_name", nom);
+                localStorage.setItem("user_photo", base64);
+                window.location.href = "home.html";
+            });
         }
     </script>
 </body>
