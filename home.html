@@ -7,39 +7,44 @@
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* CABECERA SIN EL ICONO DE COMUNIDAD */
-        .header { background-color: #085f56; padding: 10px 15px 0 15px; flex-shrink: 0; }
+        /* CABECERA CON TRES PUNTOS */
+        .header { background-color: #085f56; padding: 10px 15px 0 15px; flex-shrink: 0; position: relative; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
-        .header-top h1 { margin: 0; font-size: 22px; color: #e9edef; font-weight: 500; }
+        .header-top h1 { margin: 0; font-size: 22px; color: #e9edef; }
         
         .tabs { display: flex; text-align: center; font-weight: bold; font-size: 14px; color: #8696a0; }
-        .tab { flex: 1; padding: 12px 0; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab { flex: 1; padding: 12px 0; cursor: pointer; border-bottom: 3px solid transparent; }
         .tab.active { color: #00a884; border-bottom: 3px solid #00a884; }
 
-        /* SECCIONES CON SCROLL SUAVE */
-        .content-section { 
-            flex: 1; 
-            overflow-y: scroll; 
-            -webkit-overflow-scrolling: touch; 
-            display: none; 
-            padding-bottom: 100px; /* Para que el botón no tape el último item */
+        /* MENU TRES PUNTOS */
+        #menu-top { 
+            display: none; position: absolute; right: 10px; top: 45px; 
+            background: #232d36; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            border-radius: 5px; padding: 10px 0; z-index: 2000; width: 150px;
         }
+        .menu-item { padding: 12px 20px; font-size: 16px; cursor: pointer; }
+        .menu-item:active { background: #2a3942; }
+
+        /* SECCIONES SCROLLABLE */
+        .content-section { flex: 1; overflow-y: scroll; -webkit-overflow-scrolling: touch; display: none; padding-bottom: 100px; }
         .content-section.active { display: block; }
 
-        /* ESTILO DE ITEMS (CHATS/ESTADOS) */
-        .item { display: flex; align-items: center; padding: 15px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .avatar-circle { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #2a3942; }
+        /* ITEMS */
+        .item { display: flex; align-items: center; padding: 15px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #2a3942; object-fit: cover; }
         .info { flex: 1; }
-        .nombre { font-size: 16px; font-weight: bold; margin-bottom: 3px; }
+        .nombre { font-size: 16px; font-weight: bold; }
         .subtext { font-size: 14px; color: #8696a0; }
 
-        /* ESTADOS */
-        .my-status { display: flex; align-items: center; padding: 15px; gap: 15px; position: relative; }
-        .add-status-btn { position: absolute; bottom: 12px; left: 48px; background: #00a884; border: 2px solid #0b141a; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: bold; }
+        /* MODAL BORRAR CHAT */
+        #modal-borrar-chat {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 3000; align-items: center; justify-content: center;
+        }
+        .modal-box { background: #232d36; padding: 25px; border-radius: 5px; width: 80%; }
+        .modal-btn { color: #00a884; font-weight: bold; text-align: right; margin-top: 20px; cursor: pointer; }
 
-        /* BOTONES FLOTANTES */
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #00a884; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 999; }
-        .fab-text { bottom: 90px; right: 25px; background: #232d36; width: 45px; height: 45px; font-size: 20px; }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #00a884; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 999; }
     </style>
 </head>
 <body>
@@ -47,8 +52,16 @@
     <div class="header">
         <div class="header-top">
             <h1>DNPlus</h1>
-            <div style="display: flex; gap: 20px; font-size: 18px;"><span>🔍</span><span>⋮</span></div>
+            <div style="display: flex; gap: 20px; font-size: 18px;">
+                <span>🔍</span>
+                <span onclick="toggleMenu()" style="cursor:pointer">⋮</span>
+            </div>
         </div>
+        <div id="menu-top">
+            <div class="menu-item">Nuevo grupo</div>
+            <div class="menu-item" onclick="location.href='ajustes.html'">Ajustes</div>
+        </div>
+
         <div class="tabs">
             <div class="tab active" onclick="switchTab('chats', this)">CHATS</div>
             <div class="tab" onclick="switchTab('estados', this)">ESTADOS</div>
@@ -62,22 +75,15 @@
     </div>
 
     <div id="sec-estados" class="content-section">
-        <div class="my-status">
-            <div style="position: relative;">
-                <img id="mi-foto-estado" class="avatar-circle" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                <div class="add-status-btn">+</div>
-            </div>
+        <div class="item">
+            <img id="mi-foto-estado" class="avatar" src="">
             <div class="info">
                 <div class="nombre" id="mi-nombre-estado">Mi estado</div>
                 <div class="subtext">Toca para añadir un estado</div>
             </div>
         </div>
-        <div class="subtext" style="padding: 10px 15px; background: rgba(255,255,255,0.03);">Recientes</div>
+        <div class="subtext" style="padding: 10px 15px; background: rgba(255,255,255,0.03);">RECIENTES</div>
         <div id="lista-estados-fb"></div>
-        
-        <div class="fab fab-text" onclick="crearEstadoTexto()">✏️</div>
-        <div class="fab" onclick="document.getElementById('file-status').click()">📷</div>
-        <input type="file" id="file-status" hidden accept="image/*">
     </div>
 
     <div id="sec-llamadas" class="content-section">
@@ -85,26 +91,102 @@
         <div class="fab" onclick="location.href='crear_new_contact.html'">📞</div>
     </div>
 
+    <div id="modal-borrar-chat" onclick="cerrarModalBorrar()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div style="font-size: 18px;">¿Deseas eliminar este chat?</div>
+            <div class="modal-btn" id="confirmar-borrado">ELIMINAR CHAT</div>
+        </div>
+    </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
 <script>
-    // Recuperar datos de registro para los Estados
-    const miNombre = localStorage.getItem("user_name") || "Usuario";
-    const miFoto = localStorage.getItem("user_photo") || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    // Tu Configuración de Firebase (David, pon la tuya aquí)
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+        authDomain: "dnplus-messenger-pro.firebaseapp.com",
+        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        projectId: "dnplus-messenger-pro",
+        storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+        messagingSenderId: "625573378436",
+        appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // Aplicar a la interfaz de Estados
-    document.getElementById('mi-nombre-estado').innerText = miNombre;
-    document.getElementById('mi-foto-estado').src = miFoto;
+    // 1. MENU TOP
+    function toggleMenu() {
+        const menu = document.getElementById('menu-top');
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    }
+    window.onclick = (e) => { if(!e.target.innerText.includes('⋮')) document.getElementById('menu-top').style.display='none'; }
 
-    function switchTab(section, element) {
-        // Quitar active de todos
+    // 2. CARGAR CHATS Y BORRAR
+    db.ref("contactos").on("value", snap => {
+        const list = document.getElementById('lista-chats-fb');
+        list.innerHTML = "";
+        snap.forEach(child => {
+            const c = child.val();
+            const div = document.createElement('div');
+            div.className = "item";
+            // Click normal: ir al chat
+            div.onclick = () => location.href = `mensajes.html?nombre=${encodeURIComponent(c.nombre)}`;
+            // Click largo: Borrar
+            div.oncontextmenu = (e) => {
+                e.preventDefault();
+                abrirModalBorrar(child.key);
+            };
+
+            div.innerHTML = `<img class="avatar" src="${c.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+                <div class="info">
+                    <div class="nombre">${c.nombre}</div>
+                    <div class="subtext">${c.telefono}</div>
+                </div>`;
+            list.appendChild(div);
+        });
+    });
+
+    function abrirModalBorrar(id) {
+        document.getElementById('modal-borrar-chat').style.display = 'flex';
+        document.getElementById('confirmar-borrado').onclick = () => {
+            db.ref("contactos").child(id).remove();
+            cerrarModalBorrar();
+        };
+    }
+    function cerrarModalBorrar() { document.getElementById('modal-borrar-chat').style.display = 'none'; }
+
+    // 3. CARGAR ESTADOS REALES
+    db.ref("estados").on("value", snap => {
+        const list = document.getElementById('lista-estados-fb');
+        list.innerHTML = "";
+        snap.forEach(child => {
+            const est = child.val();
+            const div = document.createElement('div');
+            div.className = "item";
+            div.innerHTML = `
+                <div style="border: 2px solid #00a884; border-radius: 50%; padding: 2px;">
+                    <img class="avatar" src="${est.fotoUser || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" style="width:45px; height:45px;">
+                </div>
+                <div class="info">
+                    <div class="nombre">${est.user}</div>
+                    <div class="subtext">Justo ahora</div>
+                </div>`;
+            list.appendChild(div);
+        });
+    });
+
+    // Pestañas
+    function switchTab(section, el) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        
-        // Activar el seleccionado
-        element.classList.add('active');
+        el.classList.add('active');
         document.getElementById('sec-' + section).classList.add('active');
     }
 
-    // El resto de tu lógica de Firebase aquí...
+    // Datos mi perfil
+    document.getElementById('mi-nombre-estado').innerText = localStorage.getItem("user_name") || "Mi estado";
+    document.getElementById('mi-foto-estado').src = localStorage.getItem("user_photo") || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 </script>
 </body>
 </html>
