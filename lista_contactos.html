@@ -5,58 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contactos - DNPlus</title>
     <style>
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: #0b141a; 
-            color: #e9edef; 
-        }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
+        .header-c { background-color: #085f56; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        
+        .seccion-nuevo-contacto { display: flex; align-items: center; padding: 20px 25px; gap: 20px; cursor: pointer; }
+        .icono-plus { color: #00a884; font-size: 24px; font-weight: bold; width: 40px; height: 40px; background: #00a884; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .texto-enlace { color: #e9edef; font-weight: 500; font-size: 16px; }
 
-        /* --- CABECERA --- */
-        .header-c { 
-            background-color: #085f56; 
-            color: white; 
-            padding: 15px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: sticky; 
-            top: 0; 
-            z-index: 100; 
-        }
-
-        /* --- ESTILO DE TEXTO SIMPLE (SIN BOTÓN) --- */
-        .seccion-nuevo-contacto { 
-            display: flex; 
-            align-items: center; 
-            padding: 20px 25px; /* Espaciado cómodo */
-            gap: 20px; 
-            cursor: pointer; 
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        /* Icono circular simple, pero sin parecer un botón de acción */
-        .icono-plus { 
-            color: #00a884; 
-            font-size: 24px; 
-            font-weight: bold; 
-        }
-
-        .texto-enlace { 
-            color: #00a884; 
-            font-weight: 500; 
-            font-size: 16px; 
-        }
-
-        /* --- LISTA DE CONTACTOS ABAJO --- */
-        .contact-item { 
-            display: flex; 
-            align-items: center; 
-            padding: 12px 25px; 
-            gap: 15px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .contact-item { display: flex; align-items: center; padding: 12px 25px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; }
+        .info-contact { flex: 1; }
+        .name-contact { font-weight: bold; font-size: 16px; }
+        .status-contact { color: #8696a0; font-size: 13px; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -65,7 +25,7 @@
         <span onclick="location.href='home.html'" style="font-size: 24px; cursor: pointer;">←</span>
         <div>
             <div style="font-weight: bold; font-size: 18px;">Seleccionar contacto</div>
-            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando...</div>
+            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando usuarios...</div>
         </div>
     </div>
 
@@ -74,8 +34,7 @@
         <div class="texto-enlace">Nuevo contacto</div>
     </div>
 
-    <div id="listaDinamica">
-        </div>
+    <div id="listaDinamica"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -94,31 +53,43 @@
         const db = firebase.database();
 
         window.onload = function() {
-            db.ref("contactos").on("value", (snapshot) => {
+            // CAMBIO CLAVE: Leemos de 'usuarios_registrados' para ver a la gente real
+            db.ref("usuarios_registrados").on("value", (snapshot) => {
                 const container = document.getElementById('listaDinamica');
                 const label = document.getElementById('countLabel');
                 const data = snapshot.val();
                 container.innerHTML = "";
                 
                 if (data) {
-                    const lista = Object.values(data);
-                    label.innerText = lista.length + " contactos";
-                    lista.forEach(c => {
+                    const usuarios = Object.values(data);
+                    // Filtramos para no aparecer nosotros mismos en la lista (opcional)
+                    const miNombre = localStorage.getItem("user_name");
+                    const listaFiltrada = usuarios.filter(u => u.nombre !== miNombre);
+                    
+                    label.innerText = listaFiltrada.length + " contactos";
+                    
+                    listaFiltrada.forEach(u => {
+                        const foto = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
                         container.innerHTML += `
-                            <div class="contact-item" onclick="location.href='mensajes.html?nombre=${encodeURIComponent(c.nombre)}'">
-                                <div style="width:40px; height:40px; border-radius:50%; background:#232d36; display:flex; align-items:center; justify-content:center; color:#8696a0;">${c.nombre.charAt(0)}</div>
-                                <div>
-                                    <div style="font-weight:bold">${c.nombre}</div>
-                                    <div style="color:#8696a0; font-size:13px">${c.telefono || 'Disponible'}</div>
+                            <div class="contact-item" onclick="irAlChat('${u.nombre}', '${foto}')">
+                                <img src="${foto}" class="avatar-img">
+                                <div class="info-contact">
+                                    <div class="name-contact">${u.nombre}</div>
+                                    <div class="status-contact">¡Hola! Estoy usando DNPlus</div>
                                 </div>
                             </div>`;
                     });
                 } else {
                     label.innerText = "0 contactos";
-                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay contactos</div>';
+                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">Nadie se ha registrado aún</div>';
                 }
             });
         };
+
+        function irAlChat(nombre, foto) {
+            // Al hacer clic, enviamos nombre y foto a la pantalla de mensajes
+            location.href = `mensajes.html?nombre=${encodeURIComponent(nombre)}&foto=${encodeURIComponent(foto)}`;
+        }
     </script>
 </body>
 </html>
