@@ -5,41 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificar DNPlus</title>
     <style>
-        body { 
-            background-color: #0b141a; 
-            color: #e9edef; 
-            text-align: center; 
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
+        body { background-color: #0b141a; color: #e9edef; text-align: center; font-family: sans-serif; margin: 0; padding: 20px; }
         .title { color: #e9edef; font-weight: 500; margin-top: 60px; font-size: 20px; }
         .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; line-height: 1.5; }
-        
-        /* CUADROS DE OTP */
         .otp-inputs { display: flex; justify-content: center; gap: 10px; margin: 40px 0; }
-        .otp-box {
-            width: 35px; height: 45px; border: none; border-bottom: 2px solid #00a884; 
-            text-align: center; font-size: 24px; font-weight: bold; color: #e9edef;
-            background: transparent; outline: none;
-        }
+        .otp-box { width: 35px; height: 45px; border: none; border-bottom: 2px solid #00a884; text-align: center; font-size: 24px; font-weight: bold; color: #e9edef; background: transparent; outline: none; }
         .otp-box:focus { border-bottom: 2px solid #53bdeb; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        .btn-confirmar { 
-            background-color: #085f56; color: white; padding: 12px 60px; border-radius: 30px; 
-            font-weight: bold; border: none; cursor: pointer; margin-top: 40px;
-            text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+        .btn-confirmar { background-color: #085f56; color: white; padding: 12px 60px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; margin-top: 40px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .btn-confirmar:disabled { opacity: 0.6; }
     </style>
 </head>
 <body>
-
-    <div style="margin-top: 40px;">
-        <h2 class="title">Verifica tu número</h2>
-        <p class="instruccion" id="descPhone">Introduce el código de 6 dígitos que enviamos por SMS.</p>
-    </div>
+    <h2 class="title">Verifica tu número</h2>
+    <p class="instruccion" id="descPhone">Introduce el código de 6 dígitos.</p>
 
     <div class="otp-inputs">
         <input type="number" class="otp-box" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)">
@@ -50,15 +29,12 @@
         <input type="number" class="otp-box" oninput="moveNext(this, 5)" onkeydown="moveBack(event, 5)">
     </div>
 
-    <button class="btn-confirmar" onclick="validarYEntrar()">
-        VERIFICAR
-    </button>
+    <button class="btn-confirmar" onclick="validarYEntrar()">VERIFICAR</button>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -70,55 +46,38 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         const inputs = document.querySelectorAll('.otp-box');
 
-        window.onload = function() {
+        window.onload = () => {
             const num = localStorage.getItem("user_phone");
-            if(num) document.getElementById('descPhone').innerText = "Introduce el código de 6 dígitos enviado al " + num;
+            if(num) document.getElementById('descPhone').innerText = "Código enviado al " + num;
             inputs[0].focus();
         };
 
-        function moveNext(current, index) {
-            if (current.value.length >= 1 && index < 5) {
-                inputs[index + 1].focus();
-            }
-        }
-
-        function moveBack(event, index) {
-            if (event.key === "Backspace" && inputs[index].value === "" && index > 0) {
-                inputs[index - 1].focus();
-            }
-        }
+        function moveNext(c, i) { if (c.value.length >= 1 && i < 5) inputs[i + 1].focus(); }
+        function moveBack(e, i) { if (e.key === "Backspace" && inputs[i].value === "" && i > 0) inputs[i - 1].focus(); }
 
         function validarYEntrar() {
             let code = "";
-            inputs.forEach(i => code += i.value);
-
+            inputs.forEach(input => code += input.value);
             if(code.length === 6) {
                 const btn = document.querySelector('.btn-confirmar');
                 btn.innerText = "VERIFICANDO...";
                 btn.disabled = true;
-                
-                setTimeout(() => {
-                    const phone = localStorage.getItem("user_phone") || "Desconocido";
-                    const tempId = phone.replace(/[^0-9]/g, ""); 
-                    localStorage.setItem("user_temp_id", tempId);
 
-                    db.ref("usuarios_registrados/" + tempId).update({
-                        telefono: phone,
-                        verificado: true,
-                        fechaRegistro: Date.now()
-                    }).then(() => {
-                        window.location.href = 'add_perfil.html'; 
-                    }).catch((error) => {
-                        alert("Error: " + error.message);
-                        btn.innerText = "VERIFICAR";
-                        btn.disabled = false;
-                    });
-                }, 1500);
-            } else {
-                alert("Por favor ingresa el código de 6 dígitos.");
+                const phone = localStorage.getItem("user_phone") || "Sin Numero";
+                const tempId = phone.replace(/\D/g, ""); // Solo números
+                localStorage.setItem("user_temp_id", tempId);
+
+                // CREAR USUARIO BASE
+                db.ref("usuarios_registrados/" + tempId).set({
+                    telefono: phone,
+                    nombre: "Usuario DNPlus",
+                    foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                    fecha: Date.now()
+                }).then(() => {
+                    window.location.href = 'add_perfil.html';
+                }).catch(e => { alert(e.message); btn.disabled = false; });
             }
         }
     </script>
