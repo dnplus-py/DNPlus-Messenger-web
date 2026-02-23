@@ -1,131 +1,76 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificar DNPlus</title>
-    <style>
-        body { 
-            background-color: #0b141a; 
-            color: #e9edef; 
-            text-align: center; 
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .title { color: #e9edef; font-weight: 500; margin-top: 60px; font-size: 20px; }
-        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; line-height: 1.5; }
-        
-        .otp-inputs {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin: 40px 0;
-        }
-        .otp-box {
-            width: 35px;
-            height: 45px;
-            border: none;
-            border-bottom: 2px solid #00a884; 
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #e9edef;
-            background: transparent;
-            outline: none;
-        }
-        .otp-box:focus {
-            border-bottom: 2px solid #53bdeb; 
-        }
-
-        /* Quitar flechitas del input number */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        .btn-confirmar { 
-            background-color: #085f56; /* Tu verde oficial */
-            color: white; 
-            padding: 12px 60px; 
-            border-radius: 30px; 
-            font-weight: bold; 
-            border: none; 
-            cursor: pointer;
-            margin-top: 40px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        
-        .resend-text {
-            color: #8696a0;
-            font-size: 14px;
-            margin-top: 40px;
-            display: block;
-        }
-        .resend-text span {
-            color: #00a884;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-    <div style="margin-top: 40px;">
-        <h2 class="title">Verifica tu número</h2>
-        <p class="instruccion" id="descPhone">Introduce el código de 6 dígitos que enviamos por SMS.</p>
-    </div>
-
-    <div class="otp-inputs">
-        <input type="number" class="otp-box" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)">
-        <input type="number" class="otp-box" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
-        <input type="number" class="otp-box" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
-        <input type="number" class="otp-box" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
-        <input type="number" class="otp-box" oninput="moveNext(this, 4)" onkeydown="moveBack(event, 4)">
-        <input type="number" class="otp-box" oninput="moveNext(this, 5)" onkeydown="moveBack(event, 5)">
-    </div>
-
-    <button class="btn-confirmar" onclick="validarYEntrar()">
-        VERIFICAR
-    </button>
-
-    <span class="resend-text">¿No recibiste el código? <span>Reenviar</span></span>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // 1. Configuración de tu base de datos
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            authDomain: "dnplus-messenger-pro.firebaseapp.com",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+            messagingSenderId: "625573378436",
+            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         const inputs = document.querySelectorAll('.otp-box');
 
+        // Enfocar el primer cuadro al cargar
         window.onload = function() {
-            // Mostrar el número guardado en la instrucción (opcional)
             const num = localStorage.getItem("user_phone");
             if(num) document.getElementById('descPhone').innerText = "Introduce el código de 6 dígitos enviado al " + num;
             inputs[0].focus();
         };
 
+        // Mover al siguiente cuadro al escribir
         function moveNext(current, index) {
             if (current.value.length >= 1 && index < 5) {
                 inputs[index + 1].focus();
             }
         }
 
+        // Volver atrás al borrar
         function moveBack(event, index) {
             if (event.key === "Backspace" && inputs[index].value === "" && index > 0) {
                 inputs[index - 1].focus();
             }
         }
 
+        // VALIDACIÓN Y REGISTRO REAL
         function validarYEntrar() {
             let code = "";
             inputs.forEach(i => code += i.value);
 
             if(code.length === 6) {
-                // Simulación de carga
-                document.querySelector('.btn-confirmar').innerText = "VERIFICANDO...";
+                const btn = document.querySelector('.btn-confirmar');
+                btn.innerText = "VERIFICANDO...";
+                btn.disabled = true; // Evita múltiples clics
                 
                 setTimeout(() => {
-                    // Redirigir a la creación de perfil
-                    window.location.href = 'add_perfil.html'; 
+                    const phone = localStorage.getItem("user_phone") || "Desconocido";
+                    // Usamos el número sin símbolos como ID único
+                    const tempId = phone.replace(/[^0-9]/g, ""); 
+                    localStorage.setItem("user_temp_id", tempId);
+
+                    // GUARDAR EN FIREBASE
+                    db.ref("usuarios_registrados/" + tempId).update({
+                        telefono: phone,
+                        verificado: true,
+                        fechaRegistro: Date.now()
+                    }).then(() => {
+                        // Ir a la siguiente pantalla
+                        window.location.href = 'add_perfil.html'; 
+                    }).catch((error) => {
+                        alert("Error de conexión: " + error.message);
+                        btn.innerText = "VERIFICAR";
+                        btn.disabled = false;
+                    });
+
                 }, 1500);
             } else {
-                alert("Por favor ingresa el código completo.");
+                alert("Por favor ingresa el código de 6 dígitos.");
             }
         }
     </script>
