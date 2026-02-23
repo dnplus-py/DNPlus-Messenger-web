@@ -24,89 +24,63 @@
             top: 0; 
             z-index: 100; 
         }
-        .header-c span { 
+
+        /* --- ESTILO DE TEXTO SIMPLE (SIN BOTÓN) --- */
+        .seccion-nuevo-contacto { 
+            display: flex; 
+            align-items: center; 
+            padding: 20px 25px; /* Espaciado cómodo */
+            gap: 20px; 
+            cursor: pointer; 
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Icono circular simple, pero sin parecer un botón de acción */
+        .icono-plus { 
+            color: #00a884; 
             font-size: 24px; 
-            cursor: pointer; 
-        }
-
-        /* --- FILAS DE CONTACTO --- */
-        .contact-row { 
-            display: flex; 
-            align-items: center; 
-            padding: 12px 20px; 
-            gap: 15px; 
-            border-bottom: 1px solid rgba(134, 150, 160, 0.1); 
-            cursor: pointer; 
-        }
-        .contact-row:active {
-            background-color: #202c33;
-        }
-
-        .img-avatar { 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 50%; 
-            background-color: #232d36; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: #8696a0; 
             font-weight: bold; 
-            font-size: 18px; 
-            overflow: hidden;
-        }
-        .img-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
-        .contact-name { 
+        .texto-enlace { 
+            color: #00a884; 
             font-weight: 500; 
             font-size: 16px; 
-            color: #e9edef; 
-        }
-        .contact-status { 
-            font-size: 13px; 
-            color: #8696a0; 
         }
 
-        /* --- BOTÓN NUEVO CONTACTO --- */
-        .btn-new-contact { 
-            color: #00a884; 
-            font-weight: bold; 
-            font-size: 16px; 
-        }
-
-        #listaDinamica {
-            padding-bottom: 20px;
+        /* --- LISTA DE CONTACTOS ABAJO --- */
+        .contact-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 25px; 
+            gap: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
     </style>
 </head>
 <body>
 
     <div class="header-c">
-        <span onclick="location.href='home.html'">←</span>
+        <span onclick="location.href='home.html'" style="font-size: 24px; cursor: pointer;">←</span>
         <div>
             <div style="font-weight: bold; font-size: 18px;">Seleccionar contacto</div>
             <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando...</div>
         </div>
     </div>
 
-    <div class="contact-row" onclick="location.href='add_contacto.html'">
-        <div class="img-avatar" style="background-color: #00a884; color: white; font-size: 22px;">
-            <span>+</span>
-        </div>
-        <div class="btn-new-contact">Nuevo contacto</div>
+    <div class="seccion-nuevo-contacto" onclick="location.href='crear_new_contact.html'">
+        <div class="icono-plus">+</div>
+        <div class="texto-enlace">Nuevo contacto</div>
     </div>
 
-    <div id="listaDinamica"></div>
+    <div id="listaDinamica">
+        </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Tu configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -116,54 +90,35 @@
             messagingSenderId: "625573378436",
             appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         window.onload = function() {
-            escucharContactos();
-        };
-
-        function escucharContactos() {
-            const container = document.getElementById('listaDinamica');
-            const label = document.getElementById('countLabel');
-            
-            // Leemos de la carpeta "contactos"
             db.ref("contactos").on("value", (snapshot) => {
+                const container = document.getElementById('listaDinamica');
+                const label = document.getElementById('countLabel');
                 const data = snapshot.val();
                 container.innerHTML = "";
                 
-                if (!data) {
+                if (data) {
+                    const lista = Object.values(data);
+                    label.innerText = lista.length + " contactos";
+                    lista.forEach(c => {
+                        container.innerHTML += `
+                            <div class="contact-item" onclick="location.href='mensajes.html?nombre=${encodeURIComponent(c.nombre)}'">
+                                <div style="width:40px; height:40px; border-radius:50%; background:#232d36; display:flex; align-items:center; justify-content:center; color:#8696a0;">${c.nombre.charAt(0)}</div>
+                                <div>
+                                    <div style="font-weight:bold">${c.nombre}</div>
+                                    <div style="color:#8696a0; font-size:13px">${c.telefono || 'Disponible'}</div>
+                                </div>
+                            </div>`;
+                    });
+                } else {
                     label.innerText = "0 contactos";
-                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No tienes contactos aún</div>';
-                    return;
+                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay contactos</div>';
                 }
-
-                const lista = Object.values(data);
-                label.innerText = lista.length + " contactos";
-
-                lista.forEach(c => {
-                    const row = document.createElement('div');
-                    row.className = 'contact-row';
-                    
-                    // Al tocar un contacto, vamos a la pantalla de chat
-                    row.onclick = function() {
-                        window.location.href = 'mensajes.html?nombre=' + encodeURIComponent(c.nombre);
-                    };
-
-                    const inicial = (c.nombre) ? c.nombre.charAt(0).toUpperCase() : "?";
-                    
-                    row.innerHTML = `
-                        <div class="img-avatar">${inicial}</div>
-                        <div style="flex: 1;">
-                            <div class="contact-name">${c.nombre}</div>
-                            <div class="contact-status">${c.telefono || 'Disponible'}</div>
-                        </div>
-                    `;
-                    container.appendChild(row);
-                });
             });
-        }
+        };
     </script>
 </body>
 </html>
