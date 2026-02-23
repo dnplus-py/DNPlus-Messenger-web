@@ -7,37 +7,37 @@
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
         .header-c { background-color: #085f56; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100; }
-        .seccion-nuevo-contacto { display: flex; align-items: center; padding: 20px 25px; gap: 20px; cursor: pointer; }
-        .icono-plus { width: 40px; height: 40px; background: #00a884; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .texto-enlace { color: #e9edef; font-weight: 500; font-size: 16px; }
-        .contact-item { display: flex; align-items: center; padding: 12px 25px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        
+        /* Estilo para los ítems de contacto */
+        .contact-item { display: flex; align-items: center; padding: 12px 25px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; }
+        .contact-item:active { background-color: #202c33; }
+        
         .avatar-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; }
         .info-contact { flex: 1; }
-        .name-contact { font-weight: bold; font-size: 16px; }
+        .name-contact { font-weight: bold; font-size: 16px; color: #e9edef; }
         .status-contact { color: #8696a0; font-size: 13px; margin-top: 2px; }
+
+        .btn-volver { font-size: 24px; cursor: pointer; text-decoration: none; color: white; }
     </style>
 </head>
 <body>
 
     <div class="header-c">
-        <span onclick="location.href='home.html'" style="font-size: 24px; cursor: pointer;">←</span>
+        <div class="btn-volver" onclick="window.location.href='home.html'">←</div>
         <div>
             <div style="font-weight: bold; font-size: 18px;">Seleccionar contacto</div>
-            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando...</div>
+            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Buscando usuarios...</div>
         </div>
     </div>
 
-    <div class="seccion-nuevo-contacto">
-        <div class="icono-plus">+</div>
-        <div class="texto-enlace">Nuevo contacto</div>
-    </div>
-
-    <div id="listaDinamica"></div>
+    <div id="listaDinamica">
+        </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // CONFIGURACIÓN DE TU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -51,8 +51,10 @@
         const db = firebase.database();
 
         window.onload = function() {
+            // Obtenemos tu propio ID para no mostrarte a ti mismo en la lista
             const miId = localStorage.getItem("user_temp_id");
 
+            // Escuchar cambios en la carpeta de usuarios
             db.ref("usuarios_registrados").on("value", (snapshot) => {
                 const container = document.getElementById('listaDinamica');
                 const label = document.getElementById('countLabel');
@@ -60,11 +62,12 @@
                 
                 if (snapshot.exists()) {
                     let contador = 0;
+                    
                     snapshot.forEach((childSnapshot) => {
-                        const u = childSnapshot.val();
                         const userId = childSnapshot.key;
+                        const u = childSnapshot.val();
 
-                        // No te muestras a ti mismo en la lista
+                        // IMPORTANTE: Solo mostrar si NO es mi propio ID
                         if (userId !== miId) {
                             contador++;
                             const nombre = u.nombre || "Usuario de DNPlus";
@@ -81,21 +84,43 @@
                                 </div>`;
                         }
                     });
+
                     label.innerText = contador + " contactos";
+                    
+                    if(contador === 0) {
+                        container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay otros usuarios registrados aún</div>';
+                    }
+
                 } else {
                     label.innerText = "0 contactos";
                     container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">Nadie se ha registrado aún</div>';
                 }
+            }, (error) => {
+                console.error("Error al leer Firebase:", error);
+                label.innerText = "Error al cargar";
             });
         };
 
-        function irAlChat(id, nombre, foto) {
-            // Guardamos los datos del receptor para que la pantalla de chat sepa con quién hablas
-            localStorage.setItem("chat_destinatario_id", id);
+        function irAlChat(idDestino, nombre, foto) {
+            const miId = localStorage.getItem("user_temp_id");
+            
+            if(!miId) {
+                alert("Error: No se encontró tu ID de usuario. Por favor, regístrate de nuevo.");
+                return;
+            }
+
+            // CREACIÓN DE SALA PRIVADA (Chat de dos)
+            // Combinamos los IDs ordenados alfabéticamente para que la sala sea ÚNICA entre los dos
+            const salaId = miId < idDestino ? `${miId}_${idDestino}` : `${idDestino}_${miId}`;
+            
+            // Guardamos la info necesaria para la pantalla de mensajes
+            localStorage.setItem("chat_sala_id", salaId);
+            localStorage.setItem("chat_destinatario_id", idDestino);
             localStorage.setItem("chat_destinatario_nombre", nombre);
             localStorage.setItem("chat_destinatario_foto", foto);
             
-            location.href = "mensajes.html";
+            // Redirigir a la pantalla de chat
+            window.location.href = "mensajes.html";
         }
     </script>
 </body>
