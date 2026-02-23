@@ -3,72 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Chat</title>
+    <title>DNPlus Chat Privado</title>
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
         
-        /* CABECERA CORREGIDA */
-        .header { background-color: #085f56; height: 65px; padding: 0 15px; display: flex; align-items: center; gap: 12px; color: white; z-index: 100; }
-        .header-info { display: flex; flex-direction: column; }
-        .header-info .nombre { font-size: 17px; font-weight: bold; }
-        .header-info .estado { font-size: 12px; opacity: 0.9; }
+        /* CABECERA CON FOTO REAL */
+        .header { background-color: #085f56; height: 65px; padding: 0 15px; display: flex; align-items: center; gap: 10px; color: white; z-index: 100; }
+        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; background: #232d36; }
+        .header-info { display: flex; flex-direction: column; flex: 1; }
+        .header-info .nombre { font-size: 16px; font-weight: bold; }
+        .header-info .estado { font-size: 11px; opacity: 0.8; }
 
         #chat-box { 
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; 
+            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             background-color: #0b141a; background-blend-mode: overlay;
         }
 
-        /* BURBUJAS */
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; position: relative; font-size: 15px; cursor: pointer; }
+        /* BURBUJAS CON HORA */
+        .msg { padding: 6px 10px; border-radius: 10px; max-width: 75%; position: relative; font-size: 15px; display: flex; flex-direction: column; }
         .msg-mio { align-self: flex-end; background-color: #176f47; border-bottom-right-radius: 2px; }
         .msg-otro { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
+        .hora-msg { font-size: 10px; align-self: flex-end; margin-top: 4px; opacity: 0.6; }
 
-        /* AUDIO WA ACTUAL (270x65) */
-        .audio-msg-container { width: 270px; height: 65px; display: flex; align-items: center; padding: 0 10px; gap: 8px; }
-        .audio-controls { font-size: 30px; cursor: pointer; color: #8696a0; }
-        .audio-visual { flex: 1; height: 25px; opacity: 0.5; filter: invert(1); }
-        .audio-avatar { width: 45px; height: 45px; border-radius: 50%; border: 1.5px solid #00a884; }
-
-        /* FOTO 240x180 */
-        .img-wrapper { width: 240px; height: 180px; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        /* FOTOS */
+        .img-wrapper { width: 230px; height: 170px; overflow: hidden; border-radius: 8px; }
         .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
         /* FOOTER */
-        .footer { background-color: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        .input-area { flex: 1; background-color: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 5px 15px; min-height: 45px; }
+        .footer { background-color: #1f2c33; padding: 8px; display: flex; align-items: center; gap: 8px; }
+        .input-area { flex: 1; background-color: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; min-height: 45px; }
         input { flex: 1; background: transparent; border: none; padding: 10px; color: white; outline: none; font-size: 16px; }
-        #crono { color: #ff4b4b; font-weight: bold; margin-left: 10px; display: none; }
+        #crono { color: #ff4b4b; font-weight: bold; display: none; margin-right: 10px; }
 
-        .btn-accion { background-color: #00a884; border: none; width: 50px; height: 50px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+        .btn-accion { background-color: #00a884; border: none; width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
 
-        /* MODAL OPCIONES */
-        #opciones-modal { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; padding: 15px 0; border-radius: 20px 20px 0 0; z-index: 1000; }
-        .opcion-btn { padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-size: 16px; cursor: pointer; color: #e9edef; }
-        .opcion-btn:active { background: #2a3942; }
-
-        /* ZOOM */
-        #zoom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; }
+        /* MODALES */
+        #opciones-modal { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; padding: 10px 0; border-radius: 20px 20px 0 0; z-index: 1000; }
+        .opcion-btn { padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-size: 16px; cursor: pointer; color: white; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="window.history.back()" style="cursor:pointer; font-size: 22px;">←</span>
+        <span onclick="window.location.href='lista_contactos.html'" style="cursor:pointer; font-size: 20px;">←</span>
+        <img id="header-foto" class="avatar-header" onclick="irAPerfil()">
         <div class="header-info">
-            <span class="nombre" id="chat-nombre">Cargando...</span>
+            <span class="nombre" id="chat-nombre">...</span>
             <span class="estado" id="chat-estado">en línea</span>
         </div>
+        <span style="font-size: 20px; cursor:pointer;">⋮</span>
     </div>
 
     <div id="chat-box"></div>
 
     <div class="footer">
         <div class="input-area">
-            <span style="font-size: 22px; cursor: pointer; color: #8696a0;">😊</span>
+            <span style="font-size: 20px;">😊</span>
             <input type="text" id="msg-input" placeholder="Mensaje" oninput="detectarEscribiendo()">
             <span id="crono">0:00</span>
-            <span id="clip" onclick="document.getElementById('file-input').click()" style="font-size: 22px; cursor: pointer; color: #8696a0; transform: rotate(-45deg); margin-left: 10px;">📎</span>
+            <span onclick="document.getElementById('file-input').click()" style="font-size: 20px; cursor: pointer; transform: rotate(-45deg);">📎</span>
         </div>
         <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="enviarImagen(event)">
         <button class="btn-accion" id="btn-main" onmousedown="iniciarGrabacion()" onmouseup="finalizarGrabacion()">🎙️</button>
@@ -77,10 +71,7 @@
     <div id="opciones-modal" onclick="cerrarModal()">
         <div class="opcion-btn" id="btn-borrar" style="color: #ff4b4b;">🗑️ Borrar para todos</div>
         <div class="opcion-btn">↩️ Responder</div>
-        <div class="opcion-btn">➡️ Reenviar</div>
     </div>
-
-    <div id="zoom-modal" onclick="this.style.display='none'"><img id="img-zoom" style="max-width:95%; max-height:80%;"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -98,56 +89,77 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const nombreContacto = urlParams.get('nombre') || "Contacto";
-    document.getElementById('chat-nombre').innerText = nombreContacto;
-    const miNombre = localStorage.getItem("user_name") || "David";
+    // DATOS DE LA SESIÓN
+    const miId = localStorage.getItem("user_temp_id");
+    const salaId = localStorage.getItem("chat_sala_id");
+    const destNombre = localStorage.getItem("chat_destinatario_nombre");
+    const destFoto = localStorage.getItem("chat_destinatario_foto");
 
-    // CARGAR CHAT REAL
-    db.ref("mensajes").on("value", (snap) => {
+    document.getElementById('chat-nombre').innerText = destNombre;
+    document.getElementById('header-foto').src = destFoto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    // CARGAR MENSAJES PRIVADOS
+    db.ref("chats_privados/" + salaId).on("value", (snap) => {
         const chatBox = document.getElementById('chat-box');
         chatBox.innerHTML = "";
         snap.forEach(child => {
             const m = child.val();
-            renderizar(m.contenido, m.remitente, m.tipo, child.key);
+            const hora = new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            renderizar(m.contenido, m.emisor, m.tipo, child.key, hora);
         });
         chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-    function renderizar(cont, rem, tipo, key) {
+    function renderizar(cont, emisor, tipo, key, hora) {
         const chat = document.getElementById('chat-box');
         const div = document.createElement('div');
-        div.className = (rem === miNombre) ? "msg msg-mio" : "msg msg-otro";
-        div.onclick = () => abrirOpciones(key);
+        div.className = (emisor === miId) ? "msg msg-mio" : "msg msg-otro";
+        div.oncontextmenu = (e) => { e.preventDefault(); abrirOpciones(key); };
 
-        if (tipo === "audio") {
-            div.style.background = (rem === miNombre) ? "#176f47" : "#202c33";
-            div.style.padding = "0";
-            div.innerHTML = `
-                <div class="audio-msg-container">
-                    <span class="audio-controls" onclick="event.stopPropagation(); playAudio('${cont}')">▶️</span>
-                    <img class="audio-visual" src="https://www.whatsapp.com/img/visualizer.png">
-                    <img class="audio-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                </div>`;
-        } else if (tipo === "imagen") {
-            div.innerHTML = `<div class="img-wrapper" onclick="event.stopPropagation(); verZoom('${cont}')"><img src="${cont}"></div>`;
+        if (tipo === "imagen") {
+            div.innerHTML = `<div class="img-wrapper"><img src="${cont}"></div><span class="hora-msg">${hora}</span>`;
+        } else if (tipo === "audio") {
+            div.innerHTML = `<div onclick="new Audio('${cont}').play()">🎵 Audio 📱</div><span class="hora-msg">${hora}</span>`;
         } else {
-            div.innerText = cont;
+            div.innerHTML = `<span>${cont}</span><span class="hora-msg">${hora}</span>`;
         }
         chat.appendChild(div);
     }
 
-    // GRABACIÓN REAL
+    function enviarTexto() {
+        const input = document.getElementById('msg-input');
+        if(input.value.trim()){
+            db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: input.value, tipo: "texto", fecha: Date.now() });
+            input.value = "";
+            detectarEscribiendo();
+        }
+    }
+
+    function enviarImagen(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: e.target.result, tipo: "imagen", fecha: Date.now() });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // GRABACIÓN CON CRONÓMETRO ARREGLADO
     let mediaRecorder;
     let audioChunks = [];
+    let interval;
     function iniciarGrabacion() {
         if(document.getElementById('msg-input').value) return;
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.start();
-            new Audio('https://www.soundjay.com/buttons/beep-07a.mp3').play();
             document.getElementById('msg-input').style.display = 'none';
             document.getElementById('crono').style.display = 'inline';
+            let seg = 0;
+            interval = setInterval(() => { 
+                seg++; 
+                document.getElementById('crono').innerText = `0:${seg < 10 ? '0'+seg : seg}`;
+            }, 1000);
             audioChunks = [];
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         });
@@ -155,37 +167,28 @@
 
     function finalizarGrabacion() {
         if(!mediaRecorder) { enviarTexto(); return; }
+        clearInterval(interval);
         mediaRecorder.stop();
         document.getElementById('msg-input').style.display = 'block';
         document.getElementById('crono').style.display = 'none';
+        document.getElementById('crono').innerText = "0:00";
         mediaRecorder.onstop = () => {
             const blob = new Blob(audioChunks, { type: 'audio/mp3' });
             const reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onloadend = () => {
-                db.ref("mensajes").push({ remitente: miNombre, contenido: reader.result, tipo: "audio", fecha: Date.now() });
+                db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: reader.result, tipo: "audio", fecha: Date.now() });
             };
         };
         mediaRecorder = null;
     }
 
-    function enviarTexto() {
-        const input = document.getElementById('msg-input');
-        if(input.value.trim()){
-            db.ref("mensajes").push({ remitente: miNombre, contenido: input.value, tipo: "texto", fecha: Date.now() });
-            input.value = "";
-            detectarEscribiendo();
-        }
-    }
+    function irAPerfil() { window.location.href = 'perfil_de_otro.html'; }
 
-    function verZoom(src) { document.getElementById('img-zoom').src = src; document.getElementById('zoom-modal').style.display = 'flex'; }
-    function playAudio(url) { new Audio(url).play(); }
-
-    // MODAL BORRAR REAL
-    let idParaBorrar = null;
-    function abrirOpciones(key) { idParaBorrar = key; document.getElementById('opciones-modal').style.display = 'block'; }
+    let idBorrar = null;
+    function abrirOpciones(key) { idBorrar = key; document.getElementById('opciones-modal').style.display = 'block'; }
     function cerrarModal() { document.getElementById('opciones-modal').style.display = 'none'; }
-    document.getElementById('btn-borrar').onclick = () => { db.ref("mensajes").child(idParaBorrar).remove(); cerrarModal(); };
+    document.getElementById('btn-borrar').onclick = () => { db.ref("chats_privados/" + salaId).child(idBorrar).remove(); cerrarModal(); };
 
     function detectarEscribiendo() {
         const input = document.getElementById('msg-input');
