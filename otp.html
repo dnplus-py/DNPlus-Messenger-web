@@ -5,20 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificar DNPlus</title>
     <style>
-        body { background-color: #0b141a; color: #e9edef; text-align: center; font-family: sans-serif; margin: 0; padding: 20px; }
-        .title { color: #e9edef; font-weight: 500; margin-top: 60px; font-size: 20px; }
-        .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; line-height: 1.5; }
+        body { background-color: #0b141a; color: #e9edef; text-align: center; font-family: sans-serif; padding: 20px; }
         .otp-inputs { display: flex; justify-content: center; gap: 10px; margin: 40px 0; }
         .otp-box { width: 35px; height: 45px; border: none; border-bottom: 2px solid #00a884; text-align: center; font-size: 24px; font-weight: bold; color: #e9edef; background: transparent; outline: none; }
-        .otp-box:focus { border-bottom: 2px solid #53bdeb; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .btn-confirmar { background-color: #085f56; color: white; padding: 12px 60px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; margin-top: 40px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-confirmar:disabled { opacity: 0.6; }
+        .btn-confirmar { background-color: #085f56; color: white; padding: 12px 60px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <h2 class="title">Verifica tu número</h2>
-    <p class="instruccion" id="descPhone">Introduce el código de 6 dígitos.</p>
+    <h2 style="margin-top:60px">Verifica tu número</h2>
+    <p id="descPhone" style="color:#8696a0">Introduce el código de 6 dígitos.</p>
 
     <div class="otp-inputs">
         <input type="number" class="otp-box" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)">
@@ -63,21 +58,21 @@
             if(code.length === 6) {
                 const btn = document.querySelector('.btn-confirmar');
                 btn.innerText = "VERIFICANDO...";
-                btn.disabled = true;
-
-                const phone = localStorage.getItem("user_phone") || "Sin Numero";
-                const tempId = phone.replace(/\D/g, ""); // Solo números
+                
+                const phone = localStorage.getItem("user_phone") || "";
+                // CLAVE: El ID debe ser solo números para que no falle la ruta en Firebase
+                const tempId = phone.replace(/\D/g, ""); 
                 localStorage.setItem("user_temp_id", tempId);
 
-                // CREAR USUARIO BASE
+                // CREAR USUARIO CON SET (Obliga a que existan los campos)
                 db.ref("usuarios_registrados/" + tempId).set({
                     telefono: phone,
-                    nombre: "Usuario DNPlus",
+                    nombre: "Usuario Nuevo",
                     foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
                     fecha: Date.now()
                 }).then(() => {
                     window.location.href = 'add_perfil.html';
-                }).catch(e => { alert(e.message); btn.disabled = false; });
+                }).catch(e => { alert(e.message); btn.innerText = "VERIFICAR"; });
             }
         }
     </script>
