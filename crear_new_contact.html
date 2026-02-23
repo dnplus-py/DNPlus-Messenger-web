@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear contacto</title>
+    <style>
+        body { background-color: #0b141a; color: white; font-family: sans-serif; text-align: center; margin: 0; }
+        
+        /* Encabezado solicitado */
+        .header { background-color: #075e54; padding: 15px; text-align: left; font-size: 19px; display: flex; align-items: center; gap: 15px; font-weight: bold; }
+        
+        .container { padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Estilo de la foto de contacto */
+        .foto-wrapper {
+            width: 140px; height: 140px;
+            background: #202c33;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid #075e54;
+        }
+        #imgPerfil { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .btn-camara {
+            position: absolute; bottom: 5px; right: 5px;
+            background: #00a884; border-radius: 50%; width: 35px; height: 35px; 
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Campos de texto */
+        .input-group { width: 90%; margin-top: 20px; text-align: left; }
+        .input-group label { color: #00a884; font-size: 14px; margin-left: 10px; }
+        
+        input, select {
+            background: transparent; border: none; border-bottom: 2px solid #00a884;
+            color: white; width: 100%; padding: 10px; font-size: 16px; outline: none;
+            margin-bottom: 15px;
+        }
+        select option { background-color: #0b141a; }
+
+        /* Botón Guardar con medida exacta: 50dp (px) x 230dp (px) */
+        .btn-save {
+            background: #00a884; color: white; border: none; 
+            height: 50px; width: 230px; 
+            border-radius: 25px; font-weight: bold; margin-top: 40px;
+            cursor: pointer; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span onclick="window.history.back()" style="cursor:pointer;">←</span>
+        <span>Crear contacto</span>
+    </div>
+
+    <div class="container">
+        <div class="foto-wrapper" onclick="document.getElementById('selector').click()">
+            <img id="imgPerfil" src="https://www.w3schools.com/howto/img_avatar.png">
+            <div class="btn-camara">📷</div>
+        </div>
+        <input type="file" id="selector" style="display:none" accept="image/*" onchange="cambiarFoto(event)">
+
+        <div class="input-group">
+            <label>Elegir País</label>
+            <select id="pais">
+                <option value="+595">Paraguay (+595)</option>
+                <option value="+54">Argentina (+54)</option>
+                <option value="+55">Brasil (+55)</option>
+                <option value="+34">España (+34)</option>
+                <option value="+1">EE.UU. (+1)</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Nombre y Apellido</label>
+            <input type="text" id="nombreContact" placeholder="Ej: Juan Pérez">
+        </div>
+
+        <div class="input-group">
+            <label>Número de teléfono</label>
+            <input type="text" id="telContact" placeholder="09xx xxx xxx">
+        </div>
+
+        <button class="btn-save" onclick="guardarContacto()">Guardar</button>
+    </div>
+
+    <script>
+        function cambiarFoto(e) {
+            const archivo = e.target.files[0];
+            if (archivo) {
+                const leer = new FileReader();
+                leer.onload = (res) => document.getElementById('imgPerfil').src = res.target.result;
+                leer.readAsDataURL(archivo);
+            }
+        }
+
+        function guardarContacto() {
+            const nombre = document.getElementById('nombreContact').value.trim();
+            const tel = document.getElementById('telContact').value.trim();
+            const pais = document.getElementById('pais').value;
+
+            if (nombre && tel) {
+                // Aquí iría tu lógica de Firebase para guardar el contacto
+                alert("Contacto guardado: " + nombre + " (" + pais + " " + tel + ")");
+                window.location.href = "home.html";
+            } else {
+                alert("Completa los campos de nombre y teléfono.");
+            }
+        }
+    </script>
+</body>
+</html>
