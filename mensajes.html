@@ -2,70 +2,93 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>DNPlus Messenger</title>
     <link rel="stylesheet" href="estilos_chat.css">
+    <style>
+        /* RESET TOTAL PARA QUE LA CABECERA PEGUE A LOS BORDES */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #0b141a;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Contenedores para las partes externas */
+        #zona-cabecera { width: 100%; z-index: 1000; }
+        #zona-input { width: 100%; z-index: 1000; }
+
+        #chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-size: contain;
+        }
+
+        /* Estilo del Modal (Debe estar aquí, no en la cabecera) */
+        .modal-bottom {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #232d36;
+            border-radius: 20px 20px 0 0;
+            z-index: 5000;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+            padding: 15px 0;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="main-container" style="display: flex; flex-direction: column; height: 100vh; overflow: hidden;">
-        <div id="zona-cabecera"></div>
+    <div id="zona-cabecera"></div>
 
-        <div id="chat-box" style="flex: 1; overflow-y: auto;"></div>
+    <div id="chat-box"></div>
 
-        <div id="zona-input"></div>
-    </div>
+    <div id="zona-input"></div>
 
-    <div id="modal-opciones" class="modal-bottom" style="display:none;">
-        <div class="menu-item" onclick="confirmarVaciarChat()"><span>🗑️</span> Vaciar chat</div>
-        <div class="menu-item" onclick="abrirSelectorFondo()"><span>🖼️</span> Fondo de pantalla</div>
+    <div id="modal-opciones" class="modal-bottom">
+        <div style="padding: 10px 20px; color: white; border-bottom: 1px solid #313d45; font-weight: bold;">Opciones</div>
+        <div class="menu-item" style="padding:15px 25px; color:white; cursor:pointer;" onclick="confirmarVaciarChat()">🗑️ Vaciar chat</div>
+        <div class="menu-item" style="padding:15px 25px; color:white; cursor:pointer;" onclick="abrirSelectorFondo()">🖼️ Fondo de pantalla</div>
         <div style="text-align:center; color:#ff4444; padding:15px; cursor:pointer;" onclick="cerrarModales()">Cancelar</div>
-    </div>
-
-    <div id="modal-colores" class="modal-bottom" style="display:none;">
-        <div style="text-align:center; padding:20px;">
-            <div class="color-circle" style="background:#0b141a" onclick="cambiarFondo('#0b141a')"></div>
-            <div class="color-circle" style="background:#176f47" onclick="cambiarFondo('#176f47')"></div>
-            <div class="color-circle" style="background:#075e54" onclick="cambiarFondo('#075e54')"></div>
-            <div class="color-circle" style="background:#3e2723" onclick="cambiarFondo('#3e2723')"></div>
-        </div>
-        <div style="text-align:center; padding:15px; color:white; cursor:pointer;" onclick="cerrarModales()">Volver</div>
-    </div>
-
-    <div id="visor" style="display:none;" onclick="this.style.display='none'">
-        <img id="img-zoom">
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
     <script>
-        // Configuración Firebase
         const firebaseConfig = { 
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", 
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" 
         };
         firebase.initializeApp(firebaseConfig);
 
-        // ENSAMBLADOR: Carga los archivos HTML hijos
-        async function cargarPartes() {
+        async function ensamblar() {
+            // Carga Cabecera
             const h = await fetch('cabecera_chat.html');
             document.getElementById('zona-cabecera').innerHTML = await h.text();
 
+            // Carga Input
             const i = await fetch('barra_input.html');
             document.getElementById('zona-input').innerHTML = await i.text();
             
-            // Vincular eventos de audio tras cargar el HTML
-            const btn = document.getElementById('btn-main');
-            if(btn) {
-                btn.onmousedown = iniciarGrabacion;
-                btn.onmouseup = detenerGrabacion;
+            // Re-vincular botones si es necesario
+            if(typeof iniciarGrabacion === 'function') {
+                const btn = document.getElementById('btn-main');
+                if(btn) {
+                    btn.onmousedown = iniciarGrabacion;
+                    btn.onmouseup = detenerGrabacion;
+                }
             }
         }
-        cargarPartes();
+        ensamblar();
     </script>
-
     <script src="chat_logic.js"></script>
-
 </body>
 </html>
