@@ -8,40 +8,31 @@
 </head>
 <body>
 
-    <div id="main-container">
-        <div id="header-container"></div>
-
-        <div id="chat-box"></div>
-
-        <div id="input-container"></div>
-    </div>
-
-    <div id="visor" onclick="this.style.display='none'"><img id="img-zoom"></div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
-    <script>
-        // Configuración Firebase (Pieza fundamental)
-        const firebaseConfig = { 
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", 
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" 
-        };
-        firebase.initializeApp(firebaseConfig);
+<div id="modal-opciones" class="modal-bottom">
+    <div style="padding: 10px 0;">
+        <div class="menu-item" onclick="confirmarVaciarChat()">
+            <span>🗑️</span> Vaciar chat
+        </div>
+        
+        <div class="menu-item" onclick="abrirSelectorFondo()">
+            <span>🖼️</span> Fondo de pantalla
+        </div>
+    </div>
+    <div style="text-align:center; color:#ff4444; padding:15px; border-top:1px solid #313d45;" onclick="cerrarModal()">
+        Cancelar
+    </div>
+</div>
 
-        // FUNCIÓN PARA JUNTAR LAS PARTES
-        async function cargarPartes() {
-            // Cargamos el HTML de la cabecera
-            const resHeader = await fetch('cabecera_chat.html');
-            document.getElementById('header-container').innerHTML = await resHeader.text();
-
-            // Cargamos el HTML de la barra de mensajes
-            const resInput = await fetch('barra_input.html');
-            document.getElementById('input-container').innerHTML = await resInput.text();
-
-            // Una vez cargado todo, activamos los eventos del micro y mensajes
-            iniciarLogicaChat(); 
-        }
+<div id="modal-colores" class="modal-bottom">
+    <div style="text-align:center; padding:10px;">
+        <div class="color-circle" style="background:#0b141a" onclick="cambiarFondo('#0b141a')"></div>
+        <div class="color-circle" style="background:#176f47" onclick="cambiarFondo('#176f47')"></div>
+        <div class="color-circle" style="background:#075e54" onclick="cambiarFondo('#075e54')"></div>
+        <div class="color-circle" style="background:#3e2723" onclick="cambiarFondo('#3e2723')"></div>
+    </div>
+    <div style="text-align:center; padding:15px;" onclick="cerrarModales()">Volver</div>
+</div>
 
         cargarPartes();
     </script>
