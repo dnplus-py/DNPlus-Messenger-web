@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNPlus - Vincular Correo</title>
+    <link rel="stylesheet" href="estilos_chat.css">
+    <style>
+        body {
+            background-color: #0b141a;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .icon-mail {
+            font-size: 50px;
+            color: #176F47;
+            margin-bottom: 20px;
+        }
+
+        h2 { margin-bottom: 10px; font-size: 22px; }
+        p { color: #8696a0; font-size: 14px; margin-bottom: 30px; }
+
+        .input-group {
+            background: #202c33;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #176F47;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .btn-enviar {
+            background-color: #176F47;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(23, 111, 71, 0.3);
+            transition: 0.3s;
+        }
+
+        .btn-enviar:active { transform: scale(0.98); background-color: #0f5235; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="icon-mail">📧</div>
+        <h2>Añade tu correo</h2>
+        <p>Te enviaremos un código de 6 dígitos para verificar tu cuenta de DNPlus.</p>
+
+        <div class="input-group">
+            <input type="email" id="user-email" placeholder="ejemplo@gmail.com" required>
+        </div>
+
+        <button class="btn-enviar" onclick="procesarEnvio()">ENVIAR CÓDIGO</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <script>
+        // Inicializar EmailJS (Debes crear cuenta en emailjs.com para tener tu ID)
+        (function() {
+            emailjs.init("TU_USER_ID_AQUI"); 
+        })();
+
+        function procesarEnvio() {
+            const email = document.getElementById('user-email').value;
+            
+            if (!email.includes("@")) {
+                alert("Por favor, ingresa un correo válido");
+                return;
+            }
+
+            // 1. Generar código de 6 dígitos
+            const codigoOTP = Math.floor(100000 + Math.random() * 900000);
+            
+            // 2. Guardar temporalmente en localStorage para validar en otp.html
+            localStorage.setItem("codigo_verificacion", codigoOTP);
+            localStorage.setItem("email_usuario", email);
+
+            // 3. Simular el envío (Aquí conectarías con EmailJS o tu API)
+            console.log("Enviando código " + codigoOTP + " a " + email);
+            
+            alert("Código enviado con éxito!");
+
+            // 4. Saltar directo a otp.html sin preguntar
+            window.location.href = "otp.html";
+        }
+    </script>
+</body>
+</html>
