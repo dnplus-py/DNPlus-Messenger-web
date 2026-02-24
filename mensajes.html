@@ -3,233 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNPlus Pro - David Oviedo</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
+        :root { --header: #075e54; --fondo: #0b141a; --mio: #005c4b; --otro: #202c33; --verde: #00a884; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--fondo); display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
         
         /* CABECERA */
-        .header { background-color: #085f56; height: 65px; padding: 0 15px; display: flex; align-items: center; gap: 10px; z-index: 100; }
-        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; }
+        .header { background: var(--header); height: 60px; padding: 0 15px; display: flex; align-items: center; gap: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; border: 1px solid rgba(255,255,255,0.2); }
         .header-info { flex: 1; }
-        .header-info .nombre { font-size: 16px; font-weight: bold; display: block; }
-        .header-info .estado { font-size: 11px; color: #00e676; }
+        .nombre { font-size: 16px; font-weight: bold; display: block; }
+        .estado { font-size: 11px; color: #00e676; font-weight: 500; }
 
-        /* CHAT BOX */
+        /* AREA DE CHAT */
         #chat-box { 
             flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; 
-            background-color: #0b141a; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay; transition: background 0.3s;
         }
 
         /* BURBUJAS */
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; animation: aparecer 0.2s ease; }
-        @keyframes aparecer { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .msg-mio { align-self: flex-end; background-color: #176f47; border-bottom-right-radius: 2px; }
-        .msg-otro { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.3); animation: pop 0.2s ease; }
+        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .msg-mio { align-self: flex-end; background-color: var(--mio); border-bottom-right-radius: 2px; }
+        .msg-otro { align-self: flex-start; background-color: var(--otro); border-bottom-left-radius: 2px; }
         .hora-msg { font-size: 10px; opacity: 0.6; float: right; margin: 5px 0 0 8px; }
 
-        /* CORAZÓN GIGANTE */
-        .heart-big { font-size: 50px; animation: pulse 0.8s infinite; display: inline-block; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-
-        /* CAJA DE AUDIO */
-        .audio-box { width: 220px; display: flex; align-items: center; gap: 10px; padding: 5px; }
-        .play-btn { font-size: 24px; cursor: pointer; color: #00a884; }
-
-        /* MODALES */
-        .modal-bottom { 
-            display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; 
-            border-radius: 20px 20px 0 0; z-index: 2000; padding: 20px 0;
-        }
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; max-height: 250px; overflow-y: auto; }
-        .color-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
-
-        .menu-top { display: none; position: fixed; top: 50px; right: 15px; background: #232d36; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 3000; }
-        .menu-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* MULTIMEDIA */
+        .heart-big { font-size: 45px; display: block; animation: beat 0.8s infinite; text-align: center; }
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        .img-msg { width: 100%; border-radius: 8px; cursor: pointer; display: block; }
+        .audio-box { display: flex; align-items: center; gap: 10px; min-width: 180px; padding: 5px 0; }
+        .play-btn { font-size: 25px; cursor: pointer; color: var(--verde); }
 
         /* FOOTER */
-        .footer { background: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        .footer { background: #1f2c33; padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
         .input-area { flex: 1; background: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; }
         input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; }
+        #btn-main { background: var(--verde); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; transition: 0.2s; }
+
+        /* MODALES */
+        .modal-bottom { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; border-radius: 20px 20px 0 0; z-index: 2000; padding: 20px 0; border-top: 1px solid #313d45; }
+        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 20px; }
+        .color-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
+        .menu-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #2a3942; display: flex; gap: 15px; align-items: center; }
+
+        /* VISOR FULLSCREEN */
+        #visor-full { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 5000; justify-content: center; align-items: center; }
+        #visor-full img { max-width: 100%; max-height: 100%; transition: transform 0.3s; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="history.back()" style="cursor:pointer;">←</span>
+        <span onclick="history.back()" style="cursor:pointer; font-size:20px;">←</span>
         <img id="header-foto" class="avatar-header">
         <div class="header-info">
             <span class="nombre" id="chat-nombre">Cargando...</span>
             <span class="estado" id="chat-estado">en línea</span>
         </div>
-        <span onclick="toggleMenuTop()" style="cursor:pointer; font-size: 20px;">⋮</span>
+        <span onclick="toggleMenuTop()" style="cursor:pointer; font-size: 22px;">⋮</span>
     </div>
 
     <div id="chat-box"></div>
 
-    <div id="menu-top" class="menu-top">
-        <div class="menu-item" onclick="borrarHistorial()">Borrar historial chat</div>
-        <div class="menu-item" onclick="abrirModalFondo()">Fondo de pantalla</div>
+    <div id="menu-top" style="display:none; position:fixed; top:55px; right:15px; background:#232d36; border-radius:8px; z-index:3000; box-shadow: 0 4px 10px black;">
+        <div class="menu-item" onclick="borrarHistorial()">🗑️ Borrar chat</div>
+        <div class="menu-item" onclick="abrirModalFondo()">🎨 Cambiar fondo</div>
     </div>
 
     <div class="footer">
         <div class="input-area">
-            <span>😊</span>
+            <span style="font-size: 20px; cursor:pointer;">😊</span>
             <input type="text" id="msg-input" placeholder="Mensaje" oninput="detectarEscribiendo()">
-            <span onclick="document.getElementById('file-input').click()" style="cursor:pointer;">📎</span>
+            <span onclick="document.getElementById('file-input').click()" style="cursor:pointer; font-size: 20px;">📎</span>
         </div>
         <input type="file" id="file-input" accept="image/*" style="display:none" onchange="enviarImagen(event)">
-        <button id="btn-main" style="background:#00a884; border:none; width:48px; height:48px; border-radius:50%; color:white; font-size:20px;" onmousedown="iniciarGrabacion()" onmouseup="finalizarGrabacion()">🎙️</button>
+        <button id="btn-main" onmousedown="gestionarAccionDown()" onmouseup="gestionarAccionUp()">🎙️</button>
     </div>
 
     <div id="modal-fondo" class="modal-bottom">
-        <h3 style="text-align:center; margin-top:0;">Colores Sólidos</h3>
         <div class="color-grid" id="grid-colores"></div>
-        <div style="text-align:center; padding:10px;" onclick="cerrarModales()">Cancelar</div>
+        <div class="menu-item" style="justify-content:center; color:#8696a0;" onclick="cerrarModales()">Cancelar</div>
     </div>
 
-    <div id="modal-accion" class="modal-bottom">
-        <div class="menu-item" onclick="borrarMensaje()">🗑️ Borrar</div>
+    <div id="modal-msg" class="modal-bottom">
+        <div class="menu-item" id="btn-borrar-msg" style="color:#f15c5c;">🗑️ Borrar para todos</div>
         <div class="menu-item" onclick="cerrarModales()">↩️ Responder</div>
-        <div class="menu-item" onclick="cerrarModales()">➡️ Reenviar a contacto</div>
+        <div class="menu-item" onclick="cerrarModales()">➡️ Reenviar</div>
+    </div>
+
+    <div id="visor-full" onclick="this.style.display='none'">
+        <img id="img-zoom" src="">
     </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-    
-// --- VARIABLES DE SESIÓN ---
-const miId = localStorage.getItem("user_temp_id");
-const salaId = localStorage.getItem("chat_sala_id");
-const destId = localStorage.getItem("chat_destinatario_id");
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-// 1. CARGAR MENSAJES (ARREGLADO PARA IMÁGENES Y AUDIOS)
-db.ref("chats_privados/" + salaId).on("value", snap => {
-    const box = document.getElementById('chat-box');
-    box.innerHTML = ""; 
-    
-    snap.forEach(child => {
-        const m = child.val();
-        const esMio = m.emisor === miId;
-        const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        
-        const div = document.createElement("div");
-        div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
-        div.oncontextmenu = (e) => { e.preventDefault(); abrirAccion(child.key); };
+    const miId = localStorage.getItem("user_temp_id");
+    const salaId = localStorage.getItem("chat_sala_id");
+    const destId = localStorage.getItem("chat_destinatario_id");
 
-        // Lógica de Renderizado Dinámico
-        if (m.tipo === "imagen" || (m.contenido && m.contenido.startsWith("data:image"))) {
-            div.innerHTML = `<div class="img-wrapper"><img src="${m.contenido}" style="width:100%; border-radius:8px; cursor:pointer;" onclick="verImagenFull(this.src)"></div><span class="hora-msg">${hora}</span>`;
-        } 
-        else if (m.tipo === "audio" || (m.contenido && m.contenido.startsWith("data:audio"))) {
-            div.innerHTML = `
-                <div class="audio-box" style="display:flex; align-items:center; gap:10px;">
-                    <span style="cursor:pointer; font-size:24px;" onclick="new Audio('${m.contenido}').play()">▶️</span>
-                    <div style="flex:1; height:3px; background:#8696a0; border-radius:2px;"></div>
-                    <span class="hora-msg">${hora}</span>
-                </div>`;
-        } 
-        else if (m.contenido === "❤️") {
-            div.innerHTML = `<span class="heart-big">❤️</span><span class="hora-msg">${hora}</span>`;
-        } 
-        else {
-            div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
+    // CARGAR INFO DEL OTRO
+    db.ref("usuarios_registrados/" + destId).on("value", s => {
+        const u = s.val();
+        if(u) {
+            document.getElementById('chat-nombre').innerText = u.nombre;
+            document.getElementById('header-foto').src = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         }
-        box.appendChild(div);
     });
-    box.scrollTop = box.scrollHeight;
-});
 
-// 2. ENVIAR TEXTO O CORAZÓN
-function enviarTexto() {
-    const input = document.getElementById('msg-input');
-    const texto = input.value.trim();
-    if (texto === "") return;
+    // CARGAR MENSAJES REALES
+    db.ref("chats_privados/" + salaId).on("value", snap => {
+        const box = document.getElementById('chat-box');
+        box.innerHTML = "";
+        snap.forEach(child => {
+            const m = child.val();
+            const esMio = m.emisor === miId;
+            const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            const div = document.createElement("div");
+            div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
+            div.oncontextmenu = (e) => { e.preventDefault(); abrirModalMsg(child.key); };
 
-    db.ref("chats_privados/" + salaId).push({
-        emisor: miId,
-        contenido: texto,
-        tipo: "texto",
-        fecha: Date.now()
-    });
-    input.value = "";
-    detectarEscribiendo();
-}
-
-// 3. ENVIAR IMAGEN (BOTÓN CLIP)
-function enviarImagen(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        db.ref("chats_privados/" + salaId).push({
-            emisor: miId,
-            contenido: e.target.result,
-            tipo: "imagen",
-            fecha: Date.now()
+            if(m.tipo === "imagen") {
+                div.innerHTML = `<img src="${m.contenido}" class="img-msg" onclick="verImagenFull('${m.contenido}')"><span class="hora-msg">${hora}</span>`;
+            } else if(m.tipo === "audio") {
+                div.innerHTML = `<div class="audio-box"><span class="play-btn" onclick="new Audio('${m.contenido}').play()">▶️</span><div style="flex:1; height:2px; background:#8696a0;"></div><span class="hora-msg">${hora}</span></div>`;
+            } else if(m.contenido === "❤️") {
+                div.innerHTML = `<span class="heart-big">❤️</span><span class="hora-msg">${hora}</span>`;
+            } else {
+                div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
+            }
+            box.appendChild(div);
         });
-    };
-    reader.readAsDataURL(file);
-}
-
-// 4. GRABADOR DE AUDIO PRO (CON STOP Y ENVÍO)
-let mediaRecorder;
-let chunks = [];
-function iniciarGrabacion() {
-    if(document.getElementById('msg-input').value.length > 0) return; // Si hay texto, no graba
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-        chunks = [];
-        document.getElementById('btn-main').style.background = "#f44336"; // Rojo grabando
-        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        box.scrollTop = box.scrollHeight;
     });
-}
 
-function finalizarGrabacion() {
-    if (!mediaRecorder || mediaRecorder.state === "inactive") return;
-    mediaRecorder.stop();
-    document.getElementById('btn-main').style.background = "#00a884"; // Vuelve a verde
-    mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/mp3' });
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-            db.ref("chats_privados/" + salaId).push({
-                emisor: miId,
-                contenido: reader.result,
-                tipo: "audio",
-                fecha: Date.now()
-            });
-        };
-    };
-}
-
-// 5. CAMBIO DE COLOR (PERSISTENTE)
-function aplicarColor(color) {
-    document.getElementById('chat-box').style.backgroundColor = color;
-    localStorage.setItem("fondo_" + salaId, color); // Se guarda por sala
-    cerrarModales();
-}
-
-// Cargar el color guardado al entrar
-const colorGuardado = localStorage.getItem("fondo_" + salaId);
-if(colorGuardado) document.getElementById('chat-box').style.backgroundColor = colorGuardado;
-
-// 6. DETECTAR SI ES ENVÍO O AUDIO
-function detectarEscribiendo() {
-    const input = document.getElementById('msg-input');
-    const btn = document.getElementById('btn-main');
-    if (input.value.length > 0) {
-        btn.innerText = "🕊️"; // Icono de enviar
-        btn.onmousedown = enviarTexto; 
-        btn.onmouseup = null;
-    } else {
-        btn.innerText = "🎙️"; // Icono de micro
-        btn.onmousedown = iniciarGrabacion;
-        btn.onmouseup = finalizarGrabacion;
+    // FUNCIONES DE ENVÍO
+    function enviarTexto() {
+        const input = document.getElementById('msg-input');
+        if(input.value.trim() === "") return;
+        db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: input.value, tipo: "texto", fecha: Date.now() });
+        input.value = "";
+        detectarEscribiendo();
     }
-}
 
+    function enviarImagen(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: ev.target.result, tipo: "imagen", fecha: Date.now() });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // AUDIO GRABADOR
+    let mediaRecorder; let chunks = [];
+    function gestionarAccionDown() {
+        if(document.getElementById('msg-input').value.length > 0) { enviarTexto(); }
+        else {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+                chunks = [];
+                document.getElementById('btn-main').style.transform = "scale(1.3)";
+                document.getElementById('btn-main').style.background = "#f44336";
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            });
+        }
+    }
+    function gestionarAccionUp() {
+        if(!mediaRecorder || mediaRecorder.state === "inactive") return;
+        mediaRecorder.stop();
+        document.getElementById('btn-main').style.transform = "scale(1)";
+        document.getElementById('btn-main').style.background = "var(--verde)";
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'audio/mp3' });
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: reader.result, tipo: "audio", fecha: Date.now() });
+            };
+        };
+    }
+
+    // MODAL COLORES SOLIDOS (ESTILO WHATSAPP)
+    const colores = ['#0b141a', '#176f47', '#075e54', '#232d36', '#4a148c', '#880e4f', '#01579b', '#004d40', '#33691e', '#bf360c'];
+    const grid = document.getElementById('grid-colores');
+    colores.forEach(c => {
+        const d = document.createElement("div");
+        d.className = "color-circle";
+        d.style.backgroundColor = c;
+        d.onclick = () => { document.getElementById('chat-box').style.backgroundColor = c; cerrarModales(); };
+        grid.appendChild(d);
+    });
+
+    function detectarEscribiendo() {
+        const input = document.getElementById('msg-input');
+        document.getElementById('btn-main').innerText = input.value.length > 0 ? "🕊️" : "🎙️";
+    }
+
+    function verImagenFull(src) {
+        document.getElementById('visor-full').style.display = 'flex';
+        document.getElementById('img-zoom').src = src;
+    }
+
+    function toggleMenuTop() { const m = document.getElementById('menu-top'); m.style.display = m.style.display==='none'?'block':'none'; }
+    function abrirModalFondo() { document.getElementById('modal-fondo').style.display = 'block'; toggleMenuTop(); }
+    function cerrarModales() { document.querySelectorAll('.modal-bottom, #menu-top').forEach(m => m.style.display = 'none'); }
+    
+    let msgKeyBorrar = "";
+    function abrirModalMsg(key) { msgKeyBorrar = key; document.getElementById('modal-msg').style.display = 'block'; }
+    document.getElementById('btn-borrar-msg').onclick = () => { db.ref("chats_privados/" + salaId).child(msgKeyBorrar).remove(); cerrarModales(); };
+    function borrarHistorial() { if(confirm("¿Borrar todo?")) db.ref("chats_privados/" + salaId).remove(); cerrarModales(); }
 </script>
 </body>
 </html>
