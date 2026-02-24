@@ -1,17 +1,15 @@
-<div class="header">
-    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-        <span onclick="history.back()" style="cursor:pointer; font-size:22px; color: white;">←</span>
+<div class="header-chat-container">
+    <div class="header-left">
+        <span class="back-icon" onclick="history.back()">←</span>
         <img id="header-foto" class="avatar-header" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-        <div style="display: flex; flex-direction: column;">
-            <span id="chat-nombre" style="font-weight:bold; font-size: 16px; color: white;">David Oviedo</span>
-            <span id="chat-estado" style="font-size:12px; color:#00e676;">en línea</span>
+        <div class="header-info">
+            <span id="chat-nombre">David Oviedo</span>
+            <span id="chat-estado">en línea</span>
         </div>
     </div>
-    
-    <div style="display: flex; align-items: center; gap: 18px;">
-        <a href="tel:+595981000000" style="text-decoration: none;">
-            <span style="font-size: 20px; color: #ffffff; text-shadow: 0px 0px 2px rgba(0,0,0,0.5);">📞</span>
-        </a>
-        <span onclick="document.getElementById('modal-fondo').style.display='block'" style="cursor:pointer; font-size:22px; color: white;">⋮</span>
+
+    <div class="header-right">
+        <a href="tel:+595900000000" class="icon-btn">📞</a>
+        <span class="icon-btn" onclick="abrirMenuOpciones()">⋮</span>
     </div>
 </div>
