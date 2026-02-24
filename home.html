@@ -3,111 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus</title>
     <style>
-        :root { --verde: #00a884; --header: #085f56; --fondo: #0b141a; }
-        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); color: white; overflow: hidden; }
-        
-        /* HEADER */
-        .header { background-color: var(--header); padding: 10px 15px 0 15px; height: 100px; display: flex; flex-direction: column; justify-content: space-between; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .tabs { display: flex; }
-        .tab { flex: 1; text-align: center; padding: 12px 0; color: rgba(255,255,255,0.6); cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; }
+        :root { --header: #085f56; --fondo: #0b141a; }
+        body { margin: 0; font-family: sans-serif; background: var(--fondo); color: white; overflow: hidden; }
+        .header { background: var(--header); padding: 15px 15px 0 15px; height: 100px; }
+        .tabs { display: flex; margin-top: 15px; }
+        .tab { flex: 1; text-align: center; padding: 12px; color: rgba(255,255,255,0.6); cursor: pointer; font-weight: bold; }
         .tab.active { color: white; border-bottom: 3px solid white; }
-
-        /* CONTENIDO */
-        #main-content { height: calc(100vh - 110px); overflow-y: auto; }
-
-        /* EL BOTÓN ÚNICO (Evita el error de botones dobles) */
-        .fab-unico {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: var(--verde);
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            z-index: 9999;
-            border: none;
-            cursor: pointer;
-        }
+        iframe { width: 100%; height: calc(100vh - 100px); border: none; }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <div class="header-top">
-            <span style="font-size: 20px; font-weight: bold;">DNPlus</span>
-            <div style="display: flex; gap: 20px;">
-                <span>🔍</span>
-                <span onclick="alert('Ajustes de David')">⋮</span>
-            </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:20px; font-weight:bold;">DNPlus</span>
+            <span onclick="toggleAjustes()">⋮</span>
         </div>
         <div class="tabs">
-            <div class="tab active" id="tab-chats" onclick="cambiarSeccion('chats')">CHATS</div>
-            <div class="tab" id="tab-estados" onclick="cambiarSeccion('estados')">ESTADOS</div>
-            <div class="tab" id="tab-llamadas" onclick="cambiarSeccion('llamadas')">LLAMADAS</div>
+            <div class="tab active" onclick="ir('lista_chats.html', this)">CHATS</div>
+            <div class="tab" onclick="ir('lista_estados.html', this)">ESTADOS</div>
+            <div class="tab" onclick="ir('lista_llamadas.html', this)">LLAMADAS</div>
         </div>
     </div>
 
-    <div id="main-content">
-        </div>
-
-    <button id="boton-maestro" class="fab-unico" onclick="ejecutarAccion()">💬</button>
+    <iframe id="ventana" src="lista_chats.html"></iframe>
 
     <script>
-        let seccionActual = 'chats';
-
-        function cambiarSeccion(seccion) {
-            seccionActual = seccion;
-            const btn = document.getElementById("boton-maestro");
-            
-            // 1. Actualizar pestañas visualmente
+        function ir(pagina, el) {
+            document.getElementById('ventana').src = pagina;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + seccion).classList.add('active');
-
-            // 2. Cambiar el ICONO del botón (Sin duplicarlo)
-            if (seccion === 'chats') btn.innerHTML = "💬";
-            else if (seccion === 'estados') btn.innerHTML = "📷";
-            else if (seccion === 'llamadas') btn.innerHTML = "➕";
-
-            // 3. Cargar la página correspondiente
-            fetch(`lista_${seccion}.html`)
-                .then(r => r.text())
-                .then(html => {
-                    document.getElementById("main-content").innerHTML = html;
-                    
-                    // IMPORTANTE: Limpiar scripts viejos para que no se "desarme"
-                    const scripts = document.getElementById("main-content").querySelectorAll("script");
-                    scripts.forEach(s => {
-                        const nuevoScript = document.createElement("script");
-                        nuevoScript.text = s.text;
-                        document.body.appendChild(nuevoScript).parentNode.removeChild(nuevoScript);
-                    });
-                });
+            el.classList.add('active');
         }
-
-        // 4. Función que decide qué hacer según dónde estés
-        function ejecutarAccion() {
-            if (seccionActual === 'chats') {
-                window.location.href = 'lista_contactos.html';
-            } else if (seccionActual === 'estados') {
-                // Busca el input de archivo en la página de estados y lo clickea
-                const input = document.getElementById('file-estado');
-                if(input) input.click();
-            } else if (seccionActual === 'llamadas') {
-                window.location.href = 'crear_new_contacto.html';
-            }
-        }
-
-        // Carga inicial
-        window.onload = () => cambiarSeccion('chats');
     </script>
 </body>
 </html>
