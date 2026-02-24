@@ -5,50 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus - David Oviedo</title>
     <style>
-        :root {
-            --fondo: #0b141a;
-            --verde-header: #085f56;
-            --verde-msg: #00a884;
-            --texto: #e9edef;
-            --gris: #8696a0;
-        }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; overflow: hidden; }
 
-        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); color: var(--texto); overflow: hidden; }
+        /* CABECERA COLOR #085f56 */
+        .header { background-color: #085f56; padding: 15px 15px 0 15px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .logo { font-size: 20px; font-weight: bold; color: white; }
+        .icons { display: flex; gap: 20px; font-size: 18px; cursor: pointer; }
 
-        /* CABECERA CON TU COLOR #085f56 */
-        .header { background-color: var(--verde-header); padding: 15px 15px 0 15px; display: flex; flex-direction: column; gap: 10px; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .logo { color: white; font-size: 20px; font-weight: bold; }
-        .icons { display: flex; gap: 22px; font-size: 18px; color: white; cursor: pointer; }
+        /* BUSCADOR REAL */
+        .search-box { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px 12px; display: none; margin-bottom: 10px; }
+        .search-box input { background: transparent; border: none; color: white; width: 100%; outline: none; }
 
-        /* BUSCADOR */
-        .search-bar { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px 15px; display: flex; align-items: center; margin: 5px 0; }
-        .search-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; }
-
-        /* TABS (CHATS, ESTADOS, LLAMADAS) */
-        .tabs { display: flex; justify-content: space-around; margin-top: 5px; }
+        /* PESTAÑAS */
+        .tabs { display: flex; justify-content: space-around; }
         .tab { padding: 12px 0; flex: 1; text-align: center; color: rgba(255,255,255,0.7); font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; }
         .tab.active { color: white; border-bottom: 3px solid white; }
 
-        /* CONTENEDOR DONDE SE CARGAN LAS LISTAS */
-        #main-content { height: calc(100vh - 150px); overflow-y: auto; }
+        /* CONTENEDOR DE LAS OTRAS PÁGINAS */
+        #contenedor-principal { height: calc(100vh - 140px); overflow-y: auto; }
 
-        /* MODAL DE AJUSTES */
-        .modal { 
+        /* MODAL 3 PUNTITOS */
+        .modal-menu { 
             display: none; position: fixed; top: 50px; right: 10px; 
-            background: #233138; box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            border-radius: 4px; z-index: 1000; width: 190px; padding: 5px 0;
+            background: #233138; border-radius: 4px; z-index: 1000; width: 180px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); padding: 5px 0;
         }
-        .modal-item { padding: 12px 20px; font-size: 15px; cursor: pointer; color: white; }
-        .modal-item:active { background: #182229; }
-
-        /* BOTÓN FLOTANTE */
-        .fab { 
-            position: fixed; bottom: 20px; right: 20px; background: var(--verde-msg); 
-            width: 55px; height: 55px; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; font-size: 22px; color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;
-        }
+        .option { padding: 12px 20px; font-size: 15px; cursor: pointer; }
+        .option:active { background: #182229; }
     </style>
 </head>
 <body>
@@ -57,92 +41,79 @@
         <div class="header-top">
             <div class="logo">DNPlus</div>
             <div class="icons">
-                <span onclick="toggleSearch()">🔍</span>
-                <span onclick="toggleModal()">⋮</span>
+                <span onclick="verBuscador()">🔍</span>
+                <span onclick="verMenu()">⋮</span>
             </div>
         </div>
 
-        <div class="search-bar" id="searchBar" style="display: none;">
-            <input type="text" id="inputBusqueda" placeholder="Buscar..." oninput="ejecutarBusqueda()">
+        <div class="search-box" id="cajaBusqueda">
+            <input type="text" id="inputBuscar" placeholder="Buscar..." oninput="filtrarTodo()">
         </div>
 
         <div class="tabs">
-            <div class="tab active" id="tab-chats" onclick="cargarSeccion('chats')">Chats</div>
-            <div class="tab" id="tab-estados" onclick="cargarSeccion('estados')">Estados</div>
-            <div class="tab" id="tab-llamadas" onclick="cargarSeccion('llamadas')">Llamadas</div>
+            <div class="tab active" id="btn-chats" onclick="mostrarPagina('chats')">Chats</div>
+            <div class="tab" id="btn-estados" onclick="mostrarPagina('estados')">Estados</div>
+            <div class="tab" id="btn-llamadas" onclick="mostrarPagina('llamadas')">Llamadas</div>
         </div>
     </div>
 
-    <div id="main-content"></div>
+    <div id="contenedor-principal"></div>
 
-    <div id="ajustesModal" class="modal">
-        <div class="modal-item" onclick="location.href='nuevo_grupo.html'">Nuevo grupo</div>
-        <div class="modal-item" onclick="location.href='ajustes.html'">Ajustes</div>
-        <div class="modal-item" onclick="borrarHistorial()" style="color: #ff5e5e;">Borrar historial chat</div>
+    <div id="menuAjustes" class="modal-menu">
+        <div class="option" onclick="location.href='nuevo_grupo.html'">Nuevo grupo</div>
+        <div class="option" onclick="location.href='ajustes.html'">Ajustes</div>
+        <div class="option" onclick="borrarChat()" style="color:#ff5e5e;">Borrar historial chat</div>
     </div>
 
-    <div class="fab" id="fab-btn" onclick="accionFab()">💬</div>
-
     <script>
-        // CARGA DINÁMICA DE ARCHIVOS
-        async function cargarSeccion(tipo) {
-            const container = document.getElementById("main-content");
-            const fab = document.getElementById("fab-btn");
-
-            // Marcar pestaña activa
+        // FUNCIÓN CLAVE: Carga los otros archivos sin recargar la página
+        function mostrarPagina(nombre) {
+            const principal = document.getElementById("contenedor-principal");
+            
+            // Cambiar pestaña activa
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tipo).classList.add('active');
+            document.getElementById('btn-' + nombre).classList.add('active');
 
-            // Cambiar icono del botón flotante según sección
-            if(tipo === 'chats') fab.innerHTML = "💬";
-            else if(tipo === 'estados') fab.innerHTML = "📷";
-            else if(tipo === 'llamadas') fab.innerHTML = "📞";
-
-            // FETCH para cargar lista_chats.html, lista_estados.html o lista_llamadas.html
-            try {
-                const url = `lista_${tipo}.html`;
-                const res = await fetch(url);
-                const html = await res.text();
-                container.innerHTML = html;
-
-                // Reactivar scripts del HTML cargado
-                const scripts = container.querySelectorAll("script");
-                scripts.forEach(s => eval(s.innerHTML));
-            } catch (e) {
-                container.innerHTML = "<p style='text-align:center; padding:20px;'>Cargando...</p>";
-            }
+            // Cargar el archivo (lista_chats.html, lista_estados.html, etc)
+            fetch(`lista_${nombre}.html`)
+                .then(response => response.text())
+                .then(data => {
+                    principal.innerHTML = data;
+                    
+                    // Esto hace que los scripts de las páginas cargadas funcionen
+                    const scripts = principal.querySelectorAll("script");
+                    scripts.forEach(s => eval(s.innerHTML));
+                })
+                .catch(err => {
+                    principal.innerHTML = "<p style='text-align:center; padding:20px;'>Error al cargar " + nombre + "</p>";
+                });
         }
 
-        function toggleSearch() {
-            const bar = document.getElementById("searchBar");
-            bar.style.display = bar.style.display === "none" ? "flex" : "none";
+        function verBuscador() {
+            const b = document.getElementById("cajaBusqueda");
+            b.style.display = (b.style.display === "block") ? "none" : "block";
         }
 
-        function toggleModal() {
-            const m = document.getElementById("ajustesModal");
-            m.style.display = m.style.display === "block" ? "none" : "block";
+        function verMenu() {
+            const m = document.getElementById("menuAjustes");
+            m.style.display = (m.style.display === "block") ? "none" : "block";
         }
 
-        function ejecutarBusqueda() {
-            const txt = document.getElementById("inputBusqueda").value.toLowerCase();
+        function filtrarTodo() {
+            const bus = document.getElementById("inputBuscar").value.toLowerCase();
             const items = document.querySelectorAll(".chat-row, .item, .call-item");
             items.forEach(i => {
-                i.style.display = i.innerText.toLowerCase().includes(txt) ? "flex" : "none";
+                i.style.display = i.innerText.toLowerCase().includes(bus) ? "flex" : "none";
             });
         }
 
-        function accionFab() {
-            const activa = document.querySelector('.tab.active').id;
-            if(activa === 'tab-chats') location.href = 'lista_contactos.html';
-            else if(activa === 'tab-estados') document.getElementById('file-estado').click();
-            else if(activa === 'tab-llamadas') alert("Nueva llamada");
+        // Cerrar menú al tocar fuera
+        window.onclick = (e) => { 
+            if (!e.target.innerText.includes('⋮')) document.getElementById("menuAjustes").style.display="none"; 
         }
 
-        // Cerrar modal al tocar fuera
-        window.onclick = (e) => { if(!e.target.innerText.includes('⋮')) document.getElementById("ajustesModal").style.display="none"; }
-
-        // Carga inicial
-        window.onload = () => cargarSeccion('chats');
+        // Carga inicial: Chats
+        window.onload = () => mostrarPagina('chats');
     </script>
 </body>
 </html>
