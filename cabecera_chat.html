@@ -1,14 +1,24 @@
-<div class="header-chat-container" style="background-color: #085F56; height: 60px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white;">
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <span onclick="history.back()" style="font-size: 20px; cursor: pointer;">←</span>
-        <img id="header-foto-perfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #2a3942;">
-        <div style="display: flex; flex-direction: column;">
-            <span id="header-nombre-usuario" style="font-weight: bold; font-size: 16px;">Cargando...</span>
-            <span id="chat-estado" style="font-size: 11px; color: #00e676;">en línea</span>
-        </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <a href="tel:+595" style="text-decoration: none; color: white; font-size: 18px;">📞</a>
-        <span onclick="abrirMenuOpciones()" style="font-size: 22px; cursor: pointer; padding: 5px;">⋮</span>
-    </div>
-</div>
+function cargarDatosContacto() {
+    const destId = localStorage.getItem("chat_destId");
+    if (!destId) return;
+
+    db.ref("usuarios/" + destId).once("value", (snap) => {
+        const user = snap.val();
+        if (user) {
+            // Estos IDs deben existir en tu cabecera_chat.html
+            const nombreTxt = document.getElementById("header-nombre-usuario");
+            const fotoImg = document.getElementById("header-foto-perfil");
+            
+            if(nombreTxt) nombreTxt.innerText = user.nombre || "Usuario";
+            if(fotoImg && user.foto) fotoImg.src = user.foto;
+        }
+    });
+}
+
+function abrirMenuOpciones() {
+    document.getElementById('modal-opciones').style.display = 'block';
+}
+
+function cerrarModales() {
+    document.getElementById('modal-opciones').style.display = 'none';
+}
