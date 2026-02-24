@@ -96,53 +96,69 @@
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-    // --- CONFIGURACIÓN Y VARIABLES ---
-const firebaseConfig = {
-    apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-    databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
+    
+// --- VARIABLES DE SESIÓN ---
 const miId = localStorage.getItem("user_temp_id");
 const salaId = localStorage.getItem("chat_sala_id");
 const destId = localStorage.getItem("chat_destinatario_id");
 
-// 1. CARGAR INFO DEL CONTACTO Y PRESENCIA
-db.ref("usuarios_registrados/" + destId).on("value", s => {
-    const u = s.val();
-    if(u) {
-        document.getElementById('chat-nombre').innerText = u.nombre;
-        document.getElementById('header-foto').src = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-    }
+// 1. CARGAR MENSAJES (ARREGLADO PARA IMÁGENES Y AUDIOS)
+db.ref("chats_privados/" + salaId).on("value", snap => {
+    const box = document.getElementById('chat-box');
+    box.innerHTML = ""; 
+    
+    snap.forEach(child => {
+        const m = child.val();
+        const esMio = m.emisor === miId;
+        const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        
+        const div = document.createElement("div");
+        div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
+        div.oncontextmenu = (e) => { e.preventDefault(); abrirAccion(child.key); };
+
+        // Lógica de Renderizado Dinámico
+        if (m.tipo === "imagen" || (m.contenido && m.contenido.startsWith("data:image"))) {
+            div.innerHTML = `<div class="img-wrapper"><img src="${m.contenido}" style="width:100%; border-radius:8px; cursor:pointer;" onclick="verImagenFull(this.src)"></div><span class="hora-msg">${hora}</span>`;
+        } 
+        else if (m.tipo === "audio" || (m.contenido && m.contenido.startsWith("data:audio"))) {
+            div.innerHTML = `
+                <div class="audio-box" style="display:flex; align-items:center; gap:10px;">
+                    <span style="cursor:pointer; font-size:24px;" onclick="new Audio('${m.contenido}').play()">▶️</span>
+                    <div style="flex:1; height:3px; background:#8696a0; border-radius:2px;"></div>
+                    <span class="hora-msg">${hora}</span>
+                </div>`;
+        } 
+        else if (m.contenido === "❤️") {
+            div.innerHTML = `<span class="heart-big">❤️</span><span class="hora-msg">${hora}</span>`;
+        } 
+        else {
+            div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
+        }
+        box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
 });
 
-db.ref(`presencia/${salaId}/${destId}`).on("value", s => {
-    if(s.exists()) document.getElementById('chat-estado').innerText = s.val();
-});
-
-// 2. FUNCIÓN PARA ENVIAR TEXTO (EL CORAZÓN TAMBIÉN VA AQUÍ)
-function enviarMensaje() {
+// 2. ENVIAR TEXTO O CORAZÓN
+function enviarTexto() {
     const input = document.getElementById('msg-input');
     const texto = input.value.trim();
-    
-    if (texto !== "") {
-        db.ref("chats_privados/" + salaId).push({
-            emisor: miId,
-            contenido: texto,
-            tipo: "texto",
-            fecha: Date.now()
-        });
-        input.value = "";
-        detectarEscribiendo();
-    }
+    if (texto === "") return;
+
+    db.ref("chats_privados/" + salaId).push({
+        emisor: miId,
+        contenido: texto,
+        tipo: "texto",
+        fecha: Date.now()
+    });
+    input.value = "";
+    detectarEscribiendo();
 }
 
-// 3. ENVIAR IMAGEN ARREGLADO
+// 3. ENVIAR IMAGEN (BOTÓN CLIP)
 function enviarImagen(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = (e) => {
         db.ref("chats_privados/" + salaId).push({
@@ -155,93 +171,63 @@ function enviarImagen(event) {
     reader.readAsDataURL(file);
 }
 
-// 4. CARGAR HISTORIAL Y MOSTRAR IMÁGENES ANTERIORES
-db.ref("chats_privados/" + salaId).on("value", snap => {
-    const box = document.getElementById('chat-box');
-    box.innerHTML = ""; // Limpiamos para recargar
-    
-    snap.forEach(child => {
-        const m = child.val();
-        const esMio = m.emisor === miId;
-        const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        
-        const div = document.createElement("div");
-        div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
-        
-        // Renderizado según tipo (Aquí se arregla lo de las fotos viejas)
-        if (m.tipo === "imagen" || (m.contenido && m.contenido.startsWith("data:image"))) {
-            div.innerHTML = `
-                <div class="img-wrapper" onclick="verImagenFull('${m.contenido}')">
-                    <img src="${m.contenido}" style="width:100%; border-radius:8px;">
-                </div>
-                <span class="hora-msg">${hora}</span>`;
-        } else if (m.contenido === "❤️") {
-            div.innerHTML = `<span class="heart-big">❤️</span><span class="hora-msg">${hora}</span>`;
-        } else if (m.tipo === "audio") {
-            div.innerHTML = `
-                <div class="audio-box" onclick="playAudio('${m.contenido}')">
-                    <span class="play-btn">▶️</span>
-                    <div style="flex:1; height:3px; background:#8696a0; border-radius:2px;"></div>
-                    <span class="hora-msg">${hora}</span>
-                </div>`;
-        } else {
-            div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
-        }
-        
-        div.oncontextmenu = (e) => { e.preventDefault(); abrirAccion(child.key); };
-        box.appendChild(div);
+// 4. GRABADOR DE AUDIO PRO (CON STOP Y ENVÍO)
+let mediaRecorder;
+let chunks = [];
+function iniciarGrabacion() {
+    if(document.getElementById('msg-input').value.length > 0) return; // Si hay texto, no graba
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        chunks = [];
+        document.getElementById('btn-main').style.background = "#f44336"; // Rojo grabando
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
     });
-    box.scrollTop = box.scrollHeight;
-});
+}
 
-// 5. BOTÓN DINÁMICO (CAMBIA SEGÚN ESCRIBES)
+function finalizarGrabacion() {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") return;
+    mediaRecorder.stop();
+    document.getElementById('btn-main').style.background = "#00a884"; // Vuelve a verde
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/mp3' });
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+            db.ref("chats_privados/" + salaId).push({
+                emisor: miId,
+                contenido: reader.result,
+                tipo: "audio",
+                fecha: Date.now()
+            });
+        };
+    };
+}
+
+// 5. CAMBIO DE COLOR (PERSISTENTE)
+function aplicarColor(color) {
+    document.getElementById('chat-box').style.backgroundColor = color;
+    localStorage.setItem("fondo_" + salaId, color); // Se guarda por sala
+    cerrarModales();
+}
+
+// Cargar el color guardado al entrar
+const colorGuardado = localStorage.getItem("fondo_" + salaId);
+if(colorGuardado) document.getElementById('chat-box').style.backgroundColor = colorGuardado;
+
+// 6. DETECTAR SI ES ENVÍO O AUDIO
 function detectarEscribiendo() {
     const input = document.getElementById('msg-input');
     const btn = document.getElementById('btn-main');
-    
     if (input.value.length > 0) {
         btn.innerText = "🕊️"; // Icono de enviar
-        btn.onmousedown = enviarMensaje; // Cambiamos la función a enviar
-        db.ref(`presencia/${salaId}/${miId}`).set("escribiendo...");
+        btn.onmousedown = enviarTexto; 
+        btn.onmouseup = null;
     } else {
         btn.innerText = "🎙️"; // Icono de micro
-        btn.onmousedown = iniciarGrabacion; // Cambiamos la función a grabar
-        db.ref(`presencia/${salaId}/${miId}`).set("en línea");
+        btn.onmousedown = iniciarGrabacion;
+        btn.onmouseup = finalizarGrabacion;
     }
-}
-
-// 6. MODAL DE COLORES ARREGLADO
-function abrirModalFondo() { 
-    document.getElementById('modal-fondo').style.display = 'block'; 
-    document.getElementById('menu-top').style.display = 'none';
-}
-
-const colores = ['#0b141a', '#176f47', '#075e54', '#232d36', '#4a148c', '#880e4f', '#01579b', '#004d40', '#33691e', '#bf360c'];
-const grid = document.getElementById('grid-colores');
-if(grid) {
-    grid.innerHTML = ""; // Limpiar antes de crear
-    colores.forEach(c => {
-        const circle = document.createElement('div');
-        circle.className = 'color-circle';
-        circle.style.backgroundColor = c;
-        circle.onclick = () => { 
-            document.getElementById('chat-box').style.backgroundColor = c; 
-            localStorage.setItem("fondo_chat_" + salaId, c); // Guardar preferencia
-            cerrarModales(); 
-        };
-        grid.appendChild(circle);
-    });
-}
-
-// Cargar fondo guardado al iniciar
-const fondoGuardado = localStorage.getItem("fondo_chat_" + salaId);
-if(fondoGuardado) document.getElementById('chat-box').style.backgroundColor = fondoGuardado;
-
-function playAudio(src) { new Audio(src).play(); }
-function cerrarModales() { document.querySelectorAll('.modal-bottom, .menu-top').forEach(m => m.style.display = 'none'); }
-function toggleMenuTop() { 
-    const m = document.getElementById('menu-top');
-    m.style.display = (m.style.display === 'block') ? 'none' : 'block';
 }
 
 </script>
