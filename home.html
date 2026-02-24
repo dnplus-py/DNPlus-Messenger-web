@@ -3,81 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus - David Oviedo</title>
+    <title>DNPlus</title>
     <style>
-        /* 1. VARIABLES DE COLOR PARA NO PERDER EL CONTROL */
-        :root {
-            --verde-dn: #00a884;
-            --header-dn: #085f56;
-            --fondo-dn: #0b141a;
-            --texto-gris: #8696a0;
-        }
-
-        body { 
-            margin: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: var(--fondo-dn); 
-            color: white; 
-            overflow: hidden; /* Evita que toda la pantalla se mueva */
-        }
-
-        /* 2. CABECERA FIJA */
-        .header { 
-            background-color: var(--header-dn); 
-            height: 100px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            padding: 10px 15px 0 15px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+        :root { --verde: #00a884; --header: #085f56; --fondo: #0b141a; }
+        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); color: white; overflow: hidden; }
         
+        /* HEADER */
+        .header { background-color: var(--header); padding: 10px 15px 0 15px; height: 100px; display: flex; flex-direction: column; justify-content: space-between; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 22px; font-weight: bold; }
+        .tabs { display: flex; }
+        .tab { flex: 1; text-align: center; padding: 12px 0; color: rgba(255,255,255,0.6); cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; }
+        .tab.active { color: white; border-bottom: 3px solid white; }
 
-        /* PESTAÑAS */
-        .tabs { display: flex; text-align: center; }
-        .tab { 
-            flex: 1; 
-            padding: 12px 0; 
-            color: rgba(255,255,255,0.6); 
-            font-weight: bold; 
-            cursor: pointer; 
-            border-bottom: 3px solid transparent;
-            transition: 0.3s;
-        }
-        .tab.active { 
-            color: white; 
-            border-bottom: 3px solid white; 
-        }
+        /* CONTENIDO */
+        #main-content { height: calc(100vh - 110px); overflow-y: auto; }
 
-        /* 3. AREA DE CONTENIDO (LO QUE CAMBIA) */
-        #main-view { 
-            height: calc(100vh - 110px); 
-            overflow-y: auto; 
-            width: 100%;
-        }
-
-        /* 4. BOTONES FLOTANTES (LOS TENEMOS ATADOS AQUÍ) */
-        .fab-master {
+        /* EL BOTÓN ÚNICO (Evita el error de botones dobles) */
+        .fab-unico {
             position: fixed;
-            bottom: 30px;
+            bottom: 25px;
             right: 25px;
+            background-color: var(--verde);
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background-color: var(--verde-dn);
-            color: white;
-            display: none; /* Se controla por JS */
+            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            cursor: pointer;
-            z-index: 2000;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 9999;
             border: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -85,64 +43,71 @@
 
     <div class="header">
         <div class="header-top">
-            <div class="logo">DNPlus</div>
-            <div style="display: flex; gap: 20px; font-size: 18px; cursor: pointer;">
+            <span style="font-size: 20px; font-weight: bold;">DNPlus</span>
+            <div style="display: flex; gap: 20px;">
                 <span>🔍</span>
-                <span onclick="toggleAjustes()">⋮</span>
+                <span onclick="alert('Ajustes de David')">⋮</span>
             </div>
         </div>
         <div class="tabs">
-            <div class="tab active" id="t-chats" onclick="navegar('chats')">Chats</div>
-            <div class="tab" id="t-estados" onclick="navegar('estados')">Estados</div>
-            <div class="tab" id="t-llamadas" onclick="navegar('llamadas')">Llamadas</div>
+            <div class="tab active" id="tab-chats" onclick="cambiarSeccion('chats')">CHATS</div>
+            <div class="tab" id="tab-estados" onclick="cambiarSeccion('estados')">ESTADOS</div>
+            <div class="tab" id="tab-llamadas" onclick="cambiarSeccion('llamadas')">LLAMADAS</div>
         </div>
     </div>
 
-    <div id="main-view">
+    <div id="main-content">
         </div>
 
-    <button id="fab-chats" class="fab-master" onclick="location.href='lista_contactos.html'">💬</button>
-    <button id="fab-estados" class="fab-master" onclick="document.getElementById('file-estado').click()">📷</button>
-    <button id="fab-llamadas" class="fab-master" onclick="location.href='crear_new_contacto.html'">➕</button>
+    <button id="boton-maestro" class="fab-unico" onclick="ejecutarAccion()">💬</button>
 
     <script>
-        function navegar(seccion) {
-            const vista = document.getElementById("main-view");
+        let seccionActual = 'chats';
+
+        function cambiarSeccion(seccion) {
+            seccionActual = seccion;
+            const btn = document.getElementById("boton-maestro");
             
-            // 1. Cambiar visual de pestañas
+            // 1. Actualizar pestañas visualmente
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('t-' + seccion).classList.add('active');
+            document.getElementById('tab-' + seccion).classList.add('active');
 
-            // 2. Control total de botones
-            document.querySelectorAll('.fab-master').forEach(b => b.style.display = 'none');
-            document.getElementById('fab-' + seccion).style.display = 'flex';
+            // 2. Cambiar el ICONO del botón (Sin duplicarlo)
+            if (seccion === 'chats') btn.innerHTML = "💬";
+            else if (seccion === 'estados') btn.innerHTML = "📷";
+            else if (seccion === 'llamadas') btn.innerHTML = "➕";
 
-            // 3. Cargar la lista sin que se desarme el resto
+            // 3. Cargar la página correspondiente
             fetch(`lista_${seccion}.html`)
                 .then(r => r.text())
                 .then(html => {
-                    vista.innerHTML = html;
+                    document.getElementById("main-content").innerHTML = html;
                     
-                    // Ejecutar scripts internos (Firebase, etc.)
-                    const scripts = vista.querySelectorAll("script");
+                    // IMPORTANTE: Limpiar scripts viejos para que no se "desarme"
+                    const scripts = document.getElementById("main-content").querySelectorAll("script");
                     scripts.forEach(s => {
-                        const scriptTag = document.createElement("script");
-                        scriptTag.text = s.text;
-                        document.body.appendChild(scriptTag).parentNode.removeChild(scriptTag);
+                        const nuevoScript = document.createElement("script");
+                        nuevoScript.text = s.text;
+                        document.body.appendChild(nuevoScript).parentNode.removeChild(nuevoScript);
                     });
-                })
-                .catch(err => {
-                    vista.innerHTML = "<p style='text-align:center; margin-top:50px;'>Error al cargar lista.</p>";
                 });
         }
 
-        function toggleAjustes() {
-            // Aquí llamarías a tu modal de ajustes
-            alert("Ajustes de David");
+        // 4. Función que decide qué hacer según dónde estés
+        function ejecutarAccion() {
+            if (seccionActual === 'chats') {
+                window.location.href = 'lista_contactos.html';
+            } else if (seccionActual === 'estados') {
+                // Busca el input de archivo en la página de estados y lo clickea
+                const input = document.getElementById('file-estado');
+                if(input) input.click();
+            } else if (seccionActual === 'llamadas') {
+                window.location.href = 'crear_new_contacto.html';
+            }
         }
 
         // Carga inicial
-        window.onload = () => navegar('chats');
+        window.onload = () => cambiarSeccion('chats');
     </script>
 </body>
 </html>
