@@ -6,33 +6,14 @@
     <title>DNPlus - David Oviedo</title>
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; overflow: hidden; }
-
-        /* CABECERA COLOR #085f56 */
         .header { background-color: #085f56; padding: 15px 15px 0 15px; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .logo { font-size: 20px; font-weight: bold; color: white; }
-        .icons { display: flex; gap: 20px; font-size: 18px; cursor: pointer; }
-
-        /* BUSCADOR REAL */
-        .search-box { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px 12px; display: none; margin-bottom: 10px; }
-        .search-box input { background: transparent; border: none; color: white; width: 100%; outline: none; }
-
-        /* PESTAÑAS */
+        .icons { display: flex; gap: 20px; font-size: 18px; cursor: pointer; color: white; }
         .tabs { display: flex; justify-content: space-around; }
         .tab { padding: 12px 0; flex: 1; text-align: center; color: rgba(255,255,255,0.7); font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; }
         .tab.active { color: white; border-bottom: 3px solid white; }
-
-        /* CONTENEDOR DE LAS OTRAS PÁGINAS */
-        #contenedor-principal { height: calc(100vh - 140px); overflow-y: auto; }
-
-        /* MODAL 3 PUNTITOS */
-        .modal-menu { 
-            display: none; position: fixed; top: 50px; right: 10px; 
-            background: #233138; border-radius: 4px; z-index: 1000; width: 180px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5); padding: 5px 0;
-        }
-        .option { padding: 12px 20px; font-size: 15px; cursor: pointer; }
-        .option:active { background: #182229; }
+        #contenedor-principal { height: calc(100vh - 120px); overflow-y: auto; background-color: #0b141a; }
     </style>
 </head>
 <body>
@@ -41,79 +22,68 @@
         <div class="header-top">
             <div class="logo">DNPlus</div>
             <div class="icons">
-                <span onclick="verBuscador()">🔍</span>
-                <span onclick="verMenu()">⋮</span>
+                <span>🔍</span>
+                <span onclick="toggleMenu()">⋮</span>
             </div>
         </div>
-
-        <div class="search-box" id="cajaBusqueda">
-            <input type="text" id="inputBuscar" placeholder="Buscar..." oninput="filtrarTodo()">
-        </div>
-
         <div class="tabs">
-            <div class="tab active" id="btn-chats" onclick="mostrarPagina('chats')">Chats</div>
-            <div class="tab" id="btn-estados" onclick="mostrarPagina('estados')">Estados</div>
-            <div class="tab" id="btn-llamadas" onclick="mostrarPagina('llamadas')">Llamadas</div>
+            <div class="tab active" id="tab-chats" onclick="mostrarPagina('chats')">Chats</div>
+            <div class="tab" id="tab-estados" onclick="mostrarPagina('estados')">Estados</div>
+            <div class="tab" id="tab-llamadas" onclick="mostrarPagina('llamadas')">Llamadas</div>
         </div>
     </div>
 
-    <div id="contenedor-principal"></div>
-
-    <div id="menuAjustes" class="modal-menu">
-        <div class="option" onclick="location.href='nuevo_grupo.html'">Nuevo grupo</div>
-        <div class="option" onclick="location.href='ajustes.html'">Ajustes</div>
-        <div class="option" onclick="borrarChat()" style="color:#ff5e5e;">Borrar historial chat</div>
+    <div id="contenedor-principal">
+        <p style="text-align:center; padding:20px; color:#8696a0;">Iniciando...</p>
     </div>
 
     <script>
-        // FUNCIÓN CLAVE: Carga los otros archivos sin recargar la página
+        // Función para cargar los archivos lista_xxx.html
         function mostrarPagina(nombre) {
             const principal = document.getElementById("contenedor-principal");
             
-            // Cambiar pestaña activa
+            // Estética de pestañas
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('btn-' + nombre).classList.add('active');
+            document.getElementById('tab-' + nombre).classList.add('active');
 
-            // Cargar el archivo (lista_chats.html, lista_estados.html, etc)
-            fetch(`lista_${nombre}.html`)
-                .then(response => response.text())
-                .then(data => {
-                    principal.innerHTML = data;
+            // USAMOS RUTAS RELATIVAS PARA GITHUB
+            const archivo = "./lista_" + nombre + ".html";
+
+            fetch(archivo)
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en red");
+                    return response.text();
+                })
+                .then(html => {
+                    principal.innerHTML = html;
                     
-                    // Esto hace que los scripts de las páginas cargadas funcionen
+                    // RE-EJECUTAR SCRIPTS DE FIREBASE
                     const scripts = principal.querySelectorAll("script");
-                    scripts.forEach(s => eval(s.innerHTML));
+                    scripts.forEach(s => {
+                        const nuevoScript = document.createElement("script");
+                        if (s.src) {
+                            nuevoScript.src = s.src;
+                        } else {
+                            nuevoScript.textContent = s.textContent;
+                        }
+                        document.body.appendChild(nuevoScript);
+                    });
                 })
                 .catch(err => {
-                    principal.innerHTML = "<p style='text-align:center; padding:20px;'>Error al cargar " + nombre + "</p>";
+                    principal.innerHTML = `<div style="text-align:center; padding:40px; color:#8696a0;">
+                        Error al cargar ${nombre}<br>
+                        <small style="font-size:10px;">Asegúrate de que lista_${nombre}.html esté en la raíz</small>
+                    </div>`;
                 });
         }
 
-        function verBuscador() {
-            const b = document.getElementById("cajaBusqueda");
-            b.style.display = (b.style.display === "block") ? "none" : "block";
-        }
-
-        function verMenu() {
-            const m = document.getElementById("menuAjustes");
-            m.style.display = (m.style.display === "block") ? "none" : "block";
-        }
-
-        function filtrarTodo() {
-            const bus = document.getElementById("inputBuscar").value.toLowerCase();
-            const items = document.querySelectorAll(".chat-row, .item, .call-item");
-            items.forEach(i => {
-                i.style.display = i.innerText.toLowerCase().includes(bus) ? "flex" : "none";
-            });
-        }
-
-        // Cerrar menú al tocar fuera
-        window.onclick = (e) => { 
-            if (!e.target.innerText.includes('⋮')) document.getElementById("menuAjustes").style.display="none"; 
-        }
-
-        // Carga inicial: Chats
+        // Cargar chats al entrar
         window.onload = () => mostrarPagina('chats');
+        
+        function toggleMenu() {
+            // Lógica simple para el modal si lo necesitas
+            alert("Ajustes próximamente");
+        }
     </script>
 </body>
 </html>
