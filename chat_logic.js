@@ -1,83 +1,29 @@
-// chat_logic.js - Lógica pura, sin etiquetas HTML
-const db = firebase.database();
-const miId = localStorage.getItem("user_temp_id");
-const salaId = localStorage.getItem("chat_sala_id");
-const destId = localStorage.getItem("chat_destinatario_id");
-
-// Cargar mensajes y aplicar las medidas de 230x180 que definimos en el CSS
-db.ref("chats_privados/" + salaId).on("value", snap => {
-    const box = document.getElementById('chat-box');
-    if (!box) return; // Seguridad por si el componente no cargó aún
-    box.innerHTML = "";
+// Función para cargar los datos del contacto en la cabecera
+function cargarDatosCabecera() {
+    const destId = localStorage.getItem("chat_destId"); // El ID del contacto guardado
     
-    snap.forEach(child => {
-        const m = child.val();
-        const esMio = m.emisor === miId;
-        const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        const div = document.createElement("div");
-        div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
-
-        if(m.tipo === "imagen") {
-            div.innerHTML = `
-                <div class="img-wrapper">
-                    <img src="${m.contenido}" onclick="zoom('${m.contenido}')">
-                </div>
-                <span class="hora-msg">${hora}</span>`;
-        } else if(m.tipo === "audio") {
-            div.innerHTML = `
-                <div class="audio-container">
-                    <span class="play-icon" onclick="new Audio('${m.contenido}').play()">▶️</span>
-                    <div style="flex:1; height:3px; background:#8696a0; border-radius:2px;"></div>
-                    <span class="hora-msg">${hora}</span>
-                </div>`;
-        } else {
-            div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
-        }
-        box.appendChild(div);
-    });
-    box.scrollTop = box.scrollHeight;
-});
-
-// Función para el botón dinámico (cambia micro por flecha)
-function detectarCambio() {
-    const input = document.getElementById('msg-input');
-    const btn = document.getElementById('btn-main');
-    if (input.value.length > 0) {
-        btn.innerText = "🕊️"; // Icono de enviar
-    } else {
-        btn.innerText = "🎙️"; // Icono de micro
-    }
-}
-
-// ... aquí sigues con iniciarGrabacion, detenerGrabacion, etc.
-
-// --- FUNCIONES DEL MENÚ ---
-
-function cerrarModales() {
-    document.getElementById('modal-opciones').style.display = 'none';
-    document.getElementById('modal-colores').style.display = 'none';
-}
-
-function abrirSelectorFondo() {
-    document.getElementById('modal-opciones').style.display = 'none';
-    document.getElementById('modal-colores').style.display = 'block';
-}
-
-// VACIAR CHAT (Borra todo en Firebase para esta sala)
-function confirmarVaciarChat() {
-    if(confirm("¿Estás seguro de que quieres vaciar este chat? No se puede deshacer.")) {
-        db.ref("chats_privados/" + salaId).remove()
-        .then(() => {
-            alert("Chat vaciado con éxito");
-            cerrarModales();
+    if (destId) {
+        db.ref("usuarios/" + destId).once("value", (snap) => {
+            const user = snap.val();
+            if (user) {
+                document.getElementById("header-nombre-usuario").innerText = user.nombre || "Usuario";
+                if (user.foto) {
+                    document.getElementById("header-foto-perfil").src = user.foto;
+                }
+            }
         });
     }
 }
 
-// CAMBIAR FONDO (Personalización de David)
-function cambiarFondo(color) {
-    const chatBox = document.getElementById('chat-box');
-    chatBox.style.backgroundColor = color;
-    localStorage.setItem("fondo_personalizado", color);
-    cerrarModales();
+// Función para abrir el modal desde los 3 puntos
+function abrirMenuOpciones() {
+    const modal = document.getElementById('modal-opciones');
+    if (modal) {
+        modal.style.display = 'block';
+    }
 }
+
+// Ejecutar cuando se cargue la página
+window.onload = () => {
+    cargarDatosCabecera();
+};
