@@ -23,3 +23,30 @@ function confirmarVaciarChat() {
         });
     }
 }
+// Función para conectar con Firebase y traer los datos del contacto
+function cargarDatosContacto() {
+    const destId = localStorage.getItem("chat_destId");
+    
+    if (!destId) {
+        console.error("No se encontró el ID del destinatario");
+        return;
+    }
+
+    // Buscamos en la rama de usuarios
+    db.ref("usuarios/" + destId).once("value").then((snap) => {
+        const datos = snap.val();
+        if (datos) {
+            // Inyectamos el nombre y la foto en los IDs de la cabecera
+            document.getElementById("header-nombre-usuario").innerText = datos.nombre || "Usuario";
+            
+            if (datos.foto) {
+                document.getElementById("header-foto-perfil").src = datos.foto;
+            }
+        }
+    }).catch(e => console.error("Error al cargar datos:", e));
+}
+
+// Llamamos a la función cuando todo esté listo
+document.addEventListener("DOMContentLoaded", () => {
+    cargarDatosContacto();
+});
