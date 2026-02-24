@@ -3,45 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Añadir Contacto - DNPlus</title>
+    <title>Nuevo Contacto - DNPlus</title>
     <style>
         body { background-color: #0b141a; color: white; font-family: sans-serif; margin: 0; padding: 0; }
-        .header-simple { background-color: #085f56; padding: 15px; display: flex; align-items: center; gap: 15px; }
-        .container { padding: 25px; display: flex; flex-direction: column; align-items: center; }
+        .header-c { background-color: #085f56; padding: 15px; display: flex; align-items: center; gap: 15px; }
         
-        /* Grupo de Selección de País */
-        .field-group { width: 100%; max-width: 320px; margin-bottom: 20px; text-align: left; }
-        .label-custom { color: #00a884; font-size: 12px; font-weight: bold; margin-bottom: 5px; display: block; text-transform: uppercase; }
+        .container { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* ESTILO DEL SELECTOR DE PAÍS */
+        .pais-seccion { background: #2a3942; padding: 12px; border-radius: 8px; border-bottom: 2px solid #00a884; }
+        .label-mini { color: #00a884; font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px; }
         
-        .select-pais { 
-            width: 100%; background: #2a3942; border: none; border-radius: 8px; 
-            color: white; padding: 12px; font-size: 16px; outline: none; cursor: pointer;
+        select { 
+            width: 100%; background: transparent; border: none; color: white; 
+            font-size: 16px; outline: none; cursor: pointer; appearance: none;
         }
 
+        /* CAMPOS DE ENTRADA */
+        .input-box { border-bottom: 1px solid #3b4a54; padding: 10px 0; }
         input { 
-            width: 100%; max-width: 320px; padding: 12px; background: #2a3942; 
-            border: none; border-radius: 8px; color: white; outline: none; font-size: 16px; 
-            box-sizing: border-box;
+            width: 100%; background: transparent; border: none; color: white; 
+            font-size: 16px; outline: none; padding: 5px 0;
         }
+        input::placeholder { color: #8696a0; }
 
-        .btn-save { 
-            background: #00a884; color: white; padding: 15px; border: none; 
-            border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 30px; 
-            width: 100%; max-width: 250px; font-size: 16px; 
+        .btn-guardar { 
+            background: #00a884; color: #0b141a; padding: 15px; border: none; 
+            border-radius: 30px; font-weight: bold; cursor: pointer; 
+            margin-top: 20px; font-size: 15px; text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-simple">
+    <div class="header-c">
         <span onclick="window.history.back()" style="cursor:pointer; font-size: 22px;">←</span>
-        <span style="font-weight: bold; font-size: 18px;">Nuevo contacto</span>
+        <span style="font-weight: bold; font-size: 18px;">Añadir contacto</span>
     </div>
 
     <div class="container">
-        <div class="field-group">
-            <span class="label-custom">Elegir país</span>
-            <select id="paisSel" class="select-pais">
+        
+        <div class="pais-seccion">
+            <span class="label-mini">ELEGIR PAÍS</span>
+            <select id="paisSel">
                 <option value="595">Paraguay (+595)</option>
                 <option value="54">Argentina (+54)</option>
                 <option value="55">Brasil (+55)</option>
@@ -51,21 +55,22 @@
                 <option value="34">España (+34)</option>
                 <option value="52">México (+52)</option>
                 <option value="598">Uruguay (+598)</option>
-                <option value="1">USA / Canadá (+1)</option>
+                <option value="1">Estados Unidos (+1)</option>
             </select>
         </div>
 
-        <div class="field-group">
-            <span class="label-custom">Nombre</span>
-            <input type="text" id="nomCont" placeholder="Ej: Noelia la reina">
+        <div class="input-box">
+            <span class="label-mini">NOMBRE</span>
+            <input type="text" id="nomCont" placeholder="Nombre del contacto">
         </div>
 
-        <div class="field-group">
-            <span class="label-custom">Número de teléfono</span>
+        <div class="input-box">
+            <span class="label-mini">TELÉFONO (SIN CÓDIGO)</span>
             <input type="number" id="telCont" placeholder="Ej: 981123456">
         </div>
 
-        <button class="btn-save" onclick="guardarContacto()">GUARDAR CONTACTO</button>
+        <button class="btn-guardar" onclick="guardarContacto()">Guardar en DNPlus</button>
+
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -88,21 +93,19 @@
             const miId = localStorage.getItem("user_temp_id");
             const prefijo = document.getElementById('paisSel').value;
             const nombre = document.getElementById('nomCont').value.trim();
-            const numSimple = document.getElementById('telCont').value.trim();
+            const numero = document.getElementById('telCont').value.trim();
 
-            if(!nombre || !numSimple) return alert("Completa los datos, David");
-            if(!miId) return alert("Error de sesión, vuelve a entrar");
+            if(!nombre || !numero) return alert("David, completa los campos");
 
-            // UNIFICACIÓN: 595 + 981... = 595981...
-            const telFinal = prefijo + numSimple;
+            // UNIFICAMOS: Prefijo + Número (595 + 981...)
+            const telefonoFinal = prefijo + numero;
 
-            db.ref("mis_contactos/" + miId + "/" + telFinal).set({
+            db.ref("mis_contactos/" + miId + "/" + telefonoFinal).set({
                 nombre: nombre,
-                telefono: telFinal,
-                fecha: Date.now()
+                telefono: telefonoFinal
             }).then(() => {
                 window.location.href = "lista_contactos.html";
-            }).catch(e => alert("Error: " + e.message));
+            });
         }
     </script>
 </body>
