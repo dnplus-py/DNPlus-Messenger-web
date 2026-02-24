@@ -5,35 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus - David Oviedo</title>
     <style>
-        :root { --header: #085f56; --fondo: #0b141a; --verde: #00a884; }
-        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); color: white; overflow: hidden; }
+        /* 1. VARIABLES DE COLOR PARA NO PERDER EL CONTROL */
+        :root {
+            --verde-dn: #00a884;
+            --header-dn: #085f56;
+            --fondo-dn: #0b141a;
+            --texto-gris: #8696a0;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--fondo-dn); 
+            color: white; 
+            overflow: hidden; /* Evita que toda la pantalla se mueva */
+        }
+
+        /* 2. CABECERA FIJA */
+        .header { 
+            background-color: var(--header-dn); 
+            height: 100px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            padding: 10px 15px 0 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
         
-        /* CABECERA */
-        .header { background-color: var(--header); padding: 15px 15px 0 15px; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 20px; font-weight: bold; }
-        .icons { display: flex; gap: 20px; font-size: 18px; cursor: pointer; }
+        .logo { font-size: 22px; font-weight: bold; }
 
-        /* TABS */
-        .tabs { display: flex; justify-content: space-around; margin-top: 10px; }
-        .tab { padding: 12px 0; flex: 1; text-align: center; color: rgba(255,255,255,0.6); font-weight: bold; cursor: pointer; font-size: 13px; text-transform: uppercase; }
-        .tab.active { color: white; border-bottom: 3px solid white; }
+        /* PESTAÑAS */
+        .tabs { display: flex; text-align: center; }
+        .tab { 
+            flex: 1; 
+            padding: 12px 0; 
+            color: rgba(255,255,255,0.6); 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
+        .tab.active { 
+            color: white; 
+            border-bottom: 3px solid white; 
+        }
 
-        /* CONTENEDOR PRINCIPAL */
-        #content-area { height: calc(100vh - 110px); overflow-y: auto; }
-        .page { display: none; }
-        .page.active { display: block; }
+        /* 3. AREA DE CONTENIDO (LO QUE CAMBIA) */
+        #main-view { 
+            height: calc(100vh - 110px); 
+            overflow-y: auto; 
+            width: 100%;
+        }
 
-        /* ESTILOS DE CHATS (Para que se vea real) */
-        .chat-row { display: flex; align-items: center; padding: 15px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #232d36; }
-        .info { flex: 1; }
-        .name { font-weight: bold; font-size: 16px; }
-        .msg { color: #8696a0; font-size: 14px; }
-
-        /* MODAL */
-        .modal { display: none; position: fixed; top: 50px; right: 10px; background: #233138; border-radius: 4px; width: 180px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .opt { padding: 12px 20px; cursor: pointer; }
+        /* 4. BOTONES FLOTANTES (LOS TENEMOS ATADOS AQUÍ) */
+        .fab-master {
+            position: fixed;
+            bottom: 30px;
+            right: 25px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--verde-dn);
+            color: white;
+            display: none; /* Se controla por JS */
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 2000;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -41,95 +86,63 @@
     <div class="header">
         <div class="header-top">
             <div class="logo">DNPlus</div>
-            <div class="icons">
-                <span onclick="alert('Buscando...')">🔍</span>
-                <span onclick="toggleMenu()">⋮</span>
+            <div style="display: flex; gap: 20px; font-size: 18px; cursor: pointer;">
+                <span>🔍</span>
+                <span onclick="toggleAjustes()">⋮</span>
             </div>
         </div>
         <div class="tabs">
-            <div class="tab active" onclick="ver('chats')">Chats</div>
-            <div class="tab" onclick="ver('estados')">Estados</div>
-            <div class="tab" onclick="ver('llamadas')">Llamadas</div>
+            <div class="tab active" id="t-chats" onclick="navegar('chats')">Chats</div>
+            <div class="tab" id="t-estados" onclick="navegar('estados')">Estados</div>
+            <div class="tab" id="t-llamadas" onclick="navegar('llamadas')">Llamadas</div>
         </div>
     </div>
 
-    <div id="content-area">
-        <div id="p-chats" class="page active">
-            <div id="lista-chats-real">
-                <p style="text-align:center; padding:20px; color:#8696a0;">Cargando mensajes...</p>
-            </div>
+    <div id="main-view">
         </div>
 
-        <div id="p-estados" class="page">
-            <p style="text-align:center; padding:20px; color:#8696a0;">No hay estados nuevos.</p>
-        </div>
-
-        <div id="p-llamadas" class="page">
-            <p style="text-align:center; padding:20px; color:#8696a0;">Llamadas recientes aparecerán aquí.</p>
-        </div>
-    </div>
-
-    <div id="m-menu" class="modal">
-        <div class="opt" onclick="location.href='nuevo_grupo.html'">Nuevo grupo</div>
-        <div class="opt" onclick="location.href='ajustes.html'">Ajustes</div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <button id="fab-chats" class="fab-master" onclick="location.href='lista_contactos.html'">💬</button>
+    <button id="fab-estados" class="fab-master" onclick="document.getElementById('file-estado').click()">📷</button>
+    <button id="fab-llamadas" class="fab-master" onclick="location.href='crear_new_contacto.html'">➕</button>
 
     <script>
-        // Configuración Firebase (Reemplaza con la tuya)
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const miId = localStorage.getItem("user_temp_id");
-
-        // Cambiar entre pestañas
-        function ver(seccion) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        function navegar(seccion) {
+            const vista = document.getElementById("main-view");
             
-            document.getElementById('p-' + seccion).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+            // 1. Cambiar visual de pestañas
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('t-' + seccion).classList.add('active');
 
-        function toggleMenu() {
-            const m = document.getElementById("m-menu");
-            m.style.display = m.style.display === "block" ? "none" : "block";
-        }
+            // 2. Control total de botones
+            document.querySelectorAll('.fab-master').forEach(b => b.style.display = 'none');
+            document.getElementById('fab-' + seccion).style.display = 'flex';
 
-        // CARGAR CHATS REALES DE FIREBASE
-        function cargarChats() {
-            db.ref("chats_privados").on("value", (snap) => {
-                const list = document.getElementById("lista-chats-real");
-                list.innerHTML = "";
-                if(!snap.exists()) {
-                    list.innerHTML = "<p style='text-align:center; padding:20px;'>No hay chats aún.</p>";
-                    return;
-                }
-                snap.forEach(child => {
-                    if(child.key.includes(miId)) {
-                        const otroId = child.key.replace(miId, "").replace("_", "");
-                        db.ref("usuarios_registrados/" + otroId).once("value", u => {
-                            const user = u.val();
-                            list.innerHTML += `
-                                <div class="chat-row" onclick="location.href='mensajes.html'">
-                                    <img src="${user.foto}" class="avatar">
-                                    <div class="info">
-                                        <div class="name">${user.nombre}</div>
-                                        <div class="msg">Toca para chatear</div>
-                                    </div>
-                                </div>`;
-                        });
-                    }
+            // 3. Cargar la lista sin que se desarme el resto
+            fetch(`lista_${seccion}.html`)
+                .then(r => r.text())
+                .then(html => {
+                    vista.innerHTML = html;
+                    
+                    // Ejecutar scripts internos (Firebase, etc.)
+                    const scripts = vista.querySelectorAll("script");
+                    scripts.forEach(s => {
+                        const scriptTag = document.createElement("script");
+                        scriptTag.text = s.text;
+                        document.body.appendChild(scriptTag).parentNode.removeChild(scriptTag);
+                    });
+                })
+                .catch(err => {
+                    vista.innerHTML = "<p style='text-align:center; margin-top:50px;'>Error al cargar lista.</p>";
                 });
-            });
         }
 
-        window.onload = cargarChats;
+        function toggleAjustes() {
+            // Aquí llamarías a tu modal de ajustes
+            alert("Ajustes de David");
+        }
+
+        // Carga inicial
+        window.onload = () => navegar('chats');
     </script>
 </body>
 </html>
