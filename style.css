@@ -2,15 +2,15 @@
 :root {
     --verde-principal: #176F47;
     --verde-oscuro: #085F56;
-    --blanco-fondo: #FAFAFA;
+    --fondo-oscuro: #0b141a; /* Cambiado para estilo WhatsApp Dark */
+    --blanco-puro: #FFFFFF;
 }
 
 body {
     margin: 0; padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: var(--blanco-fondo);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--fondo-oscuro); /* Fondo oscuro profesional */
     display: flex; flex-direction: column;
-    align-items: center;
     min-height: 100vh;
 }
 
@@ -23,13 +23,20 @@ body {
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(23, 111, 71, 0.3);
+    transition: transform 0.1s, background-color 0.2s; /* Efecto de rebote */
+}
+
+.btn-confirmar:active {
+    transform: scale(0.95); /* Se encoge un poquito al tocarlo */
+    background-color: #125a3a;
 }
 
 .header-chat {
     background-color: var(--verde-oscuro);
     width: 100%;
     color: white;
-    padding: 15px 0;
-    text-align: center;
+    padding: 10px 15px; /* Más espacio lateral */
+    display: flex;
+    align-items: center;
+    box-sizing: border-box; /* Para que el padding no estire el ancho */
 }
-
