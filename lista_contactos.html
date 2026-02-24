@@ -7,37 +7,29 @@
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
         .header-c { background-color: #085f56; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100; }
-        
-        /* Estilo para los ítems de contacto */
-        .contact-item { display: flex; align-items: center; padding: 12px 25px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; }
-        .contact-item:active { background-color: #202c33; }
-        
+        .contact-item { display: flex; align-items: center; padding: 12px 25px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .avatar-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; }
         .info-contact { flex: 1; }
-        .name-contact { font-weight: bold; font-size: 16px; color: #e9edef; }
-        .status-contact { color: #8696a0; font-size: 13px; margin-top: 2px; }
-
-        .btn-volver { font-size: 24px; cursor: pointer; text-decoration: none; color: white; }
+        .name-contact { font-weight: bold; font-size: 16px; }
+        .status-contact { color: #8696a0; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div class="header-c">
-        <div class="btn-volver" onclick="window.location.href='home.html'">←</div>
+        <span onclick="window.location.href='home.html'" style="cursor:pointer; font-size: 24px;">←</span>
         <div>
-            <div style="font-weight: bold; font-size: 18px;">Seleccionar contacto</div>
-            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Buscando usuarios...</div>
+            <div style="font-weight: bold; font-size: 18px;">Mis Contactos</div>
+            <div id="countLabel" style="font-size: 12px; opacity: 0.8;">Cargando lista...</div>
         </div>
     </div>
 
-    <div id="listaDinamica">
-        </div>
+    <div id="listaDinamica"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIGURACIÓN DE TU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             authDomain: "dnplus-messenger-pro.firebaseapp.com",
@@ -51,75 +43,58 @@
         const db = firebase.database();
 
         window.onload = function() {
-            // Obtenemos tu propio ID para no mostrarte a ti mismo en la lista
             const miId = localStorage.getItem("user_temp_id");
 
-            // Escuchar cambios en la carpeta de usuarios
-            db.ref("usuarios_registrados").on("value", (snapshot) => {
+            // 1. ESCUCHAR MIS CONTACTOS GUARDADOS
+            db.ref("mis_contactos/" + miId).on("value", (snapshot) => {
                 const container = document.getElementById('listaDinamica');
                 const label = document.getElementById('countLabel');
                 container.innerHTML = "";
                 
                 if (snapshot.exists()) {
-                    let contador = 0;
-                    
-                    snapshot.forEach((childSnapshot) => {
-                        const userId = childSnapshot.key;
-                        const u = childSnapshot.val();
+                    let total = 0;
+                    snapshot.forEach((child) => {
+                        const tel = child.key;
+                        const info = child.val();
+                        total++;
 
-                        // IMPORTANTE: Solo mostrar si NO es mi propio ID
-                        if (userId !== miId) {
-                            contador++;
-                            const nombre = u.nombre || "Usuario de DNPlus";
-                            const foto = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-                            const estado = u.estado || "¡Hola! Estoy usando DNPlus";
+                        // 2. BUSCAR DATOS REALES (Foto y Nombre de registro)
+                        db.ref("usuarios_registrados/" + tel).once("value", (userSnap) => {
+                            let foto = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                            let nombre = info.nombre;
+                            let estado = "No usa DNPlus";
+
+                            if(userSnap.exists()){
+                                const uReal = userSnap.val();
+                                foto = uReal.foto || foto;
+                                nombre = uReal.nombre || nombre; // Unifica con el nombre que el usuario eligió
+                                estado = "¡Hola! Estoy usando DNPlus";
+                            }
 
                             container.innerHTML += `
-                                <div class="contact-item" onclick="irAlChat('${userId}', '${nombre}', '${foto}')">
+                                <div class="contact-item" onclick="irAlChat('${tel}', '${nombre}', '${foto}')">
                                     <img src="${foto}" class="avatar-img">
                                     <div class="info-contact">
                                         <div class="name-contact">${nombre}</div>
                                         <div class="status-contact">${estado}</div>
                                     </div>
                                 </div>`;
-                        }
+                        });
                     });
-
-                    label.innerText = contador + " contactos";
-                    
-                    if(contador === 0) {
-                        container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">No hay otros usuarios registrados aún</div>';
-                    }
-
+                    label.innerText = total + " contactos guardados";
                 } else {
                     label.innerText = "0 contactos";
-                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#8696a0;">Nadie se ha registrado aún</div>';
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No has guardado contactos todavía.</p>";
                 }
-            }, (error) => {
-                console.error("Error al leer Firebase:", error);
-                label.innerText = "Error al cargar";
             });
         };
 
-        function irAlChat(idDestino, nombre, foto) {
+        function irAlChat(id, nom, foto) {
             const miId = localStorage.getItem("user_temp_id");
-            
-            if(!miId) {
-                alert("Error: No se encontró tu ID de usuario. Por favor, regístrate de nuevo.");
-                return;
-            }
-
-            // CREACIÓN DE SALA PRIVADA (Chat de dos)
-            // Combinamos los IDs ordenados alfabéticamente para que la sala sea ÚNICA entre los dos
-            const salaId = miId < idDestino ? `${miId}_${idDestino}` : `${idDestino}_${miId}`;
-            
-            // Guardamos la info necesaria para la pantalla de mensajes
+            const salaId = miId < id ? `${miId}_${id}` : `${id}_${miId}`;
             localStorage.setItem("chat_sala_id", salaId);
-            localStorage.setItem("chat_destinatario_id", idDestino);
-            localStorage.setItem("chat_destinatario_nombre", nombre);
+            localStorage.setItem("chat_destinatario_nombre", nom);
             localStorage.setItem("chat_destinatario_foto", foto);
-            
-            // Redirigir a la pantalla de chat
             window.location.href = "mensajes.html";
         }
     </script>
