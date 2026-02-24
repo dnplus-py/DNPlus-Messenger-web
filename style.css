@@ -1,22 +1,46 @@
+/* Colores Oficiales DNPlus Messenger */
+:root {
+    --verde-principal: #176F47;
+    --verde-oscuro: #085F56;
+    --fondo-oscuro: #0b141a; 
+    --blanco-puro: #FFFFFF;
+    --en-linea: #00e676;
+}
+
+body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--fondo-oscuro);
+    display: flex; flex-direction: column;
+    min-height: 100vh;
+}
+
+/* LA CORRECCIÓN: Agregué el punto (.) inicial */
 .header-chat-container {
     background-color: var(--verde-oscuro);
     height: 65px;
+    width: 100%; /* Asegura que ocupe todo el ancho */
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 15px;
     color: white;
+    box-sizing: border-box;
+    position: sticky; /* Se queda fija arriba */
+    top: 0;
+    z-index: 1000;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .back-icon {
-    font-size: 24px;
+    font-size: 22px;
     cursor: pointer;
+    color: white;
 }
 
 .avatar-header {
@@ -24,6 +48,7 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .header-info {
@@ -34,17 +59,18 @@
 #chat-nombre {
     font-weight: bold;
     font-size: 16px;
+    color: white;
 }
 
 #chat-estado {
     font-size: 12px;
-    color: #00e676; /* Verde neón para el 'en línea' */
+    color: var(--en-linea);
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 18px; /* Espacio entre el teléfono y los puntos */
 }
 
 .icon-btn {
@@ -52,24 +78,11 @@
     color: white;
     text-decoration: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
-/* Colores Oficiales DNPlus Messenger */
-:root {
-    --verde-principal: #176F47;
-    --verde-oscuro: #085F56;
-    --fondo-oscuro: #0b141a; /* Cambiado para estilo WhatsApp Dark */
-    --blanco-puro: #FFFFFF;
-}
-
-body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--fondo-oscuro); /* Fondo oscuro profesional */
-    display: flex; flex-direction: column;
-    min-height: 100vh;
-}
-
+/* Botón de confirmar para los modales futuros */
 .btn-confirmar {
     background-color: var(--verde-principal);
     color: white;
@@ -79,20 +92,9 @@ body {
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(23, 111, 71, 0.3);
-    transition: transform 0.1s, background-color 0.2s; /* Efecto de rebote */
+    transition: transform 0.1s;
 }
 
 .btn-confirmar:active {
-    transform: scale(0.95); /* Se encoge un poquito al tocarlo */
-    background-color: #125a3a;
-}
-
-.header-chat {
-    background-color: var(--verde-oscuro);
-    width: 100%;
-    color: white;
-    padding: 10px 15px; /* Más espacio lateral */
-    display: flex;
-    align-items: center;
-    box-sizing: border-box; /* Para que el padding no estire el ancho */
+    transform: scale(0.95);
 }
