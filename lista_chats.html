@@ -4,52 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Mantenemos tus estilos originales */
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
-        .chat-list-container { display: flex; flex-direction: column; padding-bottom: 80px; } /* Espacio para el botón */
-        .chat-row { display: flex; align-items: center; padding: 12px 15px; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(134, 150, 160, 0.1); }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
+        
+        .chat-list-container { display: flex; flex-direction: column; padding-bottom: 80px; }
+        
+        /* DISEÑO DE FILA DE CHAT */
+        .chat-row { 
+            display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
+            cursor: pointer; border-bottom: 1px solid rgba(134, 150, 160, 0.08); 
+            transition: background 0.2s;
+        }
         .chat-row:active { background-color: #202c33; }
-        .profile-img { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .profile-img { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; object-fit: cover; }
+        
         .chat-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .chat-header { display: flex; justify-content: space-between; align-items: center; }
         .name { font-size: 16px; font-weight: 500; color: #e9edef; }
-        .time { font-size: 12px; color: #00a884; font-weight: 500; }
+        .time { font-size: 12px; color: #8696a0; }
+        
         .last-msg-container { display: flex; justify-content: space-between; align-items: center; margin-top: 3px; }
-        .message { font-size: 14px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-        .unread-badge { background-color: #00a884; color: #0b141a; font-size: 11px; font-weight: bold; min-width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
-        /* ESTILO DEL BOTÓN FLOTANTE (FAB) */
+        .message { font-size: 14px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        
+        /* BOTÓN FLOTANTE INTERNO */
         .fab-chats {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #00a884;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            cursor: pointer;
-            z-index: 99;
+            position: fixed; bottom: 25px; right: 25px;
+            background-color: #00a884; width: 56px; height: 56px;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 24px; color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 99; cursor: pointer;
         }
-        .fab-chats img { width: 24px; height: 24px; filter: invert(1); }
     </style>
 </head>
 <body>
 
-    <div class="chat-list-container" id="lista-real-chats">
-        </div>
+    <div class="chat-list-container" id="contenedor-chats-real">
+        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando tus chats...</p>
+    </div>
 
-    <div class="fab-chats" onclick="location.href='lista_contactos.html'">
-        <span>💬</span> </div>
+    <div class="fab-chats" onclick="window.top.location.href='lista_contactos.html'">💬</div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Configuración de David Oviedo
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -58,41 +56,43 @@
         const db = firebase.database();
         const miId = localStorage.getItem("user_temp_id");
 
-        function cargarLista() {
+        function cargarChats() {
             db.ref("chats_privados").on("value", (snapshot) => {
-                const container = document.getElementById("lista-real-chats");
+                const container = document.getElementById("contenedor-chats-real");
                 container.innerHTML = "";
                 
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const salaId = child.key;
-                        if (salaId.includes(miId)) {
-                            const idOtro = salaId.replace(miId, "").replace("_", "");
-                            
-                            db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
-                                const d = uSnap.val() || {};
-                                const msgs = Object.values(child.val());
-                                const ultimo = msgs[msgs.length - 1];
-                                const hora = new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-                                container.innerHTML += `
-                                    <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${d.nombre}', '${d.foto}')">
-                                        <img src="${d.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
-                                        <div class="chat-details">
-                                            <div class="chat-header">
-                                                <span class="name">${d.nombre || 'Usuario'}</span>
-                                                <span class="time">${hora}</span>
-                                            </div>
-                                            <div class="last-msg-container">
-                                                <span class="message">${ultimo.contenido}</span>
-                                                <div class="unread-badge">1</div>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                            });
-                        }
-                    });
+                if (!snapshot.exists()) {
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats aún. Toca el botón para empezar uno.</p>";
+                    return;
                 }
+
+                snapshot.forEach((child) => {
+                    const salaId = child.key;
+                    if (salaId.includes(miId)) {
+                        const idOtro = salaId.replace(miId, "").replace("_", "");
+                        
+                        db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
+                            const user = uSnap.val() || {};
+                            const msgs = Object.values(child.val());
+                            const ultimo = msgs[msgs.length - 1];
+                            const hora = ultimo.fecha ? new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+
+                            container.innerHTML += `
+                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre}', '${user.foto}')">
+                                    <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
+                                    <div class="chat-details">
+                                        <div class="chat-header">
+                                            <span class="name">${user.nombre || 'Usuario'}</span>
+                                            <span class="time">${hora}</span>
+                                        </div>
+                                        <div class="last-msg-container">
+                                            <span class="message">${ultimo.contenido || 'Archivo'}</span>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                });
             });
         }
 
@@ -101,10 +101,12 @@
             localStorage.setItem("chat_destinatario_id", id);
             localStorage.setItem("chat_destinatario_nombre", nom);
             localStorage.setItem("chat_destinatario_foto", foto);
-            window.location.href = "mensajes.html";
+            
+            // USAMOS window.top para salir del iframe y abrir el chat en toda la pantalla
+            window.top.location.href = "mensajes.html";
         }
 
-        window.onload = cargarLista;
+        window.onload = cargarChats;
     </script>
 </body>
 </html>
