@@ -1,29 +1,25 @@
-// Función para cargar los datos del contacto en la cabecera
-function cargarDatosCabecera() {
-    const destId = localStorage.getItem("chat_destId"); // El ID del contacto guardado
-    
-    if (destId) {
-        db.ref("usuarios/" + destId).once("value", (snap) => {
-            const user = snap.val();
-            if (user) {
-                document.getElementById("header-nombre-usuario").innerText = user.nombre || "Usuario";
-                if (user.foto) {
-                    document.getElementById("header-foto-perfil").src = user.foto;
-                }
-            }
+// Abre el modal desde los tres puntos
+function abrirMenuOpciones() {
+    document.getElementById('modal-opciones').style.display = 'block';
+}
+
+// Cierra cualquier modal abierto
+function cerrarModales() {
+    document.getElementById('modal-opciones').style.display = 'none';
+    if(document.getElementById('modal-colores')) {
+        document.getElementById('modal-colores').style.display = 'none';
+    }
+}
+
+// Lógica para VACIAR el chat (Solo borra para ti o para ambos según tu Firebase)
+function confirmarVaciarChat() {
+    if(confirm("¿Deseas vaciar todos los mensajes?")) {
+        // Suponiendo que salaId está definido en tu lógica de mensajes
+        db.ref("chats_privados/" + salaId).remove()
+        .then(() => {
+            alert("Chat vaciado");
+            cerrarModales();
+            location.reload(); // Recarga para limpiar la pantalla
         });
     }
 }
-
-// Función para abrir el modal desde los 3 puntos
-function abrirMenuOpciones() {
-    const modal = document.getElementById('modal-opciones');
-    if (modal) {
-        modal.style.display = 'block';
-    }
-}
-
-// Ejecutar cuando se cargue la página
-window.onload = () => {
-    cargarDatosCabecera();
-};
