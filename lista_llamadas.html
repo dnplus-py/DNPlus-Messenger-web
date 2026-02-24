@@ -6,10 +6,12 @@
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
         
+        .call-list-container { padding-bottom: 80px; }
         .call-item { 
             display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
             cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); 
         }
+        .call-item:active { background-color: #202c33; }
         
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #232d36; }
         
@@ -17,34 +19,53 @@
         .name { font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
         .details { color: #8696a0; font-size: 13px; margin-top: 3px; display: flex; align-items: center; gap: 5px; }
         
-        /* Iconos de llamada */
-        .icon-call { color: #00a884; font-size: 20px; }
-        .missed { color: #f15c5c; } /* Rojo para llamadas perdidas */
-        .incoming { transform: rotate(135deg); }
+        .icon-call { color: #00a884; font-size: 22px; padding: 10px; }
+        .missed { color: #f15c5c; font-weight: bold; } /* Rojo para perdidas */
+        .success { color: #00a884; font-weight: bold; } /* Verde para realizadas/recibidas */
+
+        /* BOTÓN FLOTANTE (FAB) */
+        .fab-calls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #00a884;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            z-index: 99;
+            font-size: 24px;
+            color: white;
+        }
+
+        /* MODAL LLAMADA */
+        #pantalla-llamada {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #0b141a; z-index: 5000; text-align: center; padding-top: 100px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="lista-llamadas">
-        <div class="call-item">
-            <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" class="avatar">
-            <div class="info">
-                <div class="name">Noelia Ortega</div>
-                <div class="details">
-                    <span class="missed">↙</span> (2) Hoy, 14:20
-                </div>
-            </div>
-            <div class="icon-call" onclick="iniciarLlamada('ID_DE_NOELIA')">📞</div>
-        </div>
+    <div class="call-list-container" id="contenedor-llamadas">
+        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando historial...</p>
     </div>
 
-    <div id="pantalla-llamada" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0b141a; z-index:5000; text-align:center; padding-top:100px;">
+    <div class="fab-calls" onclick="location.href='crear_new_contacto.html'">
+        ➕
+    </div>
+
+    <div id="pantalla-llamada">
         <img id="call-avatar" src="" style="width:120px; height:120px; border-radius:50%; border:3px solid #00a884;">
-        <h2 id="call-name" style="margin-top:20px;">Llamando...</h2>
+        <h2 id="call-name" style="margin-top:20px; color:white;">Llamando...</h2>
         <p style="color:#00a884; font-weight:bold;">DNPlus Voice</p>
         
-        <div style="position:absolute; bottom:80px; width:100%; display:flex; justify-content:center; gap:40px;">
-            <div onclick="colgar()" style="background:#f15c5c; width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;">📞</div>
+        <div style="position:absolute; bottom:80px; width:100%; display:flex; justify-content:center;">
+            <div onclick="colgar()" style="background:#f15c5c; width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer; color:white;">📞</div>
         </div>
     </div>
 
@@ -52,41 +73,68 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Tu configuración de Firebase
+        // Configuración Firebase (David Oviedo)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
         const miId = localStorage.getItem("user_temp_id");
 
-        function iniciarLlamada(idDestino) {
-            // 1. Mostrar pantalla de "Llamando..."
-            const pantalla = document.getElementById("pantalla-llamada");
-            pantalla.style.display = "block";
-            
-            // 2. Notificar por Firebase a la otra persona
-            db.ref("llamadas_activas/" + idDestino).set({
-                quienLlama: miId,
-                nombreLlamador: "David Oviedo", // Esto deberías traerlo de tu perfil
-                estado: "timbrando",
-                fecha: Date.now()
-            });
+        // CARGAR HISTORIAL DE LLAMADAS
+        function cargarHistorial() {
+            db.ref("historial_llamadas/" + miId).on("value", snapshot => {
+                const container = document.getElementById("contenedor-llamadas");
+                container.innerHTML = "";
+                
+                if (!snapshot.exists()) {
+                    container.innerHTML = "<p style='text-align:center; padding:20px; color:#8696a0;'>No hay llamadas recientes.</p>";
+                    return;
+                }
 
-            // Aquí se integraría el código de WebRTC para el audio real
+                snapshot.forEach(child => {
+                    const call = child.val();
+                    const esPerdida = call.tipo === "perdida";
+                    const flecha = esPerdida ? "↙" : "↗";
+                    const clase = esPerdida ? "missed" : "success";
+                    const fecha = new Date(call.fecha).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
+
+                    container.innerHTML += `
+                        <div class="call-item">
+                            <img src="${call.foto}" class="avatar">
+                            <div class="info">
+                                <div class="name">${call.nombre}</div>
+                                <div class="details">
+                                    <span class="${clase}">${flecha}</span> ${fecha}
+                                </div>
+                            </div>
+                            <div class="icon-call" onclick="iniciarLlamada('${call.idOtro}', '${call.nombre}', '${call.foto}')">📞</div>
+                        </div>`;
+                });
+            });
+        }
+
+        function iniciarLlamada(id, nombre, foto) {
+            document.getElementById("pantalla-llamada").style.display = "block";
+            document.getElementById("call-name").innerText = nombre;
+            document.getElementById("call-avatar").src = foto;
+            
+            // Registro en Firebase para notificar al otro
+            db.ref("llamadas_activas/" + id).set({
+                quienLlama: miId,
+                nombreLlamador: "David Oviedo",
+                fotoLlamador: localStorage.getItem("mi_foto_perfil") || "",
+                estado: "timbrando"
+            });
         }
 
         function colgar() {
             document.getElementById("pantalla-llamada").style.display = "none";
-            // Limpiar registro en Firebase para que el otro deje de recibir la llamada
+            // Aquí agregarías la lógica para limpiar llamadas_activas en Firebase
         }
 
-        // ESCUCHAR SI ALGUIEN ME LLAMA A MÍ
-        db.ref("llamadas_activas/" + miId).on("value", snapshot => {
-            if(snapshot.exists()) {
-                const data = snapshot.val();
-                if(data.estado === "timbrando") {
-                    alert("¡Te está llamando " + data.nombreLlamador + "!");
-                    // Aquí abrirías la pantalla de "Recibir Llamada"
-                }
-            }
-        });
+        window.onload = cargarHistorial;
     </script>
 </body>
 </html>
