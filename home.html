@@ -3,50 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Messenger</title>
+    <title>DNPlus - David Oviedo</title>
     <style>
         :root {
             --fondo: #0b141a;
-            --verde: #00a884;
-            --header: #202c33;
+            --verde-header: #085f56;
+            --verde-msg: #00a884;
             --texto: #e9edef;
             --gris: #8696a0;
         }
 
         body { margin: 0; font-family: sans-serif; background-color: var(--fondo); color: var(--texto); overflow: hidden; }
 
-        /* HEADER PRINCIPAL */
-        .header { background-color: var(--header); padding: 10px 15px; display: flex; flex-direction: column; gap: 10px; }
+        /* CABECERA CON TU COLOR #085f56 */
+        .header { background-color: var(--verde-header); padding: 15px 15px 0 15px; display: flex; flex-direction: column; gap: 10px; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .logo { color: var(--gris); font-size: 20px; font-weight: bold; }
-        .icons { display: flex; gap: 20px; font-size: 20px; color: var(--gris); cursor: pointer; }
+        .logo { color: white; font-size: 20px; font-weight: bold; }
+        .icons { display: flex; gap: 22px; font-size: 18px; color: white; cursor: pointer; }
 
-        /* BUSCADOR REAL */
-        .search-bar { background: var(--fondo); border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; gap: 10px; margin: 5px 0; }
-        .search-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 15px; }
+        /* BUSCADOR */
+        .search-bar { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px 15px; display: flex; align-items: center; margin: 5px 0; }
+        .search-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; }
 
-        /* TABS (Pestañas) */
-        .tabs { display: flex; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab { padding: 12px 0; flex: 1; text-align: center; color: var(--gris); font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 14px; }
-        .tab.active { color: var(--verde); border-bottom: 3px solid var(--verde); }
+        /* TABS (CHATS, ESTADOS, LLAMADAS) */
+        .tabs { display: flex; justify-content: space-around; margin-top: 5px; }
+        .tab { padding: 12px 0; flex: 1; text-align: center; color: rgba(255,255,255,0.7); font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; }
+        .tab.active { color: white; border-bottom: 3px solid white; }
 
-        /* CONTENEDOR DE PÁGINAS */
-        #main-content { height: calc(100vh - 160px); overflow-y: auto; }
+        /* CONTENEDOR DONDE SE CARGAN LAS LISTAS */
+        #main-content { height: calc(100vh - 150px); overflow-y: auto; }
 
-        /* MODAL DE AJUSTES (3 PUNTITOS) */
+        /* MODAL DE AJUSTES */
         .modal { 
-            display: none; position: fixed; top: 45px; right: 10px; 
+            display: none; position: fixed; top: 50px; right: 10px; 
             background: #233138; box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            border-radius: 8px; z-index: 1000; width: 200px; padding: 5px 0;
+            border-radius: 4px; z-index: 1000; width: 190px; padding: 5px 0;
         }
-        .modal-item { padding: 12px 20px; font-size: 15px; cursor: pointer; }
-        .modal-item:hover { background: #182229; }
+        .modal-item { padding: 12px 20px; font-size: 15px; cursor: pointer; color: white; }
+        .modal-item:active { background: #182229; }
 
         /* BOTÓN FLOTANTE */
         .fab { 
-            position: fixed; bottom: 20px; right: 20px; background: var(--verde); 
+            position: fixed; bottom: 20px; right: 20px; background: var(--verde-msg); 
             width: 55px; height: 55px; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; font-size: 24px; color: #0b141a;
+            align-items: center; justify-content: center; font-size: 22px; color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;
         }
     </style>
@@ -77,94 +77,71 @@
 
     <div id="ajustesModal" class="modal">
         <div class="modal-item" onclick="location.href='nuevo_grupo.html'">Nuevo grupo</div>
-        <div class="modal-item" onclick="location.href='perfil.html'">Ajustes</div>
-        <div class="modal-item" onclick="borrarHistorial()" style="color: #f15c5c;">Borrar historial chat</div>
+        <div class="modal-item" onclick="location.href='ajustes.html'">Ajustes</div>
+        <div class="modal-item" onclick="borrarHistorial()" style="color: #ff5e5e;">Borrar historial chat</div>
     </div>
 
-    <div class="fab" onclick="location.href='lista_contactos.html'">💬</div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <div class="fab" id="fab-btn" onclick="accionFab()">💬</div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // 1. CARGAR SECCIONES
+        // CARGA DINÁMICA DE ARCHIVOS
         async function cargarSeccion(tipo) {
             const container = document.getElementById("main-content");
-            
-            // Actualizar Tabs
+            const fab = document.getElementById("fab-btn");
+
+            // Marcar pestaña activa
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tipo).classList.add('active');
 
-            // Cargar el archivo HTML correspondiente
+            // Cambiar icono del botón flotante según sección
+            if(tipo === 'chats') fab.innerHTML = "💬";
+            else if(tipo === 'estados') fab.innerHTML = "📷";
+            else if(tipo === 'llamadas') fab.innerHTML = "📞";
+
+            // FETCH para cargar lista_chats.html, lista_estados.html o lista_llamadas.html
             try {
-                const response = await fetch(`lista_${tipo}.html`);
-                const html = await response.text();
+                const url = `lista_${tipo}.html`;
+                const res = await fetch(url);
+                const html = await res.text();
                 container.innerHTML = html;
 
-                // Ejecutar scripts que vengan dentro del HTML cargado
+                // Reactivar scripts del HTML cargado
                 const scripts = container.querySelectorAll("script");
-                scripts.forEach(oldScript => {
-                    const newScript = document.createElement("script");
-                    newScript.text = oldScript.text;
-                    document.body.appendChild(newScript).parentNode.removeChild(newScript);
-                });
-            } catch (err) {
-                container.innerHTML = "<p style='text-align:center; padding:20px;'>Cargando sección...</p>";
+                scripts.forEach(s => eval(s.innerHTML));
+            } catch (e) {
+                container.innerHTML = "<p style='text-align:center; padding:20px;'>Cargando...</p>";
             }
         }
 
-        // 2. BUSCADOR REAL
         function toggleSearch() {
             const bar = document.getElementById("searchBar");
             bar.style.display = bar.style.display === "none" ? "flex" : "none";
         }
 
-        function ejecutarBusqueda() {
-            const texto = document.getElementById("inputBusqueda").value.toLowerCase();
-            // Esto filtrará los elementos que tengan la clase 'chat-row', 'item', etc.
-            const items = document.querySelectorAll(".chat-row, .item, .call-item");
-            items.forEach(item => {
-                const nombre = item.textContent.toLowerCase();
-                item.style.display = nombre.includes(texto) ? "flex" : "none";
-            });
-        }
-
-        // 3. MODAL AJUSTES
         function toggleModal() {
             const m = document.getElementById("ajustesModal");
             m.style.display = m.style.display === "block" ? "none" : "block";
         }
 
-        function borrarHistorial() {
-            if(confirm("¿David, estás seguro de borrar todo tu historial de chats?")) {
-                const miId = localStorage.getItem("user_temp_id");
-                db.ref("chats_privados").once("value", snap => {
-                    snap.forEach(child => {
-                        if(child.key.includes(miId)) {
-                            db.ref("chats_privados/" + child.key).remove();
-                        }
-                    });
-                    alert("Historial borrado");
-                    location.reload();
-                });
-            }
+        function ejecutarBusqueda() {
+            const txt = document.getElementById("inputBusqueda").value.toLowerCase();
+            const items = document.querySelectorAll(".chat-row, .item, .call-item");
+            items.forEach(i => {
+                i.style.display = i.innerText.toLowerCase().includes(txt) ? "flex" : "none";
+            });
+        }
+
+        function accionFab() {
+            const activa = document.querySelector('.tab.active').id;
+            if(activa === 'tab-chats') location.href = 'lista_contactos.html';
+            else if(activa === 'tab-estados') document.getElementById('file-estado').click();
+            else if(activa === 'tab-llamadas') alert("Nueva llamada");
         }
 
         // Cerrar modal al tocar fuera
-        window.onclick = function(event) {
-            if (!event.target.matches('span')) {
-                document.getElementById("ajustesModal").style.display = "none";
-            }
-        }
+        window.onclick = (e) => { if(!e.target.innerText.includes('⋮')) document.getElementById("ajustesModal").style.display="none"; }
 
-        // Cargar chats por defecto al abrir
+        // Carga inicial
         window.onload = () => cargarSeccion('chats');
     </script>
 </body>
