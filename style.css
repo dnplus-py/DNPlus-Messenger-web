@@ -1,82 +1,80 @@
-/* RESET PARA EVITAR MARGENES FEOS */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DNPlus Messenger</title>
+    <link rel="stylesheet" href="estilos_chat.css">
+    <style>
+        /* RESET CRÍTICO: Sin esto, la cabecera siempre se verá mal */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #0b141a;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Evita rebotes feos */
+        }
 
-.header-chat-container {
-    background-color: #202c33; /* Color oscuro real de WhatsApp */
-    height: 60px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 10px;
-    color: #e9edef;
-    position: fixed; /* Se queda arriba siempre */
-    top: 0;
-    left: 0;
-    z-index: 2000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra para que no se vea plano */
-}
+        /* Contenedores maestros */
+        #zona-cabecera { width: 100%; min-height: 60px; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 10px; }
+        #zona-input { width: 100%; }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    flex: 1;
-}
+        .modal-bottom {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #232d36;
+            border-radius: 20px 20px 0 0;
+            z-index: 5000;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
 
-.back-icon {
-    padding: 8px;
-    font-size: 20px;
-    cursor: pointer;
-    border-radius: 50%;
-}
+    <div id="zona-cabecera"></div>
 
-.back-icon:active { background: rgba(255,255,255,0.1); }
+    <div id="chat-box"></div>
 
-.avatar-header {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    margin: 0 10px;
-    object-fit: cover;
-    background: #6a7175;
-}
+    <div id="zona-input"></div>
 
-.header-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+    <div id="modal-opciones" class="modal-bottom">
+        <div style="padding:15px 25px; color:white;" onclick="confirmarVaciarChat()">🗑️ Vaciar chat</div>
+        <div style="padding:15px 25px; color:white;" onclick="abrirSelectorFondo()">🖼️ Fondo de pantalla</div>
+        <div style="text-align:center; color:#ff4444; padding:15px;" onclick="document.getElementById('modal-opciones').style.display='none'">Cancelar</div>
+    </div>
 
-#chat-nombre {
-    font-weight: 600;
-    font-size: 16px;
-    color: #e9edef;
-    white-space: nowrap;
-}
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Tu config de siempre
+        const firebaseConfig = { 
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", 
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" 
+        };
+        firebase.initializeApp(firebaseConfig);
 
-#chat-estado {
-    font-size: 11px;
-    color: #8696a0; /* Gris suave para el estado */
-}
+        // Cargador de archivos externos
+        async function ensamblarTodo() {
+            const h = await fetch('cabecera_chat.html');
+            document.getElementById('zona-cabecera').innerHTML = await h.text();
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* Iconos más finos */
-.icon-btn {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    cursor: pointer;
-    color: #aebac1;
-    text-decoration: none;
-    font-size: 18px;
-}
-
-.icon-btn:active { background: rgba(255,255,255,0.1); }
+            const i = await fetch('barra_input.html');
+            document.getElementById('zona-input').innerHTML = await i.text();
+            
+            // Si el JS ya cargó, vinculamos el audio
+            if(window.iniciarGrabacion) {
+                const b = document.getElementById('btn-main');
+                if(b){ b.onmousedown = iniciarGrabacion; b.onmouseup = detenerGrabacion; }
+            }
+        }
+        ensamblarTodo();
+    </script>
+    <script src="chat_logic.js"></script>
+</body>
+</html>
