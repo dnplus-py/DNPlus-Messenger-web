@@ -3,197 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Chat Privado</title>
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
         
-        /* CABECERA CON FOTO REAL */
-        .header { background-color: #085f56; height: 65px; padding: 0 15px; display: flex; align-items: center; gap: 10px; color: white; z-index: 100; }
-        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; background: #232d36; }
-        .header-info { display: flex; flex-direction: column; flex: 1; }
-        .header-info .nombre { font-size: 16px; font-weight: bold; }
-        .header-info .estado { font-size: 11px; opacity: 0.8; }
+        /* CABECERA */
+        .header { background-color: #085f56; height: 65px; padding: 0 15px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; }
+        .header-info { flex: 1; }
+        .header-info .nombre { font-size: 16px; font-weight: bold; display: block; }
+        .header-info .estado { font-size: 11px; color: #00e676; }
 
+        /* CHAT BOX */
         #chat-box { 
             flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; 
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-color: #0b141a; background-blend-mode: overlay;
+            background-color: #0b141a; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
         }
 
-        /* BURBUJAS CON HORA */
-        .msg { padding: 6px 10px; border-radius: 10px; max-width: 75%; position: relative; font-size: 15px; display: flex; flex-direction: column; }
+        /* BURBUJAS */
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; animation: aparecer 0.2s ease; }
+        @keyframes aparecer { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .msg-mio { align-self: flex-end; background-color: #176f47; border-bottom-right-radius: 2px; }
         .msg-otro { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
-        .hora-msg { font-size: 10px; align-self: flex-end; margin-top: 4px; opacity: 0.6; }
+        .hora-msg { font-size: 10px; opacity: 0.6; float: right; margin: 5px 0 0 8px; }
 
-        /* FOTOS */
-        .img-wrapper { width: 230px; height: 170px; overflow: hidden; border-radius: 8px; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        /* CORAZÓN GIGANTE */
+        .heart-big { font-size: 50px; animation: pulse 0.8s infinite; display: inline-block; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        /* FOOTER */
-        .footer { background-color: #1f2c33; padding: 8px; display: flex; align-items: center; gap: 8px; }
-        .input-area { flex: 1; background-color: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; min-height: 45px; }
-        input { flex: 1; background: transparent; border: none; padding: 10px; color: white; outline: none; font-size: 16px; }
-        #crono { color: #ff4b4b; font-weight: bold; display: none; margin-right: 10px; }
-
-        .btn-accion { background-color: #00a884; border: none; width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        /* CAJA DE AUDIO */
+        .audio-box { width: 220px; display: flex; align-items: center; gap: 10px; padding: 5px; }
+        .play-btn { font-size: 24px; cursor: pointer; color: #00a884; }
 
         /* MODALES */
-        #opciones-modal { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; padding: 10px 0; border-radius: 20px 20px 0 0; z-index: 1000; }
-        .opcion-btn { padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-size: 16px; cursor: pointer; color: white; }
+        .modal-bottom { 
+            display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; 
+            border-radius: 20px 20px 0 0; z-index: 2000; padding: 20px 0;
+        }
+        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; max-height: 250px; overflow-y: auto; }
+        .color-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
+
+        .menu-top { display: none; position: fixed; top: 50px; right: 15px; background: #232d36; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 3000; }
+        .menu-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        /* FOOTER */
+        .footer { background: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        .input-area { flex: 1; background: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; }
+        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="window.location.href='lista_contactos.html'" style="cursor:pointer; font-size: 20px;">←</span>
-        <img id="header-foto" class="avatar-header" onclick="irAPerfil()">
+        <span onclick="history.back()" style="cursor:pointer;">←</span>
+        <img id="header-foto" class="avatar-header">
         <div class="header-info">
-            <span class="nombre" id="chat-nombre">...</span>
+            <span class="nombre" id="chat-nombre">Cargando...</span>
             <span class="estado" id="chat-estado">en línea</span>
         </div>
-        <span style="font-size: 20px; cursor:pointer;">⋮</span>
+        <span onclick="toggleMenuTop()" style="cursor:pointer; font-size: 20px;">⋮</span>
     </div>
 
     <div id="chat-box"></div>
 
-    <div class="footer">
-        <div class="input-area">
-            <span style="font-size: 20px;">😊</span>
-            <input type="text" id="msg-input" placeholder="Mensaje" oninput="detectarEscribiendo()">
-            <span id="crono">0:00</span>
-            <span onclick="document.getElementById('file-input').click()" style="font-size: 20px; cursor: pointer; transform: rotate(-45deg);">📎</span>
-        </div>
-        <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="enviarImagen(event)">
-        <button class="btn-accion" id="btn-main" onmousedown="iniciarGrabacion()" onmouseup="finalizarGrabacion()">🎙️</button>
+    <div id="menu-top" class="menu-top">
+        <div class="menu-item" onclick="borrarHistorial()">Borrar historial chat</div>
+        <div class="menu-item" onclick="abrirModalFondo()">Fondo de pantalla</div>
     </div>
 
-    <div id="opciones-modal" onclick="cerrarModal()">
-        <div class="opcion-btn" id="btn-borrar" style="color: #ff4b4b;">🗑️ Borrar para todos</div>
-        <div class="opcion-btn">↩️ Responder</div>
+    <div class="footer">
+        <div class="input-area">
+            <span>😊</span>
+            <input type="text" id="msg-input" placeholder="Mensaje" oninput="detectarEscribiendo()">
+            <span onclick="document.getElementById('file-input').click()" style="cursor:pointer;">📎</span>
+        </div>
+        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="enviarImagen(event)">
+        <button id="btn-main" style="background:#00a884; border:none; width:48px; height:48px; border-radius:50%; color:white; font-size:20px;" onmousedown="iniciarGrabacion()" onmouseup="finalizarGrabacion()">🎙️</button>
+    </div>
+
+    <div id="modal-fondo" class="modal-bottom">
+        <h3 style="text-align:center; margin-top:0;">Colores Sólidos</h3>
+        <div class="color-grid" id="grid-colores"></div>
+        <div style="text-align:center; padding:10px;" onclick="cerrarModales()">Cancelar</div>
+    </div>
+
+    <div id="modal-accion" class="modal-bottom">
+        <div class="menu-item" onclick="borrarMensaje()">🗑️ Borrar</div>
+        <div class="menu-item" onclick="cerrarModales()">↩️ Responder</div>
+        <div class="menu-item" onclick="cerrarModales()">➡️ Reenviar a contacto</div>
     </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
+    // Tu Configuración Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-        authDomain: "dnplus-messenger-pro.firebaseapp.com",
         databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        projectId: "dnplus-messenger-pro",
-        storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-        messagingSenderId: "625573378436",
-        appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // DATOS DE LA SESIÓN
     const miId = localStorage.getItem("user_temp_id");
     const salaId = localStorage.getItem("chat_sala_id");
-    const destNombre = localStorage.getItem("chat_destinatario_nombre");
-    const destFoto = localStorage.getItem("chat_destinatario_foto");
+    const destId = localStorage.getItem("chat_destinatario_id");
 
-    document.getElementById('chat-nombre').innerText = destNombre;
-    document.getElementById('header-foto').src = destFoto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-
-    // CARGAR MENSAJES PRIVADOS
-    db.ref("chats_privados/" + salaId).on("value", (snap) => {
-        const chatBox = document.getElementById('chat-box');
-        chatBox.innerHTML = "";
-        snap.forEach(child => {
-            const m = child.val();
-            const hora = new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            renderizar(m.contenido, m.emisor, m.tipo, child.key, hora);
-        });
-        chatBox.scrollTop = chatBox.scrollHeight;
+    // CARGAR PERFIL
+    db.ref("usuarios_registrados/" + destId).on("value", s => {
+        const u = s.val();
+        document.getElementById('chat-nombre').innerText = u.nombre;
+        document.getElementById('header-foto').src = u.foto;
     });
 
-    function renderizar(cont, emisor, tipo, key, hora) {
-        const chat = document.getElementById('chat-box');
-        const div = document.createElement('div');
-        div.className = (emisor === miId) ? "msg msg-mio" : "msg msg-otro";
-        div.oncontextmenu = (e) => { e.preventDefault(); abrirOpciones(key); };
-
-        if (tipo === "imagen") {
-            div.innerHTML = `<div class="img-wrapper"><img src="${cont}"></div><span class="hora-msg">${hora}</span>`;
-        } else if (tipo === "audio") {
-            div.innerHTML = `<div onclick="new Audio('${cont}').play()">🎵 Audio 📱</div><span class="hora-msg">${hora}</span>`;
-        } else {
-            div.innerHTML = `<span>${cont}</span><span class="hora-msg">${hora}</span>`;
-        }
-        chat.appendChild(div);
-    }
-
-    function enviarTexto() {
-        const input = document.getElementById('msg-input');
-        if(input.value.trim()){
-            db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: input.value, tipo: "texto", fecha: Date.now() });
-            input.value = "";
-            detectarEscribiendo();
-        }
-    }
-
-    function enviarImagen(event) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: e.target.result, tipo: "imagen", fecha: Date.now() });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // GRABACIÓN CON CRONÓMETRO ARREGLADO
-    let mediaRecorder;
-    let audioChunks = [];
-    let interval;
-    function iniciarGrabacion() {
-        if(document.getElementById('msg-input').value) return;
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            document.getElementById('msg-input').style.display = 'none';
-            document.getElementById('crono').style.display = 'inline';
-            let seg = 0;
-            interval = setInterval(() => { 
-                seg++; 
-                document.getElementById('crono').innerText = `0:${seg < 10 ? '0'+seg : seg}`;
-            }, 1000);
-            audioChunks = [];
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        });
-    }
-
-    function finalizarGrabacion() {
-        if(!mediaRecorder) { enviarTexto(); return; }
-        clearInterval(interval);
-        mediaRecorder.stop();
-        document.getElementById('msg-input').style.display = 'block';
-        document.getElementById('crono').style.display = 'none';
-        document.getElementById('crono').innerText = "0:00";
-        mediaRecorder.onstop = () => {
-            const blob = new Blob(audioChunks, { type: 'audio/mp3' });
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-                db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: reader.result, tipo: "audio", fecha: Date.now() });
-            };
-        };
-        mediaRecorder = null;
-    }
-
-    function irAPerfil() { window.location.href = 'perfil_de_otro.html'; }
-
-    let idBorrar = null;
-    function abrirOpciones(key) { idBorrar = key; document.getElementById('opciones-modal').style.display = 'block'; }
-    function cerrarModal() { document.getElementById('opciones-modal').style.display = 'none'; }
-    document.getElementById('btn-borrar').onclick = () => { db.ref("chats_privados/" + salaId).child(idBorrar).remove(); cerrarModal(); };
-
+    // PRESENCIA REAL (Escribiendo...)
     function detectarEscribiendo() {
-        const input = document.getElementById('msg-input');
-        document.getElementById('btn-main').innerHTML = input.value.length > 0 ? "🕊️" : "🎙️";
+        const val = document.getElementById('msg-input').value;
+        db.ref(`presencia/${salaId}/${miId}`).set(val.length > 0 ? "escribiendo..." : "en línea");
+        document.getElementById('btn-main').innerText = val.length > 0 ? "🕊️" : "🎙️";
     }
+
+    db.ref(`presencia/${salaId}/${destId}`).on("value", s => {
+        if(s.exists()) document.getElementById('chat-estado').innerText = s.val();
+    });
+
+    // CARGAR CHAT
+    db.ref("chats_privados/" + salaId).on("value", snap => {
+        const box = document.getElementById('chat-box');
+        box.innerHTML = "";
+        snap.forEach(child => {
+            const m = child.val();
+            const esMio = m.emisor === miId;
+            const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
+            const div = document.createElement("div");
+            div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
+            div.oncontextmenu = (e) => { e.preventDefault(); abrirAccion(child.key); };
+            
+            // Lógica Corazón Grande
+            if(m.contenido === "❤️") {
+                div.innerHTML = `<span class="heart-big">❤️</span><span class="hora-msg">${hora}</span>`;
+            } else if(m.tipo === "audio") {
+                div.innerHTML = `
+                    <div class="audio-box">
+                        <span class="play-btn" onclick="playAudio('${m.contenido}')">▶️</span>
+                        <div style="width:100px; height:3px; background:#8696a0;"></div>
+                        <span class="hora-msg">${hora}</span>
+                    </div>`;
+            } else {
+                div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
+            }
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+    });
+
+    // MODAL COLORES
+    const colores = ['#0b141a', '#176f47', '#075e54', '#232d36', '#4a148c', '#880e4f', '#01579b', '#004d40', '#33691e', '#bf360c', '#3e2723', '#212121', '#263238', '#000000', '#1a237e', '#b71c1c', '#006064', '#1b5e20', '#f57f17', '#e65100'];
+    const grid = document.getElementById('grid-colores');
+    colores.forEach(c => {
+        const circle = document.createElement('div');
+        circle.className = 'color-circle';
+        circle.style.backgroundColor = c;
+        circle.onclick = () => { document.getElementById('chat-box').style.backgroundColor = c; cerrarModales(); };
+        grid.appendChild(circle);
+    });
+
+    function toggleMenuTop() { document.getElementById('menu-top').style.display = 'block'; }
+    function abrirModalFondo() { document.getElementById('modal-fondo').style.display = 'block'; document.getElementById('menu-top').style.display = 'none'; }
+    function cerrarModales() { 
+        document.querySelectorAll('.modal-bottom, .menu-top').forEach(m => m.style.display = 'none'); 
+    }
+
+    let msgTarget = null;
+    function abrirAccion(key) { msgTarget = key; document.getElementById('modal-accion').style.display = 'block'; }
+    function borrarMensaje() { db.ref("chats_privados/" + salaId).child(msgTarget).remove(); cerrarModales(); }
+    function borrarHistorial() { if(confirm("¿Borrar todo?")) db.ref("chats_privados/" + salaId).remove(); cerrarModales(); }
+
+    function playAudio(src) { new Audio(src).play(); }
 </script>
 </body>
 </html>
