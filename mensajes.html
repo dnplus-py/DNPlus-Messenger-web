@@ -3,125 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus Pro - David Oviedo</title>
     <style>
-        :root { --header: #075e54; --fondo: #0b141a; --mio: #005c4b; --otro: #202c33; --verde: #00a884; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--fondo); display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
+        :root { --header: #075e54; --fondo: #0b141a; --verde: #00a884; }
+        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
         
-        /* CABECERA */
-        .header { background: var(--header); height: 60px; padding: 0 15px; display: flex; align-items: center; gap: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; border: 1px solid rgba(255,255,255,0.2); }
-        .header-info { flex: 1; }
-        .nombre { font-size: 16px; font-weight: bold; display: block; }
-        .estado { font-size: 11px; color: #00e676; font-weight: 500; }
+        .header { background: var(--header); height: 60px; padding: 0 15px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 
-        /* AREA DE CHAT */
         #chat-box { 
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; 
+            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay; transition: background 0.3s;
+            background-blend-mode: overlay; background-color: #0b141a;
         }
 
         /* BURBUJAS */
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.3); animation: pop 0.2s ease; }
-        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .msg-mio { align-self: flex-end; background-color: var(--mio); border-bottom-right-radius: 2px; }
-        .msg-otro { align-self: flex-start; background-color: var(--otro); border-bottom-left-radius: 2px; }
-        .hora-msg { font-size: 10px; opacity: 0.6; float: right; margin: 5px 0 0 8px; }
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; }
+        .msg-mio { align-self: flex-end; background-color: #005c4b; border-bottom-right-radius: 2px; }
+        .msg-otro { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
+        .hora-msg { font-size: 10px; opacity: 0.6; float: right; margin-top: 5px; margin-left: 8px; }
 
-        /* MULTIMEDIA */
-        .heart-big { font-size: 45px; display: block; animation: beat 0.8s infinite; text-align: center; }
-        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-        .img-msg { width: 100%; border-radius: 8px; cursor: pointer; display: block; }
-        .audio-box { display: flex; align-items: center; gap: 10px; min-width: 180px; padding: 5px 0; }
-        .play-btn { font-size: 25px; cursor: pointer; color: var(--verde); }
+        /* CONTENEDOR DE IMAGEN (230dp x 180dp aprox) */
+        .img-wrapper { width: 230px; height: 180px; overflow: hidden; border-radius: 8px; cursor: pointer; background: #1c272d; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* CAJA DE AUDIO (60dp x 255dp) */
+        .audio-container { width: 255px; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 10px; }
+        .play-icon { font-size: 30px; color: var(--verde); cursor: pointer; }
 
         /* FOOTER */
-        .footer { background: #1f2c33; padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
+        .footer { background: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
         .input-area { flex: 1; background: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; }
         input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; }
-        #btn-main { background: var(--verde); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; transition: 0.2s; }
+        .btn-round { background: var(--verde); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; }
 
         /* MODALES */
-        .modal-bottom { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; border-radius: 20px 20px 0 0; z-index: 2000; padding: 20px 0; border-top: 1px solid #313d45; }
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 20px; }
-        .color-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
-        .menu-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #2a3942; display: flex; gap: 15px; align-items: center; }
+        .modal-bottom { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; border-radius: 20px 20px 0 0; z-index: 1000; padding: 15px 0; border-top: 1px solid #313d45; }
+        .color-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; margin: 10px; display: inline-block; border: 2px solid rgba(255,255,255,0.2); }
 
-        /* VISOR FULLSCREEN */
-        #visor-full { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 5000; justify-content: center; align-items: center; }
-        #visor-full img { max-width: 100%; max-height: 100%; transition: transform 0.3s; }
+        /* VISOR FULL */
+        #visor { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:5000; justify-content:center; align-items:center; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="history.back()" style="cursor:pointer; font-size:20px;">←</span>
-        <img id="header-foto" class="avatar-header">
-        <div class="header-info">
-            <span class="nombre" id="chat-nombre">Cargando...</span>
-            <span class="estado" id="chat-estado">en línea</span>
+        <span onclick="history.back()">←</span>
+        <img id="header-foto" class="avatar-header" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+        <div style="flex:1">
+            <span id="chat-nombre" style="font-weight:bold; display:block">Cargando...</span>
+            <span id="chat-estado" style="font-size:11px; color:#00e676">en línea</span>
         </div>
-        <span onclick="toggleMenuTop()" style="cursor:pointer; font-size: 22px;">⋮</span>
+        <span onclick="document.getElementById('modal-fondo').style.display='block'" style="cursor:pointer">⋮</span>
     </div>
 
     <div id="chat-box"></div>
 
-    <div id="menu-top" style="display:none; position:fixed; top:55px; right:15px; background:#232d36; border-radius:8px; z-index:3000; box-shadow: 0 4px 10px black;">
-        <div class="menu-item" onclick="borrarHistorial()">🗑️ Borrar chat</div>
-        <div class="menu-item" onclick="abrirModalFondo()">🎨 Cambiar fondo</div>
-    </div>
-
     <div class="footer">
         <div class="input-area">
-            <span style="font-size: 20px; cursor:pointer;">😊</span>
-            <input type="text" id="msg-input" placeholder="Mensaje" oninput="detectarEscribiendo()">
-            <span onclick="document.getElementById('file-input').click()" style="cursor:pointer; font-size: 20px;">📎</span>
+            <span>😊</span>
+            <input type="text" id="msg-input" placeholder="Mensaje" oninput="actualizarBoton()">
+            <span onclick="document.getElementById('file-input').click()" style="cursor:pointer">📎</span>
         </div>
-        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="enviarImagen(event)">
-        <button id="btn-main" onmousedown="gestionarAccionDown()" onmouseup="gestionarAccionUp()">🎙️</button>
+        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="subirImagen(event)">
+        <button id="btn-main" class="btn-round">🎙️</button>
     </div>
 
     <div id="modal-fondo" class="modal-bottom">
-        <div class="color-grid" id="grid-colores"></div>
-        <div class="menu-item" style="justify-content:center; color:#8696a0;" onclick="cerrarModales()">Cancelar</div>
+        <div style="text-align:center; padding:10px;">
+            <div class="color-circle" style="background:#0b141a" onclick="cambiarFondo('#0b141a')"></div>
+            <div class="color-circle" style="background:#176f47" onclick="cambiarFondo('#176f47')"></div>
+            <div class="color-circle" style="background:#075e54" onclick="cambiarFondo('#075e54')"></div>
+            <div class="color-circle" style="background:#3e2723" onclick="cambiarFondo('#3e2723')"></div>
+            <div class="color-circle" style="background:#1a237e" onclick="cambiarFondo('#1a237e')"></div>
+        </div>
+        <div style="text-align:center; color:#8696a0" onclick="this.parentElement.style.display='none'">Cerrar</div>
     </div>
 
-    <div id="modal-msg" class="modal-bottom">
-        <div class="menu-item" id="btn-borrar-msg" style="color:#f15c5c;">🗑️ Borrar para todos</div>
-        <div class="menu-item" onclick="cerrarModales()">↩️ Responder</div>
-        <div class="menu-item" onclick="cerrarModales()">➡️ Reenviar</div>
-    </div>
-
-    <div id="visor-full" onclick="this.style.display='none'">
-        <img id="img-zoom" src="">
-    </div>
+    <div id="visor" onclick="this.style.display='none'"><img id="img-zoom" style="max-width:100%"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const firebaseConfig = { apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     const miId = localStorage.getItem("user_temp_id");
     const salaId = localStorage.getItem("chat_sala_id");
     const destId = localStorage.getItem("chat_destinatario_id");
 
-    // CARGAR INFO DEL OTRO
-    db.ref("usuarios_registrados/" + destId).on("value", s => {
-        const u = s.val();
-        if(u) {
-            document.getElementById('chat-nombre').innerText = u.nombre;
-            document.getElementById('header-foto').src = u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        }
-    });
-
-    // CARGAR MENSAJES REALES
+    // 1. CARGAR CHAT Y RENDERIZAR
     db.ref("chats_privados/" + salaId).on("value", snap => {
         const box = document.getElementById('chat-box');
         box.innerHTML = "";
@@ -131,14 +103,13 @@
             const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             const div = document.createElement("div");
             div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
-            div.oncontextmenu = (e) => { e.preventDefault(); abrirModalMsg(child.key); };
 
             if(m.tipo === "imagen") {
-                div.innerHTML = `<img src="${m.contenido}" class="img-msg" onclick="verImagenFull('${m.contenido}')"><span class="hora-msg">${hora}</span>`;
+                div.innerHTML = `<div class="img-wrapper"><img src="${m.contenido}" onclick="zoom('${m.contenido}')"></div><span class="hora-msg">${hora}</span>`;
             } else if(m.tipo === "audio") {
-                div.innerHTML = `<div class="audio-box"><span class="play-btn" onclick="new Audio('${m.contenido}').play()">▶️</span><div style="flex:1; height:2px; background:#8696a0;"></div><span class="hora-msg">${hora}</span></div>`;
+                div.innerHTML = `<div class="audio-container"><span class="play-icon" onclick="new Audio('${m.contenido}').play()">▶️</span><div style="flex:1;height:3px;background:#8696a0"></div><span class="hora-msg">${hora}</span></div>`;
             } else if(m.contenido === "❤️") {
-                div.innerHTML = `<span class="heart-big">❤️</span><span class="hora-msg">${hora}</span>`;
+                div.innerHTML = `<span style="font-size:50px; display:block">❤️</span><span class="hora-msg">${hora}</span>`;
             } else {
                 div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
             }
@@ -147,83 +118,58 @@
         box.scrollTop = box.scrollHeight;
     });
 
-    // FUNCIONES DE ENVÍO
-    function enviarTexto() {
-        const input = document.getElementById('msg-input');
-        if(input.value.trim() === "") return;
-        db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: input.value, tipo: "texto", fecha: Date.now() });
-        input.value = "";
-        detectarEscribiendo();
-    }
-
-    function enviarImagen(e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: ev.target.result, tipo: "imagen", fecha: Date.now() });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // AUDIO GRABADOR
+    // 2. AUDIO (LÓGICA MEJORADA)
     let mediaRecorder; let chunks = [];
-    function gestionarAccionDown() {
-        if(document.getElementById('msg-input').value.length > 0) { enviarTexto(); }
-        else {
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.start();
-                chunks = [];
-                document.getElementById('btn-main').style.transform = "scale(1.3)";
-                document.getElementById('btn-main').style.background = "#f44336";
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            });
-        }
-    }
-    function gestionarAccionUp() {
+    const btn = document.getElementById('btn-main');
+
+    btn.onmousedown = () => {
+        if(document.getElementById('msg-input').value.length > 0) { enviarTexto(); return; }
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            chunks = [];
+            btn.style.background = "red";
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        });
+    };
+
+    btn.onmouseup = () => {
         if(!mediaRecorder || mediaRecorder.state === "inactive") return;
         mediaRecorder.stop();
-        document.getElementById('btn-main').style.transform = "scale(1)";
-        document.getElementById('btn-main').style.background = "var(--verde)";
+        btn.style.background = "var(--verde)";
         mediaRecorder.onstop = () => {
-            const blob = new Blob(chunks, { type: 'audio/mp3' });
             const reader = new FileReader();
-            reader.readAsDataURL(blob);
+            reader.readAsDataURL(new Blob(chunks, { type: 'audio/mp3' }));
             reader.onloadend = () => {
                 db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: reader.result, tipo: "audio", fecha: Date.now() });
             };
         };
+    };
+
+    // 3. OTRAS FUNCIONES
+    function enviarTexto() {
+        const txt = document.getElementById('msg-input').value;
+        db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: txt, tipo: "texto", fecha: Date.now() });
+        document.getElementById('msg-input').value = "";
+        actualizarBoton();
     }
 
-    // MODAL COLORES SOLIDOS (ESTILO WHATSAPP)
-    const colores = ['#0b141a', '#176f47', '#075e54', '#232d36', '#4a148c', '#880e4f', '#01579b', '#004d40', '#33691e', '#bf360c'];
-    const grid = document.getElementById('grid-colores');
-    colores.forEach(c => {
-        const d = document.createElement("div");
-        d.className = "color-circle";
-        d.style.backgroundColor = c;
-        d.onclick = () => { document.getElementById('chat-box').style.backgroundColor = c; cerrarModales(); };
-        grid.appendChild(d);
-    });
-
-    function detectarEscribiendo() {
-        const input = document.getElementById('msg-input');
-        document.getElementById('btn-main').innerText = input.value.length > 0 ? "🕊️" : "🎙️";
+    function subirImagen(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => { db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: ev.target.result, tipo: "imagen", fecha: Date.now() }); };
+        reader.readAsDataURL(e.target.files[0]);
     }
 
-    function verImagenFull(src) {
-        document.getElementById('visor-full').style.display = 'flex';
-        document.getElementById('img-zoom').src = src;
+    function actualizarBoton() {
+        btn.innerText = document.getElementById('msg-input').value.length > 0 ? "🕊️" : "🎙️";
     }
 
-    function toggleMenuTop() { const m = document.getElementById('menu-top'); m.style.display = m.style.display==='none'?'block':'none'; }
-    function abrirModalFondo() { document.getElementById('modal-fondo').style.display = 'block'; toggleMenuTop(); }
-    function cerrarModales() { document.querySelectorAll('.modal-bottom, #menu-top').forEach(m => m.style.display = 'none'); }
-    
-    let msgKeyBorrar = "";
-    function abrirModalMsg(key) { msgKeyBorrar = key; document.getElementById('modal-msg').style.display = 'block'; }
-    document.getElementById('btn-borrar-msg').onclick = () => { db.ref("chats_privados/" + salaId).child(msgKeyBorrar).remove(); cerrarModales(); };
-    function borrarHistorial() { if(confirm("¿Borrar todo?")) db.ref("chats_privados/" + salaId).remove(); cerrarModales(); }
+    function cambiarFondo(color) {
+        document.getElementById('chat-box').style.backgroundColor = color;
+        localStorage.setItem("fondo_chat", color);
+    }
+
+    function zoom(src) { document.getElementById('visor').style.display='flex'; document.getElementById('img-zoom').src=src; }
 </script>
 </body>
 </html>
