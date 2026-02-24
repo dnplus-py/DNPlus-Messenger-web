@@ -1,4 +1,3 @@
-<script>
 // chat_logic.js - Creado para David Oviedo
 const db = firebase.database();
 const miId = localStorage.getItem("user_temp_id");
@@ -96,4 +95,4 @@ function cambiarFondo(color) {
 if(localStorage.getItem("fondo_chat")) document.getElementById('chat-box').style.backgroundColor = localStorage.getItem("fondo_chat");
 
 function zoom(src) { document.getElementById('visor').style.display='flex'; document.getElementById('img-zoom').src=src; }
-        </script>
+        
