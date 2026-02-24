@@ -4,93 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus - David Oviedo</title>
-    <style>
-        :root { --header: #075e54; --fondo: #0b141a; --verde: #00a884; }
-        body { margin: 0; font-family: sans-serif; background-color: var(--fondo); display: flex; flex-direction: column; height: 100vh; color: white; overflow: hidden; }
-        
-        .header { background: var(--header); height: 60px; padding: 0 15px; display: flex; align-items: center; gap: 10px; z-index: 100; }
-        .avatar-header { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-
-        #chat-box { 
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; 
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay; background-color: #0b141a;
-        }
-
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; }
-        .msg-mio { align-self: flex-end; background-color: #005c4b; border-bottom-right-radius: 2px; }
-        .msg-otro { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
-        .hora-msg { font-size: 10px; opacity: 0.6; float: right; margin-top: 5px; margin-left: 8px; }
-
-        /* IMAGEN 230x180 */
-        .img-wrapper { width: 230px; height: 180px; overflow: hidden; border-radius: 8px; background: #1c272d; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-
-        /* AUDIO 255x60 */
-        .audio-container { width: 255px; height: 60px; display: flex; align-items: center; gap: 12px; }
-        .play-icon { font-size: 30px; color: var(--verde); cursor: pointer; }
-
-        .footer { background: #1f2c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
-        .input-area { flex: 1; background: #2a3942; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; }
-        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; }
-        .btn-round { background: var(--verde); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; }
-
-        .modal-bottom { display: none; position: fixed; bottom: 0; width: 100%; background: #232d36; border-radius: 20px 20px 0 0; z-index: 1000; padding: 15px 0; border-top: 1px solid #313d45; }
-        .color-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; margin: 10px; display: inline-block; border: 2px solid rgba(255,255,255,0.2); }
-        #visor { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:5000; justify-content:center; align-items:center; }
-    </style>
+    <link rel="stylesheet" href="estilos_chat.css"> 
 </head>
 <body>
 
-    <div class="header">
-        <span onclick="history.back()" style="cursor:pointer">←</span>
-        <img id="header-foto" class="avatar-header" src="">
-        <div style="flex:1">
-            <span id="chat-nombre" style="font-weight:bold; display:block">Cargando...</span>
-            <span id="chat-estado" style="font-size:11px; color:#00e676">en línea</span>
-        </div>
-        <span onclick="document.getElementById('modal-fondo').style.display='block'" style="cursor:pointer">⋮</span>
+    <div id="main-container">
+        <div id="header-container"></div>
+
+        <div id="chat-box"></div>
+
+        <div id="input-container"></div>
     </div>
 
-    <div id="chat-box"></div>
-
-    <div class="footer">
-        <div class="input-area">
-            <span>😊</span>
-            <input type="text" id="msg-input" placeholder="Mensaje" oninput="actualizarBoton()">
-            <span onclick="document.getElementById('file-input').click()" style="cursor:pointer">📎</span>
-        </div>
-        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="subirImagen(event)">
-        <button id="btn-main" class="btn-round">🎙️</button>
-    </div>
-
-    <div id="modal-fondo" class="modal-bottom">
-        <div style="text-align:center; padding:10px;">
-            <div class="color-circle" style="background:#0b141a" onclick="cambiarFondo('#0b141a')"></div>
-            <div class="color-circle" style="background:#176f47" onclick="cambiarFondo('#176f47')"></div>
-            <div class="color-circle" style="background:#075e54" onclick="cambiarFondo('#075e54')"></div>
-            <div class="color-circle" style="background:#3e2723" onclick="cambiarFondo('#3e2723')"></div>
-            <div class="color-circle" style="background:#1a237e" onclick="cambiarFondo('#1a237e')"></div>
-        </div>
-        <div style="text-align:center; color:#8696a0" onclick="this.parentElement.style.display='none'">Cerrar</div>
-    </div>
-
-    <div id="visor" onclick="this.style.display='none'"><img id="img-zoom" style="max-width:100%"></div>
+    <div id="visor" onclick="this.style.display='none'"><img id="img-zoom"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
     <script>
+        // Configuración Firebase (Pieza fundamental)
         const firebaseConfig = { 
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", 
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" 
         };
         firebase.initializeApp(firebaseConfig);
+
+        // FUNCIÓN PARA JUNTAR LAS PARTES
+        async function cargarPartes() {
+            // Cargamos el HTML de la cabecera
+            const resHeader = await fetch('cabecera_chat.html');
+            document.getElementById('header-container').innerHTML = await resHeader.text();
+
+            // Cargamos el HTML de la barra de mensajes
+            const resInput = await fetch('barra_input.html');
+            document.getElementById('input-container').innerHTML = await resInput.text();
+
+            // Una vez cargado todo, activamos los eventos del micro y mensajes
+            iniciarLogicaChat(); 
+        }
+
+        cargarPartes();
     </script>
-    <script src="chat-logic.js"></script>
-    <script>
-        const b = document.getElementById('btn-main');
-        b.onmousedown = iniciarGrabacion;
-        b.onmouseup = detenerGrabacion;
-    </script>
+    <script src="chat_logic.js"></script>
 </body>
 </html>
