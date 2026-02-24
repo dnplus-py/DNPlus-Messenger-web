@@ -85,91 +85,26 @@
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" };
+     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+<script>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A", 
+        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com" 
+    };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+</script>
 
-    const miId = localStorage.getItem("user_temp_id");
-    const salaId = localStorage.getItem("chat_sala_id");
-    const destId = localStorage.getItem("chat_destinatario_id");
+<script src="chat-logic.js"></script>
 
-    // 1. CARGAR CHAT Y RENDERIZAR
-    db.ref("chats_privados/" + salaId).on("value", snap => {
-        const box = document.getElementById('chat-box');
-        box.innerHTML = "";
-        snap.forEach(child => {
-            const m = child.val();
-            const esMio = m.emisor === miId;
-            const hora = new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            const div = document.createElement("div");
-            div.className = `msg ${esMio ? 'msg-mio' : 'msg-otro'}`;
+<script>
+    // Conectamos los botones a las funciones del archivo externo
+    const btnMain = document.getElementById('btn-main');
+    btnMain.onmousedown = iniciarGrabacion;
+    btnMain.onmouseup = detenerGrabacion;
+</script>
 
-            if(m.tipo === "imagen") {
-                div.innerHTML = `<div class="img-wrapper"><img src="${m.contenido}" onclick="zoom('${m.contenido}')"></div><span class="hora-msg">${hora}</span>`;
-            } else if(m.tipo === "audio") {
-                div.innerHTML = `<div class="audio-container"><span class="play-icon" onclick="new Audio('${m.contenido}').play()">▶️</span><div style="flex:1;height:3px;background:#8696a0"></div><span class="hora-msg">${hora}</span></div>`;
-            } else if(m.contenido === "❤️") {
-                div.innerHTML = `<span style="font-size:50px; display:block">❤️</span><span class="hora-msg">${hora}</span>`;
-            } else {
-                div.innerHTML = `<span>${m.contenido}</span><span class="hora-msg">${hora}</span>`;
-            }
-            box.appendChild(div);
-        });
-        box.scrollTop = box.scrollHeight;
-    });
-
-    // 2. AUDIO (LÓGICA MEJORADA)
-    let mediaRecorder; let chunks = [];
-    const btn = document.getElementById('btn-main');
-
-    btn.onmousedown = () => {
-        if(document.getElementById('msg-input').value.length > 0) { enviarTexto(); return; }
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            chunks = [];
-            btn.style.background = "red";
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-        });
-    };
-
-    btn.onmouseup = () => {
-        if(!mediaRecorder || mediaRecorder.state === "inactive") return;
-        mediaRecorder.stop();
-        btn.style.background = "var(--verde)";
-        mediaRecorder.onstop = () => {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(chunks, { type: 'audio/mp3' }));
-            reader.onloadend = () => {
-                db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: reader.result, tipo: "audio", fecha: Date.now() });
-            };
-        };
-    };
-
-    // 3. OTRAS FUNCIONES
-    function enviarTexto() {
-        const txt = document.getElementById('msg-input').value;
-        db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: txt, tipo: "texto", fecha: Date.now() });
-        document.getElementById('msg-input').value = "";
-        actualizarBoton();
-    }
-
-    function subirImagen(e) {
-        const reader = new FileReader();
-        reader.onload = (ev) => { db.ref("chats_privados/" + salaId).push({ emisor: miId, contenido: ev.target.result, tipo: "imagen", fecha: Date.now() }); };
-        reader.readAsDataURL(e.target.files[0]);
-    }
-
-    function actualizarBoton() {
-        btn.innerText = document.getElementById('msg-input').value.length > 0 ? "🕊️" : "🎙️";
-    }
-
-    function cambiarFondo(color) {
-        document.getElementById('chat-box').style.backgroundColor = color;
-        localStorage.setItem("fondo_chat", color);
-    }
-
-    function zoom(src) { document.getElementById('visor').style.display='flex'; document.getElementById('img-zoom').src=src; }
 </script>
 </body>
 </html>
