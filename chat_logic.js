@@ -50,3 +50,34 @@ function detectarCambio() {
 }
 
 // ... aquí sigues con iniciarGrabacion, detenerGrabacion, etc.
+
+// --- FUNCIONES DEL MENÚ ---
+
+function cerrarModales() {
+    document.getElementById('modal-opciones').style.display = 'none';
+    document.getElementById('modal-colores').style.display = 'none';
+}
+
+function abrirSelectorFondo() {
+    document.getElementById('modal-opciones').style.display = 'none';
+    document.getElementById('modal-colores').style.display = 'block';
+}
+
+// VACIAR CHAT (Borra todo en Firebase para esta sala)
+function confirmarVaciarChat() {
+    if(confirm("¿Estás seguro de que quieres vaciar este chat? No se puede deshacer.")) {
+        db.ref("chats_privados/" + salaId).remove()
+        .then(() => {
+            alert("Chat vaciado con éxito");
+            cerrarModales();
+        });
+    }
+}
+
+// CAMBIAR FONDO (Personalización de David)
+function cambiarFondo(color) {
+    const chatBox = document.getElementById('chat-box');
+    chatBox.style.backgroundColor = color;
+    localStorage.setItem("fondo_personalizado", color);
+    cerrarModales();
+}
