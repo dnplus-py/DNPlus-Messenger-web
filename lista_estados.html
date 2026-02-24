@@ -4,120 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: #0b141a; /* Tu negro azulado */
-            color: #e9edef; 
-        }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
+        .title { padding: 20px 15px 10px 15px; color: #8696a0; font-size: 14px; font-weight: 500; text-transform: uppercase; }
         
-        .title { 
-            padding: 20px 15px 10px 15px; 
-            color: #8696a0; 
-            font-size: 14px; 
-            font-weight: 500; 
-            text-transform: uppercase;
-        }
-
-        .item { 
-            display: flex; 
-            align-items: center; 
-            padding: 12px 15px; 
-            gap: 15px; 
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
+        .item { display: flex; align-items: center; padding: 12px 15px; gap: 15px; cursor: pointer; position: relative; }
         .item:active { background-color: #202c33; }
 
-        .ring { 
-            width: 55px; 
-            height: 55px; 
-            border-radius: 50%; 
-            border: 2px solid #00a884; /* Verde DNPlus */
-            padding: 2px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        /* Círculo de Estado */
+        .ring-container { position: relative; width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; }
+        .img-perfil { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #232d36; z-index: 2; }
+        
+        /* El borde verde (SVG para que se divida en segmentos si hay varios estados) */
+        .status-circle { position: absolute; width: 58px; height: 58px; transform: rotate(-90deg); }
+        .status-circle circle { fill: none; stroke: #00a884; stroke-width: 3; stroke-linecap: round; }
 
-        .img { 
-            width: 100%; 
-            height: 100%; 
-            border-radius: 50%; 
-            background: #232d36; 
-            object-fit: cover;
-        }
+        .add-icon { position: absolute; bottom: 2px; right: 2px; background: #00a884; color: #0b141a; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border: 2px solid #0b141a; z-index: 3; }
 
-        .add-icon {
-            position: absolute; 
-            bottom: 0; 
-            right: 0; 
-            background: #00a884; 
-            color: #0b141a; 
-            border-radius: 50%; 
-            width: 22px; 
-            height: 22px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px; 
-            font-weight: bold;
-            border: 2px solid #0b141a;
-        }
-
-        .text-container {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .text-container { display: flex; flex-direction: column; }
         .name { font-weight: bold; font-size: 16px; }
         .subtitle { color: #8696a0; font-size: 14px; margin-top: 2px; }
+
+        /* VISOR DE ESTADOS (MODAL FULLSCREEN) */
+        #visor-estados { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; flex-direction: column; }
+        .progress-container { display: flex; gap: 5px; padding: 10px; position: absolute; top: 0; width: 95%; }
+        .bar { flex: 1; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+        .bar-fill { height: 100%; background: white; width: 0%; transition: width 0.1s linear; }
+        .visor-header { padding: 15px; display: flex; align-items: center; gap: 10px; z-index: 10; margin-top: 15px; }
+        .visor-content { flex: 1; display: flex; align-items: center; justify-content: center; }
+        .visor-content img, .visor-content video { max-width: 100%; max-height: 100%; }
     </style>
 </head>
 <body>
 
-    <div class="item" onclick="abrirGaleria()">
-        <div style="position: relative;">
-            <div class="ring" style="border-color: #8696a0;"> <div class="img">
-                    <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" width="100%" style="border-radius: 50%; filter: brightness(0.7);">
-                </div>
-            </div>
+    <div class="item" onclick="document.getElementById('file-estado').click()">
+        <div class="ring-container">
+            <svg class="status-circle" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="18"></circle>
+            </svg>
+            <img id="mi-foto-perfil" class="img-perfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
             <div class="add-icon">+</div>
         </div>
         <div class="text-container">
             <div class="name">Mi estado</div>
-            <div class="subtitle">Toca para añadir una actualización</div>
+            <div class="subtitle" id="estado-sub">Toca para añadir una actualización</div>
         </div>
+        <input type="file" id="file-estado" accept="image/*,video/*" style="display:none" onchange="subirEstado(event)">
     </div>
 
     <div class="title">Recientes</div>
+    <div id="lista-estados-otros"></div>
 
-    <div class="item" onclick="verEstado('David Oviedo')">
-        <div class="ring">
-            <div class="img">
-                <img src="https://i.postimg.cc/k4MWCJ9Y/Rounded-20260104-165201.png" width="100%" style="border-radius: 50%;">
-            </div>
+    <div id="visor-estados">
+        <div class="progress-container" id="barras-progreso"></div>
+        <div class="visor-header">
+            <img id="visor-avatar" class="img-perfil" style="width:35px; height:35px;">
+            <span id="visor-nombre" style="font-weight:bold"></span>
         </div>
-        <div class="text-container">
-            <div class="name">David Oviedo</div>
-            <div class="subtitle">Hace 5 minutos</div>
-        </div>
+        <div class="visor-content" id="visor-media" onclick="siguienteEstado()"></div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <script>
-        function abrirGaleria() {
-            // Llamada directa a tu lógica de Sketchware
-            if(window.Android && window.Android.abrirGaleria) {
-                window.Android.abrirGaleria();
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            authDomain: "dnplus-messenger-pro.firebaseapp.com",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
+            messagingSenderId: "625573378436",
+            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const miId = localStorage.getItem("user_temp_id");
+
+        // Cargar mi foto real de perfil
+        db.ref("usuarios_registrados/" + miId).once("value", s => {
+            if(s.exists()) document.getElementById("mi-foto-perfil").src = s.val().foto;
+        });
+
+        // SUBIR ESTADO (Varios sin duplicar perfil)
+        function subirEstado(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const tipo = file.type.includes("video") ? "video" : "imagen";
+                const nuevoEstado = {
+                    url: e.target.result,
+                    tipo: tipo,
+                    fecha: Date.now()
+                };
+                // Se guarda en una lista dentro de tu ID
+                db.ref("estados/" + miId).push(nuevoEstado).then(() => {
+                    alert("Estado subido, David");
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // CARGAR ESTADOS DE OTROS
+        db.ref("estados").on("value", snapshot => {
+            const container = document.getElementById("lista-estados-otros");
+            container.innerHTML = "";
+            snapshot.forEach(child => {
+                const userId = child.key;
+                if(userId === miId) return; // No mostrarme a mi mismo en recientes
+
+                db.ref("usuarios_registrados/" + userId).once("value", u => {
+                    const user = u.val();
+                    const estados = Object.values(child.val());
+                    const ultimo = estados[estados.length - 1];
+
+                    container.innerHTML += `
+                        <div class="item" onclick='mostrarVisor(${JSON.stringify(estados)}, "${user.nombre}", "${user.foto}")'>
+                            <div class="ring-container">
+                                <svg class="status-circle" viewBox="0 0 40 40">
+                                    <circle cx="20" cy="20" r="18" stroke-dasharray="${113/estados.length} 2"></circle>
+                                </svg>
+                                <img class="img-perfil" src="${user.foto}">
+                            </div>
+                            <div class="text-container">
+                                <div class="name">${user.nombre}</div>
+                                <div class="subtitle">Justo ahora</div>
+                            </div>
+                        </div>`;
+                });
+            });
+        });
+
+        // LÓGICA DEL VISOR
+        let estadosActivos = [];
+        let indiceActual = 0;
+        let timer;
+
+        function mostrarVisor(lista, nombre, foto) {
+            estadosActivos = lista;
+            indiceActual = 0;
+            document.getElementById("visor-estados").style.display = "flex";
+            document.getElementById("visor-nombre").innerText = nombre;
+            document.getElementById("visor-avatar").src = foto;
+            renderEstado();
+        }
+
+        function renderEstado() {
+            clearTimeout(timer);
+            const media = estadosActivos[indiceActual];
+            const visorMedia = document.getElementById("visor-media");
+            
+            // Crear barras de progreso
+            const barras = document.getElementById("barras-progreso");
+            barras.innerHTML = estadosActivos.map((_, i) => `<div class="bar"><div class="bar-fill" id="fill-${i}"></div></div>`).join("");
+
+            if(media.tipo === "video") {
+                visorMedia.innerHTML = `<video src="${media.url}" autoplay id="video-v"></video>`;
+                document.getElementById("video-v").onended = siguienteEstado;
             } else {
-                // Esto es solo por si lo probás en navegador
-                alert("Accediendo a la Galería para subir foto o video...");
+                visorMedia.innerHTML = `<img src="${media.url}">`;
+                // Animar barra
+                let p = 0;
+                let fill = document.getElementById(`fill-${indiceActual}`);
+                timer = setInterval(() => {
+                    p += 2;
+                    fill.style.width = p + "%";
+                    if(p >= 100) { siguienteEstado(); }
+                }, 100);
             }
         }
 
-        function verEstado(nombre) {
-            console.log("Viendo estado de: " + nombre);
+        function siguienteEstado() {
+            clearInterval(timer);
+            indiceActual++;
+            if(indiceActual < estadosActivos.length) {
+                renderEstado();
+            } else {
+                document.getElementById("visor-estados").style.display = "none";
+            }
         }
     </script>
 </body>
