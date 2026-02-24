@@ -1,0 +1,9 @@
+<div class="footer">
+    <div class="input-wrapper">
+        <span class="emoji-btn">😊</span>
+        <input type="text" id="msg-input" placeholder="Escribe un mensaje..." oninput="detectarCambio()">
+        <span class="attach-btn" onclick="document.getElementById('file-input').click()">📎</span>
+    </div>
+    <input type="file" id="file-input" style="display:none" onchange="subirImagen(event)">
+    <button id="btn-main" class="btn-send">🎙️</button>
+</div>
