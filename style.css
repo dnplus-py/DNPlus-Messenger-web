@@ -1,3 +1,59 @@
+.header-chat-container {
+    background-color: var(--verde-oscuro);
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    color: white;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.back-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.avatar-header {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-nombre {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#chat-estado {
+    font-size: 12px;
+    color: #00e676; /* Verde neón para el 'en línea' */
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.icon-btn {
+    font-size: 20px;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 /* Colores Oficiales DNPlus Messenger */
 :root {
     --verde-principal: #176F47;
