@@ -1,100 +1,82 @@
-/* Colores Oficiales DNPlus Messenger */
-:root {
-    --verde-principal: #176F47;
-    --verde-oscuro: #085F56;
-    --fondo-oscuro: #0b141a; 
-    --blanco-puro: #FFFFFF;
-    --en-linea: #00e676;
-}
+/* RESET PARA EVITAR MARGENES FEOS */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--fondo-oscuro);
-    display: flex; flex-direction: column;
-    min-height: 100vh;
-}
-
-/* LA CORRECCIÓN: Agregué el punto (.) inicial */
 .header-chat-container {
-    background-color: var(--verde-oscuro);
-    height: 65px;
-    width: 100%; /* Asegura que ocupe todo el ancho */
+    background-color: #202c33; /* Color oscuro real de WhatsApp */
+    height: 60px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15px;
-    color: white;
-    box-sizing: border-box;
-    position: sticky; /* Se queda fija arriba */
+    padding: 0 10px;
+    color: #e9edef;
+    position: fixed; /* Se queda arriba siempre */
     top: 0;
-    z-index: 1000;
+    left: 0;
+    z-index: 2000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra para que no se vea plano */
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    flex: 1;
 }
 
 .back-icon {
-    font-size: 22px;
+    padding: 8px;
+    font-size: 20px;
     cursor: pointer;
-    color: white;
+    border-radius: 50%;
 }
 
+.back-icon:active { background: rgba(255,255,255,0.1); }
+
 .avatar-header {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
+    margin: 0 10px;
     object-fit: cover;
-    border: 1px solid rgba(255,255,255,0.2);
+    background: #6a7175;
 }
 
 .header-info {
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 #chat-nombre {
-    font-weight: bold;
+    font-weight: 600;
     font-size: 16px;
-    color: white;
+    color: #e9edef;
+    white-space: nowrap;
 }
 
 #chat-estado {
-    font-size: 12px;
-    color: var(--en-linea);
+    font-size: 11px;
+    color: #8696a0; /* Gris suave para el estado */
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 18px; /* Espacio entre el teléfono y los puntos */
+    gap: 5px;
 }
 
+/* Iconos más finos */
 .icon-btn {
-    font-size: 20px;
-    color: white;
-    text-decoration: none;
-    cursor: pointer;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
-}
-
-/* Botón de confirmar para los modales futuros */
-.btn-confirmar {
-    background-color: var(--verde-principal);
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 50px;
-    font-weight: bold;
+    justify-content: center;
+    border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(23, 111, 71, 0.3);
-    transition: transform 0.1s;
+    color: #aebac1;
+    text-decoration: none;
+    font-size: 18px;
 }
 
-.btn-confirmar:active {
-    transform: scale(0.95);
-}
+.icon-btn:active { background: rgba(255,255,255,0.1); }
