@@ -1,4 +1,4 @@
-// chat-logic.js - Creado para David Oviedo
+// chat_logic.js - Creado para David Oviedo
 const db = firebase.database();
 const miId = localStorage.getItem("user_temp_id");
 const salaId = localStorage.getItem("chat_sala_id");
