@@ -32,8 +32,7 @@
 
     <script>
         function enviarCodigo() {
-            const emailInput = document.getElementById('user-email');
-            const email = emailInput.value.trim();
+            const email = document.getElementById('user-email').value.trim();
             const boton = document.getElementById('btn-enviar');
 
             if (!email.includes("@")) {
@@ -47,31 +46,29 @@
             // Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
             
-            // Guardamos en el navegador para que otp.html pueda validarlo
+            // Guardamos para que otp.html pueda leerlo
             localStorage.setItem("user_email", email);
             localStorage.setItem("temp_otp", codigoOTP);
 
+            // Parámetros para tu plantilla de EmailJS
             const templateParams = {
                 to_email: email,
                 otp_code: codigoOTP
             };
 
-            // --- CONFIGURACIÓN DE TU CUENTA ---
-            const publicKey = "RyMkpjIKl84V_buAq"; // ✅ LLAVE PÚBLICA CORRECTA
-            const serviceID = "default_service";    // ✅ SERVICIO POR DEFECTO
-            
-            // 🚨 DAVID: BUSCA EN TU PANEL EL ID QUE EMPIEZA CON "template_" Y PÉGALO AQUÍ
-            const templateID = "REEMPLAZA_ESTO_POR_TU_TEMPLATE_ID"; 
+            // CONFIGURACIÓN REAL DE DAVID
+            const publicKey = "RyMkpjIKl84V_buAq"; 
+            const serviceID = "default_service";    
+            const templateID = "7nR80oFsd98uOGeYiiNZc"; // Tu ID de plantilla real ✅
 
             emailjs.send(serviceID, templateID, templateParams, publicKey)
                 .then(() => {
-                    alert("¡Código enviado con éxito a " + email + "!");
-                    window.location.href = "otp.html";
+                    alert("¡Código enviado con éxito!");
+                    window.location.href = "otp.html"; // Salto a la verificación
                 })
                 .catch((error) => {
                     console.error("FAILED...", error);
-                    // Si el error dice "Account not found", verifica la PublicKey
-                    alert("Error al enviar: " + (error.text || "Revisa tu ID de plantilla"));
+                    alert("Error: " + error.text);
                     boton.innerText = "REINTENTAR";
                     boton.disabled = false;
                 });
