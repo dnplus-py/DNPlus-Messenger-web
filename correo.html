@@ -32,7 +32,8 @@
 
     <script>
         function enviarCodigo() {
-            const email = document.getElementById('user-email').value.trim();
+            const emailInput = document.getElementById('user-email');
+            const email = emailInput.value.trim();
             const boton = document.getElementById('btn-enviar');
 
             if (!email.includes("@")) {
@@ -40,12 +41,13 @@
                 return;
             }
 
-            boton.innerText = "VERIFICANDO CUENTA...";
+            boton.innerText = "ENVIANDO CÓDIGO...";
             boton.disabled = true;
 
+            // Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
             
-            // Guardamos para la siguiente pantalla
+            // Guardamos en el navegador para que otp.html pueda validarlo
             localStorage.setItem("user_email", email);
             localStorage.setItem("temp_otp", codigoOTP);
 
@@ -54,20 +56,22 @@
                 otp_code: codigoOTP
             };
 
-            // DAVID: REVISA ESTOS 3 DATOS EN TU PANEL DE EMAILJS
-            const publicKey = "RyMkpjIKl84V_buAq"; // <--- Asegúrate que no tenga espacios
-            const serviceID = "default_service";    // <--- Verifica en 'Email Services'
-            const templateID = "template_XXXXXX";   // <--- PON TU ID AQUÍ
+            // --- CONFIGURACIÓN DE TU CUENTA ---
+            const publicKey = "RyMkpjIKl84V_buAq"; // ✅ LLAVE PÚBLICA CORRECTA
+            const serviceID = "default_service";    // ✅ SERVICIO POR DEFECTO
+            
+            // 🚨 DAVID: BUSCA EN TU PANEL EL ID QUE EMPIEZA CON "template_" Y PÉGALO AQUÍ
+            const templateID = "REEMPLAZA_ESTO_POR_TU_TEMPLATE_ID"; 
 
             emailjs.send(serviceID, templateID, templateParams, publicKey)
                 .then(() => {
-                    alert("¡Código enviado!");
+                    alert("¡Código enviado con éxito a " + email + "!");
                     window.location.href = "otp.html";
                 })
                 .catch((error) => {
                     console.error("FAILED...", error);
-                    // Si sale "Account not found", es que el publicKey está mal.
-                    alert("Error detectado: " + error.text);
+                    // Si el error dice "Account not found", verifica la PublicKey
+                    alert("Error al enviar: " + (error.text || "Revisa tu ID de plantilla"));
                     boton.innerText = "REINTENTAR";
                     boton.disabled = false;
                 });
