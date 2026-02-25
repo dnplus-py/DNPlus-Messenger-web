@@ -20,16 +20,15 @@
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--whatsapp-bg); height: 100vh; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
 
-        header { background-color: var(--whatsapp-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        header { background-color: var(--whatsapp-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 
         #chat-container {
             flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: cover; background-attachment: fixed;
+            background-size: cover;
         }
 
-        /* Burbujas */
         .bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.15); position: relative; }
         .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; color: white; }
         .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; color: #000; }
@@ -38,17 +37,12 @@
         .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.65rem; margin-top: 4px; opacity: 0.8; }
         .double-check { color: var(--wa-blue); }
 
-        /* Menú y Llamada */
+        /* Menú Ajustes Corregido */
         #menu-opciones { display: none; position: fixed; top: 55px; right: 10px; background: #232d36; border-radius: 8px; min-width: 150px; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         .menu-item { padding: 12px 20px; color: white; cursor: pointer; border-bottom: 1px solid #2d3a45; }
+        
+        /* Pantalla de Llamada */
         #call-screen { position: fixed; inset: 0; background: #0b141a; z-index: 6000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 70px 20px 80px; color: white; }
-        .btn-hangup { background: #ff3b30; width: 65px; height: 65px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
-
-        /* Input Area */
-        .input-area { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; }
-        .input-card { background: white; flex: 1; border-radius: 24px; display: flex; align-items: center; padding: 0 15px; height: 48px; }
-        #chat-input { flex: 1; border: none; outline: none; }
-        .action-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--whatsapp-teal); color: white; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
@@ -65,7 +59,9 @@
             <div id="call-timer" class="text-sm opacity-80">Llamando...</div>
         </div>
         <img id="call-photo" src="" style="width:150px; height:150px; border-radius:50%; object-fit:cover;">
-        <button class="btn-hangup" onclick="endCall()"><i class="fas fa-phone-slash rotate-[135deg]"></i></button>
+        <button class="bg-red-600 w-16 h-16 rounded-full flex items-center justify-center" onclick="endCall()">
+            <i class="fas fa-phone-slash rotate-[135deg]"></i>
+        </button>
     </div>
 
     <header>
@@ -85,16 +81,19 @@
 
     <main id="chat-container"></main>
 
-    <div class="input-area">
-        <div class="input-card">
+    <div class="bg-[#f0f0f0] p-2 flex items-center gap-2">
+        <div class="bg-white flex-1 rounded-full flex items-center px-4 h-12 shadow-sm">
             <i class="far fa-smile text-gray-500 text-2xl mr-2"></i>
-            <input type="text" id="chat-input" placeholder="Mensaje">
+            <input type="text" id="chat-input" class="flex-1 outline-none" placeholder="Mensaje">
             <i class="fas fa-paperclip text-gray-500 text-xl rotate-[-45deg]"></i>
         </div>
-        <button class="action-btn" onclick="enviarMensaje()"><i id="action-icon" class="fas fa-microphone"></i></button>
+        <button class="w-12 h-12 rounded-full bg-[#075E54] text-white flex items-center justify-center" onclick="enviarMensaje()">
+            <i id="action-icon" class="fas fa-microphone"></i>
+        </button>
     </div>
 
     <script>
+        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -106,11 +105,11 @@
         const icon = document.getElementById('action-icon');
         const container = document.getElementById('chat-container');
 
-        // ID del contacto con el que chateamos (Lo puedes definir al entrar al chat)
-        const contactoId = localStorage.getItem("chat_actual_id") || "global";
+        // ID del contacto (puedes cambiarlo por el ID dinámico que necesites)
+        const contactoId = localStorage.getItem("chat_con_id") || "12345";
 
         window.onload = () => {
-            // 1. RECIBIR DATOS DEL PERFIL (Nombre y Foto)
+            // 1. CARGAR DATOS DEL PERFIL DEL CONTACTO DESDE FIREBASE
             db.ref("usuarios/" + contactoId).on("value", (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
@@ -122,12 +121,10 @@
                 }
             });
 
-            // 2. RECIBIR MENSAJES EN TIEMPO REAL
+            // 2. ESCUCHAR MENSAJES EN TIEMPO REAL
             db.ref("mensajes").limitToLast(20).on("child_added", (snapshot) => {
                 const msg = snapshot.val();
-                const miTelefono = localStorage.getItem("user_phone");
-                // Solo dibujamos si el mensaje no lo pusimos nosotros manualmente al enviar
-                if (msg.usuario !== miTelefono) {
+                if (msg.usuario !== localStorage.getItem("user_phone")) {
                     dibujarBurbuja(msg.texto, msg.hora, false);
                 }
             });
@@ -144,7 +141,6 @@
             const miTel = localStorage.getItem("user_phone") || "anonimo";
 
             db.ref("mensajes").push({ texto: texto, hora: hora, usuario: miTel });
-
             dibujarBurbuja(texto, hora, true);
             input.value = "";
             icon.className = "fas fa-microphone";
@@ -165,7 +161,7 @@
 
         function toggleMenu() {
             const m = document.getElementById('menu-opciones');
-            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
         }
 
         function startCall() { document.getElementById('call-screen').style.display = 'flex'; }
