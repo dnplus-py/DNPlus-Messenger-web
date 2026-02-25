@@ -65,7 +65,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <script>
-        // 1. INICIALIZACIÓN (Usando tu Public Key: RyMkpjIKl84V_buAq)
+        // Inicialización con tu Public Key
         (function() {
             emailjs.init("RyMkpjIKl84V_buAq"); 
         })();
@@ -82,17 +82,16 @@
             boton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
-            // 2. Generar código de 6 dígitos
+            // Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000);
             
-            // 3. Guardar datos
+            // Guardar para verificar en otp.html
             localStorage.setItem("codigo_verificacion", codigoOTP);
             localStorage.setItem("email_usuario", email);
 
-            // 4. ENVÍO CON EMAILJS
-            // IMPORTANTE: Busca en tu panel de EmailJS el ID que empieza con 'template_'
+            // CONFIGURACIÓN DE ENVÍO
             const serviceID = 'default_service';
-            const templateID = 'TU_TEMPLATE_ID_AQUÍ'; // <--- PEGA AQUÍ TU ID DE PLANTILLA
+            const templateID = 'template_hf10l77'; // <--- Tu ID ya está aquí ✅
 
             const templateParams = {
                 to_email: email,
@@ -102,6 +101,7 @@
 
             emailjs.send(serviceID, templateID, templateParams)
                 .then(() => {
+                    // Si el envío es exitoso, va a la pantalla del código
                     window.location.href = "otp.html";
                 }, (err) => {
                     boton.innerText = "REINTENTAR";
