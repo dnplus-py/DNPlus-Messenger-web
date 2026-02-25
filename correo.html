@@ -26,7 +26,7 @@
 
         .icon-mail {
             font-size: 50px;
-            color: #176F47;
+            color: #176F47; /* Tu verde DNPlus */
             margin-bottom: 20px;
         }
 
@@ -70,8 +70,6 @@
             color: #8696a0;
             cursor: not-allowed;
         }
-
-        .btn-enviar:active:not(:disabled) { transform: scale(0.98); background-color: #0f5235; }
     </style>
 </head>
 <body>
@@ -91,7 +89,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <script>
-        // 1. INICIALIZACIÓN (Tu clave pública)
+        // 1. INICIALIZACIÓN (Tu clave pública es correcta ✅)
         (function() {
             emailjs.init("RyMkpjIKl84V_buAq"); 
         })();
@@ -101,48 +99,9 @@
             const email = emailInput.value.trim();
             const boton = document.getElementById('btn-enviar');
             
-            // Validación básica
             if (!email || !email.includes("@")) {
-                alert("Por favor, ingresa un correo electrónico válido.");
+                alert("Por favor, ingresa un correo válido.");
                 return;
             }
 
-            // Cambiar estado del botón
             boton.innerText = "ENVIANDO...";
-            boton.disabled = true;
-
-            // 2. Generar código de 6 dígitos aleatorio
-            const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            // 3. Guardar datos en localStorage (Nombres corregidos para otp.html)
-            localStorage.setItem("user_email", email);
-            localStorage.setItem("temp_otp", codigoOTP);
-
-            // 4. Parámetros para la plantilla de EmailJS
-            // NOTA: Asegúrate de que en tu plantilla de EmailJS uses {{otp_code}} y {{to_email}}
-            const templateParams = {
-                to_email: email,
-                otp_code: codigoOTP,
-                reply_to: 'soporte@dnplus.com'
-            };
-
-            const serviceID = 'default_service'; 
-            const templateID = 'TU_TEMPLATE_ID_REAL'; // <--- PEGA TU TEMPLATE_ID AQUÍ
-
-            emailjs.send(serviceID, templateID, templateParams)
-                .then(() => {
-                    console.log("¡Correo enviado con éxito!");
-                    // Redirigir a la pantalla de verificación
-                    window.location.href = "otp.html";
-                })
-                .catch((err) => {
-                    console.error("Error al enviar:", err);
-                    alert("Ocurrió un error al enviar el código. Por favor intenta de nuevo.");
-                    boton.innerText = "ENVIAR CÓDIGO";
-                    boton.disabled = false;
-                });
-        }
-    </script>
-
-</body>
-</html>
