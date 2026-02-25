@@ -85,9 +85,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <script>
-        // 1. INICIALIZACIÓN (Reemplaza con tu Public Key de EmailJS)
+        // 1. INICIALIZACIÓN CON TU CLAVE REAL
         (function() {
-            emailjs.init("TU_PUBLIC_KEY_AQUI"); 
+            emailjs.init("RyMkpjIKl84V_buAq"); 
         })();
 
         function procesarEnvio() {
@@ -110,9 +110,8 @@
             localStorage.setItem("email_usuario", email);
 
             // 4. ENVÍO REAL CON EMAILJS
-            // Los nombres 'service_id' y 'template_id' los sacas de tu panel de EmailJS
             const serviceID = 'default_service';
-            const templateID = 'TU_TEMPLATE_ID_AQUI';
+            const templateID = 'TU_TEMPLATE_ID_AQUI'; // <--- CAMBIA ESTO POR TU ID DE PLANTILLA
 
             const templateParams = {
                 to_email: email,
@@ -122,7 +121,7 @@
 
             emailjs.send(serviceID, templateID, templateParams)
                 .then(() => {
-                    console.log("Éxito!");
+                    console.log("¡Éxito!");
                     window.location.href = "otp.html";
                 }, (err) => {
                     boton.innerText = "REINTENTAR";
