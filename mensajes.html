@@ -12,9 +12,9 @@
         :root {
             --whatsapp-teal: #075E54;
             --whatsapp-bg: #E5DDD5;
-            --msg-mine: #176f47; 
+            --msg-mine: #176f47; /* Tu verde favorito */
             --msg-theirs: #ffffff;
-            --text-color: #F08927; 
+            --text-color: #F08927; /* Tu color de texto naranja */
             --wa-blue: #34B7F1;
         }
 
@@ -37,12 +37,9 @@
         .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.65rem; margin-top: 4px; opacity: 0.8; }
         .double-check { color: var(--wa-blue); }
 
-        /* Menú Ajustes Corregido */
+        /* Menú Ajustes */
         #menu-opciones { display: none; position: fixed; top: 55px; right: 10px; background: #232d36; border-radius: 8px; min-width: 150px; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         .menu-item { padding: 12px 20px; color: white; cursor: pointer; border-bottom: 1px solid #2d3a45; }
-        
-        /* Pantalla de Llamada */
-        #call-screen { position: fixed; inset: 0; background: #0b141a; z-index: 6000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 70px 20px 80px; color: white; }
     </style>
 </head>
 <body>
@@ -51,17 +48,6 @@
         <div class="menu-item" onclick="window.location.href='ajustes.html'">⚙️ Ajustes</div>
         <div class="menu-item" onclick="location.reload()">🔄 Actualizar</div>
         <div class="menu-item" style="color:#ff4444" onclick="cerrarSesion()">🚪 Salir</div>
-    </div>
-
-    <div id="call-screen">
-        <div class="text-center">
-            <h2 id="call-name" class="text-3xl font-light mb-1">Cargando...</h2>
-            <div id="call-timer" class="text-sm opacity-80">Llamando...</div>
-        </div>
-        <img id="call-photo" src="" style="width:150px; height:150px; border-radius:50%; object-fit:cover;">
-        <button class="bg-red-600 w-16 h-16 rounded-full flex items-center justify-center" onclick="endCall()">
-            <i class="fas fa-phone-slash rotate-[135deg]"></i>
-        </button>
     </div>
 
     <header>
@@ -74,7 +60,7 @@
             </div>
         </div>
         <div class="flex items-center gap-6">
-            <i class="fas fa-phone text-lg" onclick="startCall()"></i>
+            <i class="fas fa-phone text-lg"></i>
             <i class="fas fa-ellipsis-v text-lg cursor-pointer" onclick="toggleMenu()"></i>
         </div>
     </header>
@@ -82,18 +68,15 @@
     <main id="chat-container"></main>
 
     <div class="bg-[#f0f0f0] p-2 flex items-center gap-2">
-        <div class="bg-white flex-1 rounded-full flex items-center px-4 h-12 shadow-sm">
-            <i class="far fa-smile text-gray-500 text-2xl mr-2"></i>
+        <div class="bg-white flex-1 rounded-full flex items-center px-4 h-12">
             <input type="text" id="chat-input" class="flex-1 outline-none" placeholder="Mensaje">
-            <i class="fas fa-paperclip text-gray-500 text-xl rotate-[-45deg]"></i>
         </div>
         <button class="w-12 h-12 rounded-full bg-[#075E54] text-white flex items-center justify-center" onclick="enviarMensaje()">
-            <i id="action-icon" class="fas fa-microphone"></i>
+            <i id="action-icon" class="fas fa-paper-plane"></i>
         </button>
     </div>
 
     <script>
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -102,27 +85,23 @@
         const db = firebase.database();
 
         const input = document.getElementById('chat-input');
-        const icon = document.getElementById('action-icon');
         const container = document.getElementById('chat-container');
 
-        // ID del contacto (puedes cambiarlo por el ID dinámico que necesites)
+        // ID del contacto que estamos viendo
         const contactoId = localStorage.getItem("chat_con_id") || "12345";
 
         window.onload = () => {
-            // 1. CARGAR DATOS DEL PERFIL DEL CONTACTO DESDE FIREBASE
+            // CARGAR PERFIL
             db.ref("usuarios/" + contactoId).on("value", (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     document.getElementById('header-name').innerText = data.nombre || "Usuario";
-                    document.getElementById('call-name').innerText = data.nombre || "Usuario";
-                    const fotoUrl = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                    document.getElementById('header-photo').src = fotoUrl;
-                    document.getElementById('call-photo').src = fotoUrl;
+                    document.getElementById('header-photo').src = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 }
             });
 
-            // 2. ESCUCHAR MENSAJES EN TIEMPO REAL
-            db.ref("mensajes").limitToLast(20).on("child_added", (snapshot) => {
+            // ESCUCHAR MENSAJES
+            db.ref("mensajes").on("child_added", (snapshot) => {
                 const msg = snapshot.val();
                 if (msg.usuario !== localStorage.getItem("user_phone")) {
                     dibujarBurbuja(msg.texto, msg.hora, false);
@@ -130,43 +109,28 @@
             });
         };
 
-        input.oninput = () => {
-            icon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
-        };
-
         function enviarMensaje() {
             const texto = input.value.trim();
             if(!texto) return;
             const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const miTel = localStorage.getItem("user_phone") || "anonimo";
-
-            db.ref("mensajes").push({ texto: texto, hora: hora, usuario: miTel });
+            db.ref("mensajes").push({ texto: texto, hora: hora, usuario: localStorage.getItem("user_phone") });
             dibujarBurbuja(texto, hora, true);
             input.value = "";
-            icon.className = "fas fa-microphone";
         }
 
         function dibujarBurbuja(texto, hora, esMio) {
             const b = document.createElement('div');
             b.className = esMio ? "bubble bubble-mine" : "bubble bubble-theirs";
-            b.innerHTML = `
-                <div class="${esMio ? 'msg-text-custom' : ''}">${texto}</div>
-                <div class="msg-info">
-                    <span>${hora}</span>
-                    ${esMio ? '<i class="fas fa-check-double double-check"></i>' : ''}
-                </div>`;
+            b.innerHTML = `<div class="${esMio ? 'msg-text-custom' : ''}">${texto}</div><div class="msg-info"><span>${hora}</span></div>`;
             container.appendChild(b);
             container.scrollTop = container.scrollHeight;
         }
 
         function toggleMenu() {
             const m = document.getElementById('menu-opciones');
-            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
         }
 
-        function startCall() { document.getElementById('call-screen').style.display = 'flex'; }
-        function endCall() { document.getElementById('call-screen').style.display = 'none'; }
-        
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = 'registro.html';
