@@ -30,9 +30,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-    <script>
+        <script>
         (function() {
-            // TU KEY PÚBLICA (Verifica que sea esta en Account > Public Key)
+            // Verifica que este ID sea el de Account > Public Key
             emailjs.init("RyMkpjIKl84V_buAq"); 
         })();
 
@@ -45,18 +45,17 @@
                 return;
             }
 
-            boton.innerText = "PROBANDO CONEXIÓN...";
+            boton.innerText = "CONECTANDO...";
             boton.disabled = true;
 
             const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
             
-            // Guardamos para la siguiente pantalla
             localStorage.setItem("user_email", email);
             localStorage.setItem("temp_otp", codigoOTP);
 
-            // DATOS DE PRUEBA - Asegúrate de que coincidan con tu panel
+            // IMPORTANTE: Verifica estos dos IDs en tu panel de EmailJS
             const serviceID = 'default_service'; 
-            const templateID = 'template_XXXXXX'; // <--- DAVID: AQUÍ ESTÁ EL ERROR SEGURO.
+            const templateID = 'template_XXXXXX'; // <--- EL ERROR ESTÁ AQUÍ SEGURO
 
             const templateParams = {
                 to_email: email,
@@ -64,18 +63,17 @@
             };
 
             emailjs.send(serviceID, templateID, templateParams)
-                .then(() => {
-                    alert("¡Código enviado con éxito!");
-                    window.location.href = "otp.html";
-                })
-                .catch((err) => {
-                    // ESTO NOS DARÁ LA PISTA FINAL
-                    console.error("DETALLE DEL ERROR:", err);
-                    alert("ERROR DETALLADO: " + err.status + " - " + err.text);
-                    boton.innerText = "REINTENTAR";
-                    boton.disabled = false;
+                .then(function(response) {
+                   console.log('EXITO!', response.status, response.text);
+                   window.location.href = "otp.html";
+                }, function(error) {
+                   console.log('FALLÓ...', error);
+                   // ESTA LÍNEA TE DIRÁ EL ERROR REAL EN PANTALLA
+                   alert("Error Real: " + JSON.stringify(error));
+                   boton.innerText = "REINTENTAR";
+                   boton.disabled = false;
                 });
         }
     </script>
-</body>
+ </body>
 </html>
