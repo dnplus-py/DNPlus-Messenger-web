@@ -3,71 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus - Registro</title>
-    <style>
-        body { background-color: #0b141a; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
-        .container { width: 100%; max-width: 400px; text-align: center; }
-        .icon-mail { font-size: 50px; color: #176F47; margin-bottom: 20px; }
-        h2 { margin-bottom: 10px; font-size: 22px; }
-        p { color: #8696a0; font-size: 14px; margin-bottom: 30px; }
-        .input-group { background: #202c33; border-radius: 10px; padding: 10px; margin-bottom: 20px; border-bottom: 2px solid #176F47; }
-        input { background: transparent; border: none; color: white; width: 100%; padding: 10px; font-size: 16px; outline: none; }
-        .btn-enviar { background-color: #176F47; color: white; border: none; width: 100%; padding: 15px; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="icon-mail">📧</div>
-        <h2>Verifica tu correo</h2>
-        <p>Enviaremos un código de seguridad a tu cuenta de DNPlus.</p>
-        <div class="input-group">
-            <input type="email" id="user-email" placeholder="tu-correo@gmail.com" required>
-        </div>
-        <button class="btn-enviar" id="btn-texto" onclick="procesarEnvio()">ENVIAR CÓDIGO</button>
-    </div>
-
+    <title>DNPlus - Verificación</title>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>
-    (function() {
-        emailjs.init("Ycta0gV4PbOTe1hr9"); 
-    })();
+</head>
+<body style="background-color: #176f47; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
 
-    function procesarEnvio() {
-        const emailIngresado = document.getElementById('user-email').value;
-        const boton = document.getElementById('btn-texto');
-        
-        if (!emailIngresado.includes("@")) {
-            alert("Por favor, ingresa un correo válido.");
-            return;
+    <h1>DNPlus</h1>
+    <p>Ingresa tu correo para recibir el código</p>
+
+    <input type="email" id="user-email" placeholder="tu@email.com" 
+           style="padding: 10px; border-radius: 5px; border: none; width: 80%; max-width: 300px;">
+    
+    <br><br>
+
+    <button id="btn-enviar" onclick="procesarEnvio()" 
+            style="background-color: #F08927; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        <span id="btn-texto">OBTENER CÓDIGO</span>
+    </button>
+
+    <script>
+        // Inicializamos con tu Public Key ✅
+        (function() {
+            emailjs.init("Ycta0gV4PbOTe1hr9"); 
+        })();
+
+        function procesarEnvio() {
+            const emailIngresado = document.getElementById('user-email').value;
+            const boton = document.getElementById('btn-enviar');
+            const textoBoton = document.getElementById('btn-texto');
+            
+            if (!emailIngresado.includes("@")) {
+                alert("Por favor, ingresa un correo válido.");
+                return;
+            }
+
+            // Bloqueamos el botón para evitar múltiples clics
+            textoBoton.innerText = "ENVIANDO...";
+            boton.disabled = true;
+
+            // Generamos el código de 6 dígitos
+            const codigoOTP = Math.floor(100000 + Math.random() * 900000);
+            localStorage.setItem("codigo_verificacion", codigoOTP);
+
+            // CONFIGURACIÓN QUE DIO 200 OK ✅
+            const serviceID = 'service_eakuydh'; 
+            const templateID = 'template_7nnvz18'; 
+
+            const templateParams = {
+                email: emailIngresado, // Nombre de variable en tu plantilla
+                passcode: codigoOTP,   // Nombre de variable en tu plantilla
+                time: "One-Time password"
+            };
+
+            // Envío del correo
+            emailjs.send(serviceID, templateID, templateParams)
+                .then(() => {
+                    // Si el envío es exitoso, vamos a la pantalla del OTP
+                    window.location.href = "otp.html";
+                }, (err) => {
+                    // Si hay error, liberamos el botón
+                    textoBoton.innerText = "REINTENTAR";
+                    boton.disabled = false;
+                    alert("Error al enviar: " + JSON.stringify(err));
+                });
         }
-
-        boton.innerText = "ENVIANDO...";
-        boton.disabled = true;
-
-        // Generamos el código de 6 dígitos
-        const codigoOTP = Math.floor(100000 + Math.random() * 900000);
-        localStorage.setItem("codigo_verificacion", codigoOTP);
-
-        // CONFIGURACIÓN EXITOSA ✅
-        const serviceID = 'service_eakuydh'; 
-        const templateID = 'PONER_AQUÍ_EL_ID_DE_TU_CAPTURA_8:00PM'; 
-
-        const templateParams = {
-            email: emailIngresado, // Debe llamarse 'email' como en tu prueba exitosa
-            passcode: codigoOTP,   // Debe llamarse 'passcode' como en tu prueba exitosa
-            time: "One-Time password"
-        };
-
-        emailjs.send(serviceID, templateID, templateParams)
-            .then(() => {
-                window.location.href = "otp.html";
-            }, (err) => {
-                boton.innerText = "REINTENTAR";
-                boton.disabled = false;
-                alert("Error: " + JSON.stringify(err));
-            });
-    }
-</script>
+    </script>
 </body>
 </html>
