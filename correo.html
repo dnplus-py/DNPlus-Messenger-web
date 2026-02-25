@@ -5,24 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus - Verificación</title>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body {
+            background-color: #176f47; /* Tu color verde favorito */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        button {
+            width: 100%;
+            background-color: #F08927; /* Tu color naranja para textos/botones */
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: background 0.3s ease;
+        }
+        button:disabled {
+            background-color: #a5a5a5;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
-<body style="background-color: #176f47; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+<body>
 
-    <h1>DNPlus</h1>
-    <p>Ingresa tu correo para recibir el código</p>
+    <div class="container">
+        <h1>DNPlus</h1>
+        <p>Ingresa tu correo para recibir el código</p>
 
-    <input type="email" id="user-email" placeholder="tu@email.com" 
-           style="padding: 10px; border-radius: 5px; border: none; width: 80%; max-width: 300px;">
-    
-    <br><br>
-
-    <button id="btn-enviar" onclick="procesarEnvio()" 
-            style="background-color: #F08927; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-        <span id="btn-texto">OBTENER CÓDIGO</span>
-    </button>
+        <input type="email" id="user-email" placeholder="tu@email.com">
+        
+        <button id="btn-enviar" onclick="procesarEnvio()">
+            <span id="btn-texto">OBTENER CÓDIGO</span>
+        </button>
+    </div>
 
     <script>
-        // Inicializamos con tu Public Key ✅
+        // Inicialización con tu Public Key
         (function() {
             emailjs.init("Ycta0gV4PbOTe1hr9"); 
         })();
@@ -37,34 +91,30 @@
                 return;
             }
 
-            // Bloqueamos el botón para evitar múltiples clics
             textoBoton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
-            // Generamos el código de 6 dígitos
+            // Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000);
             localStorage.setItem("codigo_verificacion", codigoOTP);
 
-            // CONFIGURACIÓN QUE DIO 200 OK ✅
+            // Datos que dieron 200 OK en tu captura
             const serviceID = 'service_eakuydh'; 
             const templateID = 'template_7nnvz18'; 
 
             const templateParams = {
-                email: emailIngresado, // Nombre de variable en tu plantilla
-                passcode: codigoOTP,   // Nombre de variable en tu plantilla
+                email: emailIngresado,
+                passcode: codigoOTP,
                 time: "One-Time password"
             };
 
-            // Envío del correo
             emailjs.send(serviceID, templateID, templateParams)
                 .then(() => {
-                    // Si el envío es exitoso, vamos a la pantalla del OTP
                     window.location.href = "otp.html";
                 }, (err) => {
-                    // Si hay error, liberamos el botón
                     textoBoton.innerText = "REINTENTAR";
                     boton.disabled = false;
-                    alert("Error al enviar: " + JSON.stringify(err));
+                    alert("Error: " + JSON.stringify(err));
                 });
         }
     </script>
