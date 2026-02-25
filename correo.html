@@ -65,7 +65,13 @@
             transition: 0.3s;
         }
 
-        .btn-enviar:active { transform: scale(0.98); background-color: #0f5235; }
+        .btn-enviar:disabled {
+            background-color: #202c33;
+            color: #8696a0;
+            cursor: not-allowed;
+        }
+
+        .btn-enviar:active:not(:disabled) { transform: scale(0.98); background-color: #0f5235; }
     </style>
 </head>
 <body>
@@ -79,57 +85,64 @@
             <input type="email" id="user-email" placeholder="ejemplo@gmail.com" required>
         </div>
 
-        <button class="btn-enviar" id="btn-texto" onclick="procesarEnvio()">ENVIAR CÓDIGO</button>
+        <button class="btn-enviar" id="btn-enviar" onclick="procesarEnvio()">ENVIAR CÓDIGO</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-<script>
-    // 1. INICIALIZACIÓN CON TU CLAVE PÚBLICA (Correcta ✅)
-    (function() {
-        emailjs.init("RyMkpjIKl84V_buAq"); 
-    })();
+    <script>
+        // 1. INICIALIZACIÓN (Tu clave pública)
+        (function() {
+            emailjs.init("RyMkpjIKl84V_buAq"); 
+        })();
 
-    function procesarEnvio() {
-        const email = document.getElementById('user-email').value;
-        const boton = document.getElementById('btn-texto');
-        
-        if (!email.includes("@")) {
-            alert("Por favor, ingresa un correo válido");
-            return;
+        function procesarEnvio() {
+            const emailInput = document.getElementById('user-email');
+            const email = emailInput.value.trim();
+            const boton = document.getElementById('btn-enviar');
+            
+            // Validación básica
+            if (!email || !email.includes("@")) {
+                alert("Por favor, ingresa un correo electrónico válido.");
+                return;
+            }
+
+            // Cambiar estado del botón
+            boton.innerText = "ENVIANDO...";
+            boton.disabled = true;
+
+            // 2. Generar código de 6 dígitos aleatorio
+            const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // 3. Guardar datos en localStorage (Nombres corregidos para otp.html)
+            localStorage.setItem("user_email", email);
+            localStorage.setItem("temp_otp", codigoOTP);
+
+            // 4. Parámetros para la plantilla de EmailJS
+            // NOTA: Asegúrate de que en tu plantilla de EmailJS uses {{otp_code}} y {{to_email}}
+            const templateParams = {
+                to_email: email,
+                otp_code: codigoOTP,
+                reply_to: 'soporte@dnplus.com'
+            };
+
+            const serviceID = 'default_service'; 
+            const templateID = 'TU_TEMPLATE_ID_REAL'; // <--- PEGA TU TEMPLATE_ID AQUÍ
+
+            emailjs.send(serviceID, templateID, templateParams)
+                .then(() => {
+                    console.log("¡Correo enviado con éxito!");
+                    // Redirigir a la pantalla de verificación
+                    window.location.href = "otp.html";
+                })
+                .catch((err) => {
+                    console.error("Error al enviar:", err);
+                    alert("Ocurrió un error al enviar el código. Por favor intenta de nuevo.");
+                    boton.innerText = "ENVIAR CÓDIGO";
+                    boton.disabled = false;
+                });
         }
-
-        boton.innerText = "ENVIANDO...";
-        boton.disabled = true;
-
-        // 2. Generar código de 6 dígitos
-        const codigoOTP = Math.floor(100000 + Math.random() * 900000);
-        
-        // 3. Guardar en localStorage para validar en otp.html
-        localStorage.setItem("codigo_verificacion", codigoOTP);
-        localStorage.setItem("email_usuario", email);
-
-        // 4. ENVÍO REAL CON EMAILJS
-        const serviceID = 'default_service'; // Revisa en "Email Services" si este es el ID
-        const templateID = 'TU_TEMPLATE_ID_REAL'; // <--- AQUÍ PEGA EL QUE EMPIEZA CON "template_"
-
-        const templateParams = {
-            to_email: email,
-            otp_code: codigoOTP,
-            reply_to: 'soporte@dnplus.com'
-        };
-
-        emailjs.send(serviceID, templateID, templateParams)
-            .then(() => {
-                console.log("¡Éxito!");
-                window.location.href = "otp.html";
-            }, (err) => {
-                boton.innerText = "REINTENTAR";
-                boton.disabled = false;
-                alert("Error al enviar: " + JSON.stringify(err));
-            });
-    }
-</script>
+    </script>
 
 </body>
 </html>
