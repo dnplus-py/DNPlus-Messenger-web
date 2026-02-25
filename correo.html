@@ -12,7 +12,7 @@
         p { color: #8696a0; font-size: 14px; margin-bottom: 30px; }
         .input-group { background: #202c33; border-radius: 10px; padding: 10px; margin-bottom: 20px; border-bottom: 2px solid #176F47; }
         input { background: transparent; border: none; color: white; width: 100%; padding: 10px; font-size: 16px; outline: none; }
-        .btn-enviar { background-color: #176F47; color: white; border: none; width: 100%; padding: 15px; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-enviar { background-color: #176F47; color: white; border: none; width: 100%; padding: 15px; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; width: 100% }
         .btn-enviar:disabled { background-color: #202c33; color: #8696a0; }
     </style>
 </head>
@@ -31,6 +31,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
     <script>
+        // Inicialización inmediata
+        (function() {
+            emailjs.init("RyMkpjIKl84V_buAq");
+        })();
+
         function enviarCodigo() {
             const email = document.getElementById('user-email').value.trim();
             const boton = document.getElementById('btn-enviar');
@@ -43,32 +48,28 @@
             boton.innerText = "ENVIANDO CÓDIGO...";
             boton.disabled = true;
 
-            // Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000).toString();
             
-            // Guardamos para que otp.html pueda leerlo
             localStorage.setItem("user_email", email);
             localStorage.setItem("temp_otp", codigoOTP);
 
-            // Parámetros para tu plantilla de EmailJS
             const templateParams = {
                 to_email: email,
                 otp_code: codigoOTP
             };
 
-            // CONFIGURACIÓN REAL DE DAVID
-            const publicKey = "RyMkpjIKl84V_buAq"; 
+            // DATOS CONFIRMADOS
             const serviceID = "default_service";    
-            const templateID = "7nR80oFsd98uOGeYiiNZc"; // Tu ID de plantilla real ✅
+            const templateID = "7nR80oFsd98uOGeYiiNZc"; 
 
-            emailjs.send(serviceID, templateID, templateParams, publicKey)
+            emailjs.send(serviceID, templateID, templateParams)
                 .then(() => {
                     alert("¡Código enviado con éxito!");
-                    window.location.href = "otp.html"; // Salto a la verificación
+                    window.location.href = "otp.html";
                 })
                 .catch((error) => {
                     console.error("FAILED...", error);
-                    alert("Error: " + error.text);
+                    alert("Error: " + (error.text || "Account not found - Verifica tu Public Key en el panel"));
                     boton.innerText = "REINTENTAR";
                     boton.disabled = false;
                 });
