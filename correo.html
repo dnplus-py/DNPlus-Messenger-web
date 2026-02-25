@@ -83,52 +83,53 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
-    <script>
-        // 1. INICIALIZACIÓN CON TU CLAVE REAL
-        (function() {
-            emailjs.init("RyMkpjIKl84V_buAq"); 
-        })();
 
-        function procesarEnvio() {
-            const email = document.getElementById('user-email').value;
-            const boton = document.getElementById('btn-texto');
-            
-            if (!email.includes("@")) {
-                alert("Por favor, ingresa un correo válido");
-                return;
-            }
+<script>
+    // 1. INICIALIZACIÓN CON TU CLAVE PÚBLICA (Correcta ✅)
+    (function() {
+        emailjs.init("RyMkpjIKl84V_buAq"); 
+    })();
 
-            boton.innerText = "ENVIANDO...";
-            boton.disabled = true;
-
-            // 2. Generar código de 6 dígitos
-            const codigoOTP = Math.floor(100000 + Math.random() * 900000);
-            
-            // 3. Guardar en localStorage para validar en otp.html
-            localStorage.setItem("codigo_verificacion", codigoOTP);
-            localStorage.setItem("email_usuario", email);
-
-            // 4. ENVÍO REAL CON EMAILJS
-            const serviceID = 'default_service';
-            const templateID = 'RyMkpjIKl84V_buAq'; // <--- CAMBIA ESTO POR TU ID DE PLANTILLA
-
-            const templateParams = {
-                to_email: email,
-                otp_code: codigoOTP,
-                reply_to: 'soporte@dnplus.com'
-            };
-
-            emailjs.send(serviceID, templateID, templateParams)
-                .then(() => {
-                    console.log("¡Éxito!");
-                    window.location.href = "otp.html";
-                }, (err) => {
-                    boton.innerText = "REINTENTAR";
-                    boton.disabled = false;
-                    alert("Error al enviar: " + JSON.stringify(err));
-                });
+    function procesarEnvio() {
+        const email = document.getElementById('user-email').value;
+        const boton = document.getElementById('btn-texto');
+        
+        if (!email.includes("@")) {
+            alert("Por favor, ingresa un correo válido");
+            return;
         }
-    </script>
+
+        boton.innerText = "ENVIANDO...";
+        boton.disabled = true;
+
+        // 2. Generar código de 6 dígitos
+        const codigoOTP = Math.floor(100000 + Math.random() * 900000);
+        
+        // 3. Guardar en localStorage para validar en otp.html
+        localStorage.setItem("codigo_verificacion", codigoOTP);
+        localStorage.setItem("email_usuario", email);
+
+        // 4. ENVÍO REAL CON EMAILJS
+        const serviceID = 'default_service'; // Revisa en "Email Services" si este es el ID
+        const templateID = 'TU_TEMPLATE_ID_REAL'; // <--- AQUÍ PEGA EL QUE EMPIEZA CON "template_"
+
+        const templateParams = {
+            to_email: email,
+            otp_code: codigoOTP,
+            reply_to: 'soporte@dnplus.com'
+        };
+
+        emailjs.send(serviceID, templateID, templateParams)
+            .then(() => {
+                console.log("¡Éxito!");
+                window.location.href = "otp.html";
+            }, (err) => {
+                boton.innerText = "REINTENTAR";
+                boton.disabled = false;
+                alert("Error al enviar: " + JSON.stringify(err));
+            });
+    }
+</script>
+
 </body>
 </html>
