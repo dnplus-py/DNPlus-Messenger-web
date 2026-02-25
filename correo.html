@@ -28,45 +28,45 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
-    <script>
-        (function() {
-            emailjs.init("Ycta0gV4PbOTe1hr9"); 
-        })();
+<script>
+    (function() {
+        emailjs.init("Ycta0gV4PbOTe1hr9"); 
+    })();
 
-        function procesarEnvio() {
-            const email = document.getElementById('user-email').value;
-            const boton = document.getElementById('btn-texto');
-            
-            if (!email.includes("@")) {
-                alert("Por favor, ingresa un correo válido.");
-                return;
-            }
-
-            boton.innerText = "ENVIANDO...";
-            boton.disabled = true;
-
-            const codigoOTP = Math.floor(100000 + Math.random() * 900000);
-            localStorage.setItem("codigo_verificacion", codigoOTP);
-
-            // --- ESTE ES EL CAMBIO QUE FALTA ---
-            const serviceID = 'PON_AQUI_TU_SERVICE_ID'; // <--- EL QUE ENCONTRASTE EN "EMAIL SERVICES"
-            const templateID = 'template_fey8e85'; 
-
-            const templateParams = {
-                to_email: email,
-                otp_code: codigoOTP
-            };
-
-            emailjs.send(serviceID, templateID, templateParams, "Ycta0gV4PbOTe1hr9")
-                .then(() => {
-                    window.location.href = "otp.html";
-                }, (err) => {
-                    boton.innerText = "REINTENTAR";
-                    boton.disabled = false;
-                    alert("Error: " + err.status + " " + err.text);
-                });
+    function procesarEnvio() {
+        const email = document.getElementById('user-email').value;
+        const boton = document.getElementById('btn-texto');
+        
+        if (!email.includes("@")) {
+            alert("Por favor, ingresa un correo válido.");
+            return;
         }
-    </script>
+
+        boton.innerText = "ENVIANDO...";
+        boton.disabled = true;
+
+        const codigoOTP = Math.floor(100000 + Math.random() * 900000);
+        localStorage.setItem("codigo_verificacion", codigoOTP);
+
+        // CONFIGURACIÓN CON TUS DATOS REALES ✅
+        const serviceID = 'service_dzes88m'; // Tu ID de la captura
+        const templateID = 'template_t9tweev'; // Tu Template ID
+
+        const templateParams = {
+            to_email: email,
+            otp_code: codigoOTP
+        };
+
+        emailjs.send(serviceID, templateID, templateParams, "Ycta0gV4PbOTe1hr9")
+            .then(() => {
+                window.location.href = "otp.html";
+            }, (err) => {
+                boton.innerText = "REINTENTAR";
+                boton.disabled = false;
+                alert("Error: " + err.status + " " + err.text);
+            });
+    }
+</script>
+
 </body>
 </html>
