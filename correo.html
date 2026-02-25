@@ -31,7 +31,6 @@
     
     <script>
         (function() {
-            // Tu Public Key ya configurada
             emailjs.init("Ycta0gV4PbOTe1hr9"); 
         })();
 
@@ -47,26 +46,20 @@
             boton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
-            // Generamos el código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000);
-            
-            // Guardamos para que otp.html lo verifique después
             localStorage.setItem("codigo_verificacion", codigoOTP);
 
-            // --- CONFIGURACIÓN DE IDs ---
-            // ⚠️ RECUERDA: Cambia 'default_service' por tu Service ID real si es diferente
-            const serviceID = 'default_service'; 
-            const templateID = 'template_fey8e85'; // Tu nuevo ID actualizado ✅
+            // --- ESTE ES EL CAMBIO QUE FALTA ---
+            const serviceID = 'PON_AQUI_TU_SERVICE_ID'; // <--- EL QUE ENCONTRASTE EN "EMAIL SERVICES"
+            const templateID = 'template_fey8e85'; 
 
             const templateParams = {
                 to_email: email,
                 otp_code: codigoOTP
             };
 
-            // Enviamos el correo pasando también la Public Key al final por seguridad
             emailjs.send(serviceID, templateID, templateParams, "Ycta0gV4PbOTe1hr9")
                 .then(() => {
-                    // Si todo sale bien, vamos a la pantalla de verificación
                     window.location.href = "otp.html";
                 }, (err) => {
                     boton.innerText = "REINTENTAR";
