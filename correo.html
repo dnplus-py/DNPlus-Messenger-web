@@ -30,6 +30,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
     (function() {
+        // Tu Public Key que ya está verificada
         emailjs.init("Ycta0gV4PbOTe1hr9"); 
     })();
 
@@ -48,25 +49,27 @@
         const codigoOTP = Math.floor(100000 + Math.random() * 900000);
         localStorage.setItem("codigo_verificacion", codigoOTP);
 
-        // CONFIGURACIÓN CON TUS DATOS REALES ✅
-        const serviceID = 'service_dzes88m'; // Tu ID de la captura
-        const templateID = 'template_t9tweev'; // Tu Template ID
+        // --- ESTOS SON TUS DATOS REALES SEGÚN TUS CAPTURAS ---
+        const serviceID = 'service_eakuydh'; // Tu ID de la captura de las 7:10 PM
+        const templateID = 'template_t9tweev'; // Tu Template ID de la captura de las 5:55 PM
 
         const templateParams = {
             to_email: email,
             otp_code: codigoOTP
         };
 
+        // Enviamos usando tus IDs y tu Public Key
         emailjs.send(serviceID, templateID, templateParams, "Ycta0gV4PbOTe1hr9")
             .then(() => {
+                // Si todo sale bien, te manda a la pantalla del código
                 window.location.href = "otp.html";
             }, (err) => {
                 boton.innerText = "REINTENTAR";
                 boton.disabled = false;
+                // Si sale error 412, recuerda reconectar Gmail marcando todas las casillas
                 alert("Error: " + err.status + " " + err.text);
             });
     }
 </script>
-
 </body>
 </html>
