@@ -1,85 +1,180 @@
-// CONFIGURACIÓN FIREBASE
-const firebaseConfig = {
-    apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-    databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const input = document.getElementById('chat-input');
-const icon = document.getElementById('action-icon');
-const container = document.getElementById('chat-container');
-
-// --- 1. CARGAR DATOS DEL PERFIL DEL CONTACTO ---
-window.onload = () => {
-    // Obtenemos el ID del usuario con el que estamos hablando
-    // (Esto lo podrías pasar por la URL o guardarlo al tocar un contacto)
-    const contactoId = localStorage.getItem("chat_con_id") || "12345"; // ID de ejemplo
-
-    db.ref("usuarios/" + contactoId).on("value", (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            // Actualizamos Nombre y Foto en el Header y Llamada
-            document.getElementById('header-name').innerText = data.nombre;
-            document.getElementById('call-name').innerText = data.nombre;
-            document.querySelectorAll('.avatar, .call-avatar-big').forEach(img => {
-                img.src = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-            });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNpPlus - Chat Real</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --whatsapp-teal: #075E54;
+            --whatsapp-bg: #E5DDD5;
+            --msg-mine: #176f47; 
+            --msg-theirs: #ffffff;
+            --text-color: #F08927; 
+            --wa-blue: #34B7F1;
         }
-    });
 
-    // --- 2. ESCUCHAR MENSAJES EN TIEMPO REAL ---
-    db.ref("mensajes").on("child_added", (snapshot) => {
-        const msg = snapshot.val();
-        const miTelefono = localStorage.getItem("user_phone");
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--whatsapp-bg); height: 100vh; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
+
+        header { background-color: var(--whatsapp-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+
+        #chat-container {
+            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-size: cover; background-attachment: fixed;
+        }
+
+        /* Burbujas */
+        .bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.15); position: relative; }
+        .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; color: white; }
+        .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; color: #000; }
         
-        // Si el mensaje no es mío, lo dibujo a la izquierda
-        if (msg.usuario !== miTelefono) {
-            renderBubble(msg.texto, msg.hora, false);
+        .msg-text-custom { color: var(--text-color); font-weight: 500; }
+        .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.65rem; margin-top: 4px; opacity: 0.8; }
+        .double-check { color: var(--wa-blue); }
+
+        /* Menú y Llamada */
+        #menu-opciones { display: none; position: fixed; top: 55px; right: 10px; background: #232d36; border-radius: 8px; min-width: 150px; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .menu-item { padding: 12px 20px; color: white; cursor: pointer; border-bottom: 1px solid #2d3a45; }
+        #call-screen { position: fixed; inset: 0; background: #0b141a; z-index: 6000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 70px 20px 80px; color: white; }
+        .btn-hangup { background: #ff3b30; width: 65px; height: 65px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+
+        /* Input Area */
+        .input-area { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; }
+        .input-card { background: white; flex: 1; border-radius: 24px; display: flex; align-items: center; padding: 0 15px; height: 48px; }
+        #chat-input { flex: 1; border: none; outline: none; }
+        .action-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--whatsapp-teal); color: white; display:flex; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body>
+
+    <div id="menu-opciones">
+        <div class="menu-item" onclick="window.location.href='ajustes.html'">⚙️ Ajustes</div>
+        <div class="menu-item" onclick="location.reload()">🔄 Actualizar</div>
+        <div class="menu-item" style="color:#ff4444" onclick="cerrarSesion()">🚪 Salir</div>
+    </div>
+
+    <div id="call-screen">
+        <div class="text-center">
+            <h2 id="call-name" class="text-3xl font-light mb-1">Cargando...</h2>
+            <div id="call-timer" class="text-sm opacity-80">Llamando...</div>
+        </div>
+        <img id="call-photo" src="" style="width:150px; height:150px; border-radius:50%; object-fit:cover;">
+        <button class="btn-hangup" onclick="endCall()"><i class="fas fa-phone-slash rotate-[135deg]"></i></button>
+    </div>
+
+    <header>
+        <div class="flex items-center">
+            <i class="fas fa-arrow-left p-2 mr-1"></i>
+            <img id="header-photo" src="" class="avatar">
+            <div class="ml-3">
+                <div id="header-name" class="font-bold text-sm">Cargando...</div>
+                <div class="text-[11px] opacity-80">en línea</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <i class="fas fa-phone text-lg" onclick="startCall()"></i>
+            <i class="fas fa-ellipsis-v text-lg cursor-pointer" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main id="chat-container"></main>
+
+    <div class="input-area">
+        <div class="input-card">
+            <i class="far fa-smile text-gray-500 text-2xl mr-2"></i>
+            <input type="text" id="chat-input" placeholder="Mensaje">
+            <i class="fas fa-paperclip text-gray-500 text-xl rotate-[-45deg]"></i>
+        </div>
+        <button class="action-btn" onclick="enviarMensaje()"><i id="action-icon" class="fas fa-microphone"></i></button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const input = document.getElementById('chat-input');
+        const icon = document.getElementById('action-icon');
+        const container = document.getElementById('chat-container');
+
+        // ID del contacto con el que chateamos (Lo puedes definir al entrar al chat)
+        const contactoId = localStorage.getItem("chat_actual_id") || "global";
+
+        window.onload = () => {
+            // 1. RECIBIR DATOS DEL PERFIL (Nombre y Foto)
+            db.ref("usuarios/" + contactoId).on("value", (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    document.getElementById('header-name').innerText = data.nombre || "Usuario";
+                    document.getElementById('call-name').innerText = data.nombre || "Usuario";
+                    const fotoUrl = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                    document.getElementById('header-photo').src = fotoUrl;
+                    document.getElementById('call-photo').src = fotoUrl;
+                }
+            });
+
+            // 2. RECIBIR MENSAJES EN TIEMPO REAL
+            db.ref("mensajes").limitToLast(20).on("child_added", (snapshot) => {
+                const msg = snapshot.val();
+                const miTelefono = localStorage.getItem("user_phone");
+                // Solo dibujamos si el mensaje no lo pusimos nosotros manualmente al enviar
+                if (msg.usuario !== miTelefono) {
+                    dibujarBurbuja(msg.texto, msg.hora, false);
+                }
+            });
+        };
+
+        input.oninput = () => {
+            icon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
+        };
+
+        function enviarMensaje() {
+            const texto = input.value.trim();
+            if(!texto) return;
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const miTel = localStorage.getItem("user_phone") || "anonimo";
+
+            db.ref("mensajes").push({ texto: texto, hora: hora, usuario: miTel });
+
+            dibujarBurbuja(texto, hora, true);
+            input.value = "";
+            icon.className = "fas fa-microphone";
         }
-    });
-};
 
-// --- 3. FUNCIÓN PARA DIBUJAR BURBUJAS ---
-function renderBubble(texto, hora, esMio) {
-    const b = document.createElement('div');
-    b.className = esMio ? "bubble bubble-mine" : "bubble bubble-theirs";
-    
-    // Estilo para mensajes de otros (blanco)
-    if(!esMio) {
-        b.style.alignSelf = "flex-start";
-        b.style.backgroundColor = "white";
-        b.style.color = "black";
-    }
+        function dibujarBurbuja(texto, hora, esMio) {
+            const b = document.createElement('div');
+            b.className = esMio ? "bubble bubble-mine" : "bubble bubble-theirs";
+            b.innerHTML = `
+                <div class="${esMio ? 'msg-text-custom' : ''}">${texto}</div>
+                <div class="msg-info">
+                    <span>${hora}</span>
+                    ${esMio ? '<i class="fas fa-check-double double-check"></i>' : ''}
+                </div>`;
+            container.appendChild(b);
+            container.scrollTop = container.scrollHeight;
+        }
 
-    b.innerHTML = `
-        <div class="${esMio ? 'msg-text-custom' : ''}">${texto}</div>
-        <div class="msg-info" style="${!esMio ? 'color:#666' : ''}">
-            <span>${hora}</span>
-            ${esMio ? '<i class="fas fa-check-double double-check"></i>' : ''}
-        </div>`;
-    
-    container.appendChild(b);
-    container.scrollTop = container.scrollHeight;
-}
+        function toggleMenu() {
+            const m = document.getElementById('menu-opciones');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        }
 
-function enviarMensaje() {
-    const texto = input.value.trim();
-    if(!texto) return;
-
-    const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const miTelefono = localStorage.getItem("user_phone") || "anonimo";
-
-    // Subir a Firebase
-    db.ref("mensajes").push({
-        texto: texto,
-        hora: hora,
-        usuario: miTelefono
-    });
-
-    // Dibujamos el mío inmediatamente
-    renderBubble(texto, hora, true);
-    
-    input.value = "";
-    icon.className = "fas fa-microphone";
-}
+        function startCall() { document.getElementById('call-screen').style.display = 'flex'; }
+        function endCall() { document.getElementById('call-screen').style.display = 'none'; }
+        
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'registro.html';
+        }
+    </script>
+</body>
+</html>
