@@ -3,80 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus - Verificación</title>
+    <title>DNPlus - Login</title>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         body {
-            background-color: #176f47; /* Tu color verde favorito */
+            background-color: #0d1117; /* Fondo oscuro tipo app */
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
             text-align: center;
         }
-        .container {
-            width: 90%;
-            max-width: 400px;
-            padding: 20px;
+        .icon-container {
+            margin-bottom: 20px;
         }
-        h1 {
-            font-size: 2.5rem;
+        .icon-container img {
+            width: 80px; /* Tamaño del icono del sobre */
+        }
+        h2 {
+            font-size: 24px;
             margin-bottom: 10px;
-            letter-spacing: 2px;
         }
         p {
-            font-size: 1.1rem;
+            font-size: 14px;
+            color: #8b949e;
+            max-width: 280px;
             margin-bottom: 30px;
-            opacity: 0.9;
+            line-height: 1.4;
+        }
+        .input-group {
+            width: 90%;
+            max-width: 320px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
         }
         input[type="email"] {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
+            background: transparent;
             border: none;
+            color: white;
+            font-size: 16px;
             outline: none;
-            font-size: 1rem;
-            box-sizing: border-box;
-            margin-bottom: 20px;
             text-align: center;
         }
-        button {
-            width: 100%;
-            background-color: #F08927; /* Tu color naranja para textos/botones */
+        .btn-enviar {
+            width: 90%;
+            max-width: 320px;
+            background-color: #176f47; /* Tu verde favorito para el botón */
             color: white;
-            padding: 15px;
             border: none;
-            border-radius: 10px;
-            cursor: pointer;
+            border-radius: 25px;
+            padding: 15px;
+            font-size: 16px;
             font-weight: bold;
-            font-size: 1.1rem;
-            transition: background 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
         }
-        button:disabled {
-            background-color: #a5a5a5;
-            cursor: not-allowed;
+        .btn-enviar:disabled {
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>DNPlus</h1>
-        <p>Ingresa tu correo para recibir el código</p>
-
-        <input type="email" id="user-email" placeholder="tu@email.com">
-        
-        <button id="btn-enviar" onclick="procesarEnvio()">
-            <span id="btn-texto">OBTENER CÓDIGO</span>
-        </button>
+    <div class="icon-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Email Icon">
     </div>
 
+    <h2>Añade tu correo</h2>
+    <p>Te enviaremos un código de 6 dígitos para verificar tu cuenta de DNPlus.</p>
+
+    <div class="input-group">
+        <input type="email" id="user-email" placeholder="correo@ejemplo.com">
+    </div>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="procesarEnvio()">
+        <span id="btn-texto">OBTENER CÓDIGO</span>
+    </button>
+
     <script>
-        // Inicialización con tu Public Key
         (function() {
             emailjs.init("Ycta0gV4PbOTe1hr9"); 
         })();
@@ -94,11 +106,10 @@
             textoBoton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
-            // Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000);
             localStorage.setItem("codigo_verificacion", codigoOTP);
 
-            // Datos que dieron 200 OK en tu captura
+            // TUS IDs QUE DIERON 200 OK ✅
             const serviceID = 'service_eakuydh'; 
             const templateID = 'template_7nnvz18'; 
 
@@ -114,7 +125,7 @@
                 }, (err) => {
                     textoBoton.innerText = "REINTENTAR";
                     boton.disabled = false;
-                    alert("Error: " + JSON.stringify(err));
+                    alert("Error: Template incorrecto o problema de conexión.");
                 });
         }
     </script>
