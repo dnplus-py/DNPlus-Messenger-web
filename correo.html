@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNPlus - Vincular Correo</title>
-    <link rel="stylesheet" href="estilos_chat.css">
     <style>
         body {
             background-color: #0b141a;
@@ -80,39 +79,56 @@
             <input type="email" id="user-email" placeholder="ejemplo@gmail.com" required>
         </div>
 
-        <button class="btn-enviar" onclick="procesarEnvio()">ENVIAR CÓDIGO</button>
+        <button class="btn-enviar" id="btn-texto" onclick="procesarEnvio()">ENVIAR CÓDIGO</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <script>
-        // Inicializar EmailJS (Debes crear cuenta en emailjs.com para tener tu ID)
+        // 1. INICIALIZACIÓN (Reemplaza con tu Public Key de EmailJS)
         (function() {
-            emailjs.init("TU_USER_ID_AQUI"); 
+            emailjs.init("TU_PUBLIC_KEY_AQUI"); 
         })();
 
         function procesarEnvio() {
             const email = document.getElementById('user-email').value;
+            const boton = document.getElementById('btn-texto');
             
             if (!email.includes("@")) {
                 alert("Por favor, ingresa un correo válido");
                 return;
             }
 
-            // 1. Generar código de 6 dígitos
+            boton.innerText = "ENVIANDO...";
+            boton.disabled = true;
+
+            // 2. Generar código de 6 dígitos
             const codigoOTP = Math.floor(100000 + Math.random() * 900000);
             
-            // 2. Guardar temporalmente en localStorage para validar en otp.html
+            // 3. Guardar en localStorage para validar en otp.html
             localStorage.setItem("codigo_verificacion", codigoOTP);
             localStorage.setItem("email_usuario", email);
 
-            // 3. Simular el envío (Aquí conectarías con EmailJS o tu API)
-            console.log("Enviando código " + codigoOTP + " a " + email);
-            
-            alert("Código enviado con éxito!");
+            // 4. ENVÍO REAL CON EMAILJS
+            // Los nombres 'service_id' y 'template_id' los sacas de tu panel de EmailJS
+            const serviceID = 'default_service';
+            const templateID = 'TU_TEMPLATE_ID_AQUI';
 
-            // 4. Saltar directo a otp.html sin preguntar
-            window.location.href = "otp.html";
+            const templateParams = {
+                to_email: email,
+                otp_code: codigoOTP,
+                reply_to: 'soporte@dnplus.com'
+            };
+
+            emailjs.send(serviceID, templateID, templateParams)
+                .then(() => {
+                    console.log("Éxito!");
+                    window.location.href = "otp.html";
+                }, (err) => {
+                    boton.innerText = "REINTENTAR";
+                    boton.disabled = false;
+                    alert("Error al enviar: " + JSON.stringify(err));
+                });
         }
     </script>
 </body>
