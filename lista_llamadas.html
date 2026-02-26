@@ -3,138 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNPlus - Nuevo Contacto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0b141a; color: #e9edef; }
         
-        .call-list-container { padding-bottom: 80px; }
-        .call-item { 
-            display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
-            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); 
-        }
-        .call-item:active { background-color: #202c33; }
-        
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #232d36; }
-        
-        .info { flex: 1; }
-        .name { font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-        .details { color: #8696a0; font-size: 13px; margin-top: 3px; display: flex; align-items: center; gap: 5px; }
-        
-        .icon-call { color: #00a884; font-size: 22px; padding: 10px; }
-        .missed { color: #f15c5c; font-weight: bold; } /* Rojo para perdidas */
-        .success { color: #00a884; font-weight: bold; } /* Verde para realizadas/recibidas */
-
-        /* BOTÓN FLOTANTE (FAB) */
-        .fab-calls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #00a884;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            cursor: pointer;
-            z-index: 99;
-            font-size: 24px;
-            color: white;
+        header { 
+            height: 60px; background-color: #202c33; display: flex; 
+            align-items: center; padding: 0 15px; gap: 20px; 
         }
 
-        /* MODAL LLAMADA */
-        #pantalla-llamada {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #0b141a; z-index: 5000; text-align: center; padding-top: 100px;
+        .form-container { padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { color: #00a884; font-size: 14px; font-weight: 500; }
+        
+        .input-field { 
+            background: #2a3942; border: none; border-bottom: 2px solid transparent; 
+            padding: 12px; border-radius: 8px; color: white; outline: none; 
+            transition: border-color 0.3s;
         }
+        .input-field:focus { border-bottom-color: #00a884; }
+
+        .btn-save { 
+            background-color: #00a884; color: #0b141a; font-weight: bold; 
+            padding: 15px; border-radius: 30px; border: none; cursor: pointer;
+            margin-top: 20px; font-size: 16px;
+        }
+
+        .avatar-picker {
+            width: 100px; height: 100px; border-radius: 50%; background: #2a3942;
+            margin: 0 auto 10px auto; display: flex; align-items: center;
+            justify-content: center; overflow: hidden; position: relative;
+            border: 2px dashed #8696a0;
+        }
+        #preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="call-list-container" id="contenedor-llamadas">
-        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando historial...</p>
-    </div>
+    <header>
+        <i class="fas fa-arrow-left cursor-pointer" onclick="history.back()"></i>
+        <h1 class="text-lg font-medium">Añadir nuevo contacto</h1>
+    </header>
 
-    <div class="fab-calls" onclick="location.href='crear_new_contacto.html'">
-        ➕
-    </div>
-
-    <div id="pantalla-llamada">
-        <img id="call-avatar" src="" style="width:120px; height:120px; border-radius:50%; border:3px solid #00a884;">
-        <h2 id="call-name" style="margin-top:20px; color:white;">Llamando...</h2>
-        <p style="color:#00a884; font-weight:bold;">DNPlus Voice</p>
-        
-        <div style="position:absolute; bottom:80px; width:100%; display:flex; justify-content:center;">
-            <div onclick="colgar()" style="background:#f15c5c; width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer; color:white;">📞</div>
+    <div class="form-container">
+        <div class="text-center">
+            <div class="avatar-picker" onclick="document.getElementById('foto-input').click()">
+                <i id="placeholder-icon" class="fas fa-camera text-2xl text-[#8696a0]"></i>
+                <img id="preview-img" src="">
+            </div>
+            <p class="text-sm text-[#8696a0]">Toca para subir foto</p>
+            <input type="file" id="foto-input" accept="image/*" hidden onchange="previewFoto(event)">
         </div>
+
+        <div class="input-group">
+            <label>Nombre del contacto</label>
+            <input type="text" id="nombre" class="input-field" placeholder="Ej: Juan Pérez">
+        </div>
+
+        <div class="input-group">
+            <label>Número de teléfono / ID</label>
+            <input type="tel" id="telefono" class="input-field" placeholder="Ej: 595981000000">
+        </div>
+
+        <div class="input-group">
+            <label>Estado (Bio)</label>
+            <input type="text" id="bio" class="input-field" placeholder="Disponible">
+        </div>
+
+        <button class="btn-save" onclick="guardarContacto()">
+            GUARDAR CONTACTO
+        </button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Configuración Firebase (David Oviedo)
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const miId = localStorage.getItem("user_temp_id");
 
-        // CARGAR HISTORIAL DE LLAMADAS
-        function cargarHistorial() {
-            db.ref("historial_llamadas/" + miId).on("value", snapshot => {
-                const container = document.getElementById("contenedor-llamadas");
-                container.innerHTML = "";
-                
-                if (!snapshot.exists()) {
-                    container.innerHTML = "<p style='text-align:center; padding:20px; color:#8696a0;'>No hay llamadas recientes.</p>";
-                    return;
-                }
+        let fotoBase64 = "";
 
-                snapshot.forEach(child => {
-                    const call = child.val();
-                    const esPerdida = call.tipo === "perdida";
-                    const flecha = esPerdida ? "↙" : "↗";
-                    const clase = esPerdida ? "missed" : "success";
-                    const fecha = new Date(call.fecha).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
+        function previewFoto(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = document.getElementById('preview-img');
+                img.src = reader.result;
+                img.style.display = 'block';
+                document.getElementById('placeholder-icon').style.display = 'none';
+                fotoBase64 = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
 
-                    container.innerHTML += `
-                        <div class="call-item">
-                            <img src="${call.foto}" class="avatar">
-                            <div class="info">
-                                <div class="name">${call.nombre}</div>
-                                <div class="details">
-                                    <span class="${clase}">${flecha}</span> ${fecha}
-                                </div>
-                            </div>
-                            <div class="icon-call" onclick="iniciarLlamada('${call.idOtro}', '${call.nombre}', '${call.foto}')">📞</div>
-                        </div>`;
-                });
+        function guardarContacto() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const tel = document.getElementById('telefono').value.trim();
+            const bio = document.getElementById('bio').value.trim() || "¡Hola! Estoy usando DNPlus.";
+
+            if(!nombre || !tel) {
+                alert("Por favor, David, completa nombre y teléfono.");
+                return;
+            }
+
+            // Guardamos en el nodo global de usuarios para que el sistema lo reconozca
+            db.ref("usuarios_registrados/" + tel).set({
+                nombre: nombre,
+                telefono: tel,
+                foto: fotoBase64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                bio: bio,
+                online: false,
+                ultima_vez: Date.now()
+            }).then(() => {
+                alert("¡Contacto guardado con éxito!");
+                history.back();
+            }).catch(err => {
+                alert("Error al guardar. Revisa tu conexión.");
             });
         }
-
-        function iniciarLlamada(id, nombre, foto) {
-            document.getElementById("pantalla-llamada").style.display = "block";
-            document.getElementById("call-name").innerText = nombre;
-            document.getElementById("call-avatar").src = foto;
-            
-            // Registro en Firebase para notificar al otro
-            db.ref("llamadas_activas/" + id).set({
-                quienLlama: miId,
-                nombreLlamador: "David Oviedo",
-                fotoLlamador: localStorage.getItem("mi_foto_perfil") || "",
-                estado: "timbrando"
-            });
-        }
-
-        function colgar() {
-            document.getElementById("pantalla-llamada").style.display = "none";
-            // Aquí agregarías la lógica para limpiar llamadas_activas en Firebase
-        }
-
-        window.onload = cargarHistorial;
     </script>
 </body>
 </html>
