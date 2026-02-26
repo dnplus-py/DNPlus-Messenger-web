@@ -3,64 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Perfil - DNPlus</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Ajustes - DNPlus</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
     <style>
-        /* Mantenemos tus estilos de colores */
         :root {
-            --primary-header: #085f56;
-            --button-color: #176f47;
+            --header-bg: #202c33;
             --bg-dark: #0b141a;
             --text-main: #e9edef;
             --text-muted: #8696a0;
-            --input-underline: #2a3942;
+            --danger: #f15c5c;
+            --accent: #00a884;
         }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; margin: 0; }
-        .header { background-color: var(--primary-header); padding: 20px; display: flex; align-items: center; gap: 15px; }
-        .profile-container { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
-        .profile-pic { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; background-color: #111b21; }
-        .input-group { width: 100%; max-width: 400px; margin-bottom: 25px; }
-        .custom-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid var(--input-underline); background: transparent; color: var(--text-main); outline: none; }
-        .update-button { width: 230px; height: 50px; background-color: var(--button-color); color: white; border-radius: 25px; font-weight: 600; cursor: pointer; margin-top: 30px; }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            user-select: none; /* Evita selección de texto accidental */
+        }
+
+        /* Cabecera estilo WhatsApp */
+        .header { 
+            background-color: var(--header-bg); 
+            padding: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn { cursor: pointer; font-size: 22px; color: var(--text-main); }
+
+        /* Tarjeta de Perfil mejorada */
+        .profile-card { 
+            display: flex; 
+            align-items: center; 
+            padding: 20px 16px; 
+            gap: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .profile-card:active { background-color: #202c33; }
+
+        .avatar { 
+            width: 65px; 
+            height: 65px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            background-color: #2a3942;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info { flex: 1; overflow: hidden; }
+        .user-name { font-size: 18px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-status { color: var(--text-muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Opciones */
+        .option { 
+            display: flex; 
+            align-items: center; 
+            padding: 18px 16px; 
+            gap: 20px; 
+            cursor: pointer; 
+        }
+        .option:active { background-color: #202c33; }
+        
+        .option-icon { font-size: 20px; color: var(--text-muted); width: 24px; text-align: center; }
+        .option-title { font-size: 16px; }
+        .option-desc { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+        .logout-text { color: var(--danger); font-weight: 600; }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div onclick="window.history.back()" style="cursor:pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
-        </div>
-        <h1 class="text-xl font-semibold">Perfil</h1>
+        <span class="back-btn" onclick="window.history.back()">←</span>
+        <h2 style="margin:0; font-size:19px; font-weight: 500;">Ajustes</h2>
     </div>
 
-    <div class="profile-container">
-        <div style="position: relative; margin-bottom: 30px;">
-            <img src="https://ui-avatars.com/api/?name=User&background=111b21&color=e9edef" id="profileImage" class="profile-pic">
-            <label for="fileInput" style="position: absolute; bottom: 5px; right: 5px; background: var(--button-color); border-radius: 50%; padding: 8px; cursor: pointer;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-            </label>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    <div class="profile-card" onclick="irAPerfil()">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar" id="myAvatar">
+        <div class="user-info">
+            <div id="myName" class="user-name">Cargando...</div>
+            <div id="myBio" class="user-status">Toca para editar tu perfil</div>
         </div>
+        <span style="color: var(--accent); font-size: 18px; font-weight: bold; opacity: 0.8;">QR</span>
+    </div>
 
-        <div class="input-group">
-            <label style="color: var(--text-muted); font-size: 13px;">Nombre</label>
-            <input type="text" id="inputNombre" class="custom-input" placeholder="Cargando nombre...">
+    <div class="option">
+        <span class="option-icon">🔑</span>
+        <div class="user-info">
+            <div class="option-title">Cuenta</div>
+            <div class="option-desc">Privacidad, seguridad, cambiar número</div>
         </div>
+    </div>
 
-        <div class="input-group">
-            <label style="color: var(--text-muted); font-size: 13px;">Información</label>
-            <input type="text" id="inputBio" class="custom-input" placeholder="!Hola estoy usando DNPlus">
+    <div class="option">
+        <span class="option-icon">💬</span>
+        <div class="user-info">
+            <div class="option-title">Chats</div>
+            <div class="option-desc">Tema, fondos de pantalla, historial</div>
         </div>
+    </div>
 
-        <div class="input-group">
-            <label style="color: var(--text-muted); font-size: 13px;">Teléfono</label>
-            <input type="text" id="inputTel" class="custom-input" readonly style="opacity: 0.8; border-bottom: 1px dashed #444;">
+    <div class="option" onclick="cerrarSesion()">
+        <span class="option-icon">🚪</span>
+        <div class="user-info">
+            <div class="option-title logout-text">Cerrar sesión</div>
+            <div class="option-desc">Salir de tu cuenta en este dispositivo</div>
         </div>
+    </div>
 
-        <button class="update-button" id="btnUpdate">Actualizar</button>
-        <p id="statusMsg" style="display: none; color: #F08927; margin-top: 15px;">✓ Perfil actualizado</p>
+    <div class="footer">
+        de <br> <b style="color: var(--text-main)">DNPlus Messenger</b>
     </div>
 
     <script>
@@ -71,75 +142,36 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Obtener el número del almacenamiento o usar el tuyo por defecto
         const userPhone = localStorage.getItem("user_phone") || "595992536184";
-        let base64Image = "";
 
-        // CARGA INICIAL
+        // Función de navegación mejorada
+        function irAPerfil() {
+            // Intentamos abrir en el nivel superior para evitar quedar atrapados en pestañas
+            window.parent.location.href = 'editar_mi_perfil.html';
+        }
+
         window.onload = function() {
-            // 1. Mostrar el teléfono INMEDIATAMENTE
-            document.getElementById('inputTel').value = "+" + userPhone;
-
-            // 2. Traer datos de Firebase
-            db.ref("usuarios_registrados/" + userPhone).once("value", (snapshot) => {
+            db.ref("usuarios_registrados/" + userPhone).on("value", (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
+                    document.getElementById('myName').innerText = data.nombre || "Usuario";
+                    // Si el usuario tiene una bio en Firebase, la mostramos, sino el mensaje de ayuda
+                    const bioFirebase = data.bio;
+                    document.getElementById('myBio').innerText = bioFirebase ? bioFirebase : "Toca para editar tu perfil";
                     
-                    // Solo si hay datos en Firebase, reemplazamos los placeholders
-                    if(data.nombre) document.getElementById('inputNombre').value = data.nombre;
-                    
-                    if(data.bio) {
-                        document.getElementById('inputBio').value = data.bio;
-                    } else {
-                        document.getElementById('inputBio').value = "!Hola estoy usando DNPlus";
-                    }
-
                     if (data.foto) {
-                        document.getElementById('profileImage').src = data.foto;
-                        base64Image = data.foto;
+                        document.getElementById('myAvatar').src = data.foto;
                     }
-                } else {
-                    // Si el usuario es nuevo, dejamos la bio por defecto
-                    document.getElementById('inputBio').value = "!Hola estoy usando DNPlus";
                 }
             });
-        };
+        }
 
-        // SUBIR FOTO
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    base64Image = event.target.result;
-                    document.getElementById('profileImage').src = base64Image;
-                };
-                reader.readAsDataURL(file);
+        function cerrarSesion() {
+            if(confirm("¿David, estás seguro de que quieres cerrar sesión?")) {
+                localStorage.clear();
+                window.parent.location.href = 'index.html'; 
             }
-        });
-
-        // BOTÓN ACTUALIZAR
-        document.getElementById('btnUpdate').onclick = function() {
-            const btn = this;
-            const nuevoNombre = document.getElementById('inputNombre').value;
-            const nuevaBio = document.getElementById('inputBio').value;
-
-            btn.disabled = true;
-            btn.innerText = "Guardando...";
-
-            db.ref("usuarios_registrados/" + userPhone).update({
-                nombre: nuevoNombre,
-                bio: nuevaBio,
-                foto: base64Image,
-                telefono: userPhone // Guardamos el número también por si acaso
-            }).then(() => {
-                btn.disabled = false;
-                btn.innerText = "Actualizar";
-                const msg = document.getElementById('statusMsg');
-                msg.style.display = "block";
-                setTimeout(() => msg.style.display = "none", 3000);
-            });
-        };
+        }
     </script>
 </body>
 </html>
