@@ -51,26 +51,32 @@
         function saveProfile() {
             const nom = document.getElementById('nameInp').value;
             
-            // Usamos el ID que generamos en el paso anterior (OTP)
-            const tid = localStorage.getItem("chat_destId");
+            // Usamos el ID de usuario verificado
+            const tid = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
 
-            if(!nom) return alert("Pon tu nombre, bro");
+            if(!nom) return alert("Por favor, ingresa tu nombre.");
             
-            // Si por alguna razón no hay ID, mandamos a home para no trabar la app
             if(!tid) {
-                window.location.href="home.html";
+                alert("Error de sesión. Volviendo al inicio.");
+                window.location.href="bienvenida.html";
                 return;
             }
 
-            // ACTUALIZAMOS en la ruta 'usuarios/' (donde está el correo)
-            db.ref("usuarios/" + tid).update({
+            // Guardamos la fecha actual de forma legible
+            const fechaAhora = new Date().toLocaleString();
+
+            // ACTUALIZAMOS en 'usuarios_registrados' para mantener correo y añadir nombre/foto/fecha
+            db.ref("usuarios_registrados/" + tid).update({
                 nombre: nom,
-                foto: base64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                foto: base64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                fecha_registro: fechaAhora,
+                estado: "en línea"
             }).then(() => {
                 localStorage.setItem("user_name", nom);
                 localStorage.setItem("user_photo", base64);
+                // Redirigimos al Home directamente
                 window.location.href = "home.html";
-            }).catch(e => alert("Error: " + e.message));
+            }).catch(e => alert("Error al guardar: " + e.message));
         }
     </script>
 </body>
