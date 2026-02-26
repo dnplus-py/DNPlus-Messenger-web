@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNPlus - Estados Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
         .title { padding: 20px 15px 10px 15px; color: #8696a0; font-size: 14px; font-weight: 500; text-transform: uppercase; }
         
-        /* ESTILO DE ITEMS */
         .item { display: flex; align-items: center; padding: 12px 15px; gap: 15px; cursor: pointer; }
         .item:active { background-color: #202c33; }
 
@@ -19,26 +21,28 @@
 
         .add-icon { position: absolute; bottom: 2px; right: 2px; background: #00a884; color: #0b141a; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border: 2px solid #0b141a; z-index: 3; }
 
-        /* BOTÓN FLOTANTE ÚNICO DE ESTA PÁGINA */
-        .fab-estados {
-            position: fixed; bottom: 25px; right: 25px;
-            background-color: #00a884; width: 56px; height: 56px;
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; font-size: 24px; color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 99; cursor: pointer;
-        }
+        /* BOTONES FLOTANTES */
+        .fab-container { position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .fab-text { background-color: #232d36; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #aebac1; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; }
+        .fab-camera { background-color: #00a884; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer; }
 
-        /* VISOR DE ESTADOS (MODAL) */
-        #visor-estados { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: black; z-index: 2000; flex-direction: column; 
-        }
-        .progress-container { display: flex; gap: 5px; padding: 15px 10px; position: absolute; top: 0; width: 95%; z-index: 2001; }
+        /* VISOR DE ESTADOS */
+        #visor-estados { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; flex-direction: column; }
+        .progress-container { display: flex; gap: 5px; padding: 15px 10px; position: absolute; top: 0; width: 100%; z-index: 2001; box-sizing: border-box; }
         .bar { flex: 1; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
         .bar-fill { height: 100%; background: white; width: 0%; }
-        .visor-header { padding: 30px 15px 15px 15px; display: flex; align-items: center; gap: 10px; z-index: 10; color: white; }
-        .visor-content { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        .visor-header { position: absolute; top: 25px; left: 0; width: 100%; padding: 15px; display: flex; align-items: center; gap: 10px; z-index: 2002; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent); }
+        .visor-content { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; text-align: center; padding: 40px; font-size: 28px; font-weight: bold; }
         .visor-content img, .visor-content video { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .visor-control { position: absolute; top: 0; height: 100%; width: 50%; z-index: 2003; }
+        .left { left: 0; }
+        .right { right: 0; }
+
+        /* MODAL PARA ESCRIBIR ESTADO */
+        #modal-texto { display: none; position: fixed; inset: 0; background: #607d8b; z-index: 3000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #input-estado-texto { background: transparent; border: none; outline: none; color: white; font-size: 32px; text-align: center; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -46,31 +50,48 @@
     <div class="item" onclick="document.getElementById('file-estado').click()">
         <div class="ring-container">
             <svg class="status-circle" viewBox="0 0 40 40">
-                <circle id="mi-circulo" cx="20" cy="20" r="18" stroke="#8696a0" fill="none"></circle>
+                <circle cx="20" cy="20" r="18" stroke="#8696a0" fill="none"></circle>
             </svg>
             <img id="mi-foto-perfil" class="img-perfil" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
             <div class="add-icon">+</div>
         </div>
         <div style="display:flex; flex-direction:column;">
             <div style="font-weight:bold; font-size:16px;">Mi estado</div>
-            <div style="color:#8696a0; font-size:14px;" id="estado-sub">Toca para añadir actualización</div>
+            <div style="color:#8696a0; font-size:14px;">Toca para añadir actualización</div>
         </div>
     </div>
 
     <div class="title">Recientes</div>
     <div id="lista-estados-otros"></div>
 
-    <div class="fab-estados" onclick="document.getElementById('file-estado').click()">📷</div>
+    <div class="fab-container">
+        <div class="fab-text" onclick="abrirEditorTexto()"><i class="fas fa-pen"></i></div>
+        <div class="fab-camera" onclick="document.getElementById('file-estado').click()"><i class="fas fa-camera"></i></div>
+    </div>
 
-    <input type="file" id="file-estado" accept="image/*,video/*" style="display:none" onchange="subirEstado(event)" multiple>
+    <div id="modal-texto">
+        <div class="absolute top-10 left-5 right-5 flex justify-between text-2xl text-white">
+            <i class="fas fa-times" onclick="cerrarEditorTexto()"></i>
+            <div class="flex gap-6">
+                <i class="fas fa-palette" onclick="cambiarFondo()"></i>
+                <i class="fas fa-paper-plane" onclick="subirEstadoTexto()"></i>
+            </div>
+        </div>
+        <textarea id="input-estado-texto" placeholder="Escribe un estado" rows="4"></textarea>
+    </div>
+
+    <input type="file" id="file-estado" accept="image/*,video/*" style="display:none" onchange="subirEstadoArchivo(event)" multiple>
 
     <div id="visor-estados">
         <div class="progress-container" id="barras-progreso"></div>
         <div class="visor-header">
+            <i class="fas fa-arrow-left mr-2" onclick="cerrarVisor()"></i>
             <img id="visor-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-            <span id="visor-nombre" style="font-weight:bold; font-size:18px;"></span>
+            <span id="visor-nombre" class="font-bold"></span>
         </div>
-        <div class="visor-content" id="visor-media" onclick="siguienteEstado()"></div>
+        <div class="visor-content" id="visor-media"></div>
+        <div class="visor-control left" onclick="anteriorEstado()"></div>
+        <div class="visor-control right" onmousedown="pausarEstado()" onmouseup="reanudarEstado()" onclick="verificarClick()"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -81,19 +102,18 @@
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const miId = localStorage.getItem("user_temp_id");
+        const miId = localStorage.getItem("user_phone") || "595992536184";
 
-        // 1. CARGAR MI INFO
+        // 1. CARGAR MI FOTO
         db.ref("usuarios_registrados/" + miId).once("value", s => {
             if(s.exists()) document.getElementById("mi-foto-perfil").src = s.val().foto;
         });
 
-        // 2. SUBIR VARIOS ESTADOS
-        function subirEstado(event) {
-            const files = event.target.files;
-            Array.from(files).forEach(file => {
+        // 2. SUBIR ESTADO DE ARCHIVO
+        function subirEstadoArchivo(event) {
+            Array.from(event.target.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     db.ref("estados/" + miId).push({
@@ -104,86 +124,104 @@
                 };
                 reader.readAsDataURL(file);
             });
-            alert("Subiendo a DNPlus, David...");
         }
 
-        // 3. CARGAR LISTA DE OTROS CON "CÓDIGO" CORREGIDO
+        // 3. LOGICA ESTADO DE TEXTO
+        const colores = ["#607d8b", "#7e57c2", "#ff5722", "#26a69a", "#ec407a", "#2196f3"];
+        let colorIdx = 0;
+
+        function abrirEditorTexto() { document.getElementById("modal-texto").style.display = "flex"; }
+        function cerrarEditorTexto() { document.getElementById("modal-texto").style.display = "none"; }
+        function cambiarFondo() {
+            colorIdx = (colorIdx + 1) % colores.length;
+            document.getElementById("modal-texto").style.backgroundColor = colores[colorIdx];
+        }
+
+        function subirEstadoTexto() {
+            const txt = document.getElementById("input-estado-texto").value.trim();
+            if(!txt) return;
+            db.ref("estados/" + miId).push({
+                mensaje: txt,
+                color: colores[colorIdx],
+                tipo: "texto",
+                fecha: Date.now()
+            });
+            document.getElementById("input-estado-texto").value = "";
+            cerrarEditorTexto();
+        }
+
+        // 4. CARGAR LISTA
         db.ref("estados").on("value", snapshot => {
             const container = document.getElementById("lista-estados-otros");
             container.innerHTML = "";
             snapshot.forEach(child => {
                 const userId = child.key;
                 if(userId === miId) return;
-
                 db.ref("usuarios_registrados/" + userId).once("value", u => {
-                    const user = u.val() || { nombre: "Usuario", foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png" };
-                    const estados = Object.values(child.val());
-                    
-                    const itemDiv = document.createElement("div");
-                    itemDiv.className = "item";
-                    itemDiv.onclick = () => mostrarVisor(estados, user.nombre, user.foto);
-                    itemDiv.innerHTML = `
+                    const user = u.val() || { nombre: "Usuario", foto: "" };
+                    const lista = Object.values(child.val()).sort((a,b)=>a.fecha-b.fecha);
+                    const item = document.createElement("div");
+                    item.className = "item";
+                    item.onclick = () => mostrarVisor(lista, user.nombre, user.foto);
+                    item.innerHTML = `
                         <div class="ring-container">
-                            <svg class="status-circle" viewBox="0 0 40 40">
-                                <circle cx="20" cy="20" r="18" stroke="#00a884" stroke-dasharray="${113/estados.length} 1" fill="none"></circle>
-                            </svg>
+                            <svg class="status-circle" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" stroke="#00a884" stroke-dasharray="${113/lista.length} 2" fill="none"></circle></svg>
                             <img class="img-perfil" src="${user.foto}">
                         </div>
-                        <div style="display:flex; flex-direction:column;">
-                            <div style="font-weight:bold; font-size:16px;">${user.nombre}</div>
-                            <div style="color:#8696a0; font-size:14px;">Actualizado recientemente</div>
-                        </div>`;
-                    container.appendChild(itemDiv);
+                        <div><div class="font-bold">${user.nombre}</div><div class="text-sm text-[#8696a0]">Hace un momento</div></div>`;
+                    container.appendChild(item);
                 });
             });
         });
 
-        // 4. LÓGICA DEL VISOR (DENTRO DEL ARCHIVO)
-        let estadosActivos = [];
-        let indiceActual = 0;
-        let timer;
+        // 5. VISOR MEJORADO
+        let estadosActivos = [], idx = 0, pct = 0, timer, pausado = false, clickT = 0;
 
         function mostrarVisor(lista, nombre, foto) {
-            estadosActivos = lista;
-            indiceActual = 0;
+            estadosActivos = lista; idx = 0;
             document.getElementById("visor-estados").style.display = "flex";
             document.getElementById("visor-nombre").innerText = nombre;
             document.getElementById("visor-avatar").src = foto;
-            renderEstado();
+            render();
         }
 
-        function renderEstado() {
-            clearInterval(timer);
-            const media = estadosActivos[indiceActual];
-            const visorMedia = document.getElementById("visor-media");
-            const barras = document.getElementById("barras-progreso");
-            
-            barras.innerHTML = estadosActivos.map((_, i) => `
-                <div class="bar"><div class="bar-fill" id="fill-${i}" style="width: ${i < indiceActual ? '100%' : '0%'}"></div></div>
-            `).join("");
+        function render() {
+            clearInterval(timer); pct = 0; pausado = false;
+            const m = estadosActivos[idx];
+            const content = document.getElementById("visor-media");
+            const bars = document.getElementById("barras-progreso");
+            bars.innerHTML = estadosActivos.map((_, i) => `<div class="bar"><div class="bar-fill" id="f-${i}" style="width:${i<idx?'100%':'0%'}"></div></div>`).join("");
 
-            if(media.tipo === "video") {
-                visorMedia.innerHTML = `<video src="${media.url}" autoplay id="video-v" style="width:100%"></video>`;
-                document.getElementById("video-v").onended = siguienteEstado;
+            if(m.tipo === "video") {
+                content.innerHTML = `<video id="vid" src="${m.url}" autoplay style="width:100%"></video>`;
+                const v = document.getElementById("vid");
+                v.onloadedmetadata = () => run(v.duration * 1000);
+            } else if(m.tipo === "texto") {
+                content.innerHTML = `<div class="w-full h-full flex items-center justify-center" style="background:${m.color}">${m.mensaje}</div>`;
+                run(4000);
             } else {
-                visorMedia.innerHTML = `<img src="${media.url}">`;
-                let p = 0;
-                timer = setInterval(() => {
-                    p += 1;
-                    if(document.getElementById(`fill-${indiceActual}`)) {
-                        document.getElementById(`fill-${indiceActual}`).style.width = p + "%";
-                    }
-                    if(p >= 100) siguienteEstado();
-                }, 40);
+                content.innerHTML = `<img src="${m.url}">`;
+                run(4000);
             }
         }
 
-        function siguienteEstado() {
-            clearInterval(timer);
-            indiceActual++;
-            if(indiceActual < estadosActivos.length) renderEstado();
-            else document.getElementById("visor-estados").style.display = "none";
+        function run(ms) {
+            const step = 100, inc = (step/ms)*100;
+            timer = setInterval(() => {
+                if(!pausado) {
+                    pct += inc;
+                    if(document.getElementById(`f-${idx}`)) document.getElementById(`f-${idx}`).style.width = pct + "%";
+                    if(pct >= 100) next();
+                }
+            }, step);
         }
+
+        function next() { idx < estadosActivos.length - 1 ? (idx++, render()) : cerrarVisor(); }
+        function prev() { if(idx > 0) { idx--; render(); } }
+        function pausarEstado() { pausado = true; if(document.getElementById("vid")) document.getElementById("vid").pause(); clickT = Date.now(); }
+        function reanudarEstado() { pausado = false; if(document.getElementById("vid")) document.getElementById("vid").play(); }
+        function verificarClick() { if(Date.now() - clickT < 200) next(); }
+        function cerrarVisor() { clearInterval(timer); document.getElementById("visor-estados").style.display = "none"; }
     </script>
 </body>
 </html>
