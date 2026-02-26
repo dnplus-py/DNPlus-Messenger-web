@@ -31,7 +31,6 @@
             margin-bottom: 20px;
         }
 
-        /* Cargador circular minimalista */
         .loader {
             border: 3px solid rgba(255,255,255,0.2);
             border-top: 3px solid #ffffff;
@@ -75,19 +74,20 @@
     </div>
 
     <script>
-        // Lógica de redirección inteligente corregida
+        // LÓGICA DE REDIRECCIÓN INTELIGENTE CORREGIDA ✅
         setTimeout(() => {
-            // Verificamos si existe el nombre del usuario en el almacenamiento local
-            const yaRegistrado = localStorage.getItem("user_name");
+            // Verificamos si existe el ID del chat o el correo (datos que se guardan al verificar el OTP)
+            const idUsuario = localStorage.getItem("chat_destId");
+            const emailUsuario = localStorage.getItem("user_email");
 
-            if (yaRegistrado) {
-                // Si ya tiene datos, va directo al Home
+            // Si el usuario ya verificó su correo, lo mandamos al Home
+            if (idUsuario || emailUsuario) {
                 window.location.href = 'home.html';
             } else {
-                // Si es la primera vez (o tras desinstalar), va a Bienvenida
+                // Si no hay datos, es porque es nuevo o no terminó el registro
                 window.location.href = 'bienvenida.html';
             }
-        }, 3000); // 3 segundos para que luzca el splash
+        }, 3000); 
     </script>
 
 </body>
