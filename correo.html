@@ -18,23 +18,10 @@
             margin: 0;
             text-align: center;
         }
-        .icon-container {
-            margin-bottom: 20px;
-        }
-        .icon-container img {
-            width: 80px;
-        }
-        h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 14px;
-            color: #8b949e;
-            max-width: 280px;
-            margin-bottom: 30px;
-            line-height: 1.4;
-        }
+        .icon-container { margin-bottom: 20px; }
+        .icon-container img { width: 80px; }
+        h2 { font-size: 24px; margin-bottom: 10px; }
+        p { font-size: 14px; color: #8b949e; max-width: 280px; margin-bottom: 30px; line-height: 1.4; }
         .input-group {
             width: 90%;
             max-width: 320px;
@@ -66,9 +53,7 @@
             cursor: pointer;
             text-transform: uppercase;
         }
-        .btn-enviar:disabled {
-            opacity: 0.5;
-        }
+        .btn-enviar:disabled { opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -78,7 +63,7 @@
     </div>
 
     <h2>Añade tu correo</h2>
-    <p>Te enviaremos un código de 6 dígitos para verificar tu cuenta de DNPlus.</p>
+    <p>Te enviaremos un código de 5 dígitos para verificar tu cuenta de DNPlus.</p>
 
     <div class="input-group">
         <input type="email" id="user-email" placeholder="correo@ejemplo.com">
@@ -90,6 +75,7 @@
 
     <script>
         (function() {
+            // Tu Public Key de las capturas
             emailjs.init("Ycta0gV4PbOTe1hr9"); 
         })();
 
@@ -106,8 +92,12 @@
             textoBoton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
-            // Generamos exactamente 5 dígitos ✅
-const codigoOTP = Math.floor(10000 + Math.random() * 90000);
+            // GENERACIÓN DE EXACTAMENTE 5 DÍGITOS ✅
+            const codigoOTP = Math.floor(10000 + Math.random() * 90000);
+            localStorage.setItem("codigo_verificacion", codigoOTP);
+            localStorage.setItem("user_email", emailIngresado);
+
+            // IDs QUE DIERON 200 OK EN TU PANEL ✅
             const serviceID = 'service_eakuydh'; 
             const templateID = 'template_7nnvz18'; 
 
@@ -123,7 +113,8 @@ const codigoOTP = Math.floor(10000 + Math.random() * 90000);
                 }, (err) => {
                     textoBoton.innerText = "REINTENTAR";
                     boton.disabled = false;
-                    alert("Error: Revisa tu conexión o IDs de EmailJS.");
+                    alert("Error: Revisa tus IDs de EmailJS o la conexión.");
+                    console.log("FAILED...", err);
                 });
         }
     </script>
