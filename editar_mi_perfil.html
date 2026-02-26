@@ -219,4 +219,53 @@
                     
                     // Lógica arreglada: si data.bio está vacío o no existe, pone la frase por defecto
                     const bioFirebase = data.bio;
-                    document.getElementById('inputBio').value = (bioFirebase && bioFirebase.trim() !== "") ?
+                    document.getElementById('inputBio').value = (bioFirebase && bioFirebase.trim() !== "") ? bioFirebase : "!Hola estoy usando DNPlus";
+                    
+                    document.getElementById('inputTel').value = "+" + userPhone;
+                    if (data.foto) {
+                        document.getElementById('profileImage').src = data.foto;
+                        base64Image = data.foto;
+                    }
+                }
+            });
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    base64Image = event.target.result;
+                    document.getElementById('profileImage').src = base64Image;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('btnUpdate').addEventListener('click', function() {
+            const btn = this;
+            const nombre = document.getElementById('inputNombre').value;
+            const bio = document.getElementById('inputBio').value;
+
+            btn.innerText = 'Guardando...';
+            btn.disabled = true;
+
+            db.ref("usuarios_registrados/" + userPhone).update({
+                nombre: nombre,
+                bio: bio,
+                foto: base64Image
+            }, (error) => {
+                btn.innerText = 'Actualizar';
+                btn.disabled = false;
+                if (!error) {
+                    const msg = document.getElementById('statusMsg');
+                    msg.style.display = 'block';
+                    setTimeout(() => msg.style.display = 'none', 3000);
+                }
+            });
+        });
+
+        loadProfile();
+    </script>
+</body>
+</html>
