@@ -177,7 +177,7 @@
                 </div>
                 <div class="flex-grow">
                     <label class="input-label">Información</label>
-                    <input type="text" id="inputBio" class="custom-input" placeholder="Estado">
+                    <input type="text" id="inputBio" class="custom-input" value="!Hola estoy usando DNPlus">
                 </div>
             </div>
         </div>
@@ -200,7 +200,6 @@
     </div>
 
     <script>
-        // Configuración de tu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -209,17 +208,16 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // El ID de usuario (tu número por defecto)
         const userPhone = localStorage.getItem("user_phone") || "595992536184";
         let base64Image = "";
 
-        // 1. CARGAR DATOS REALES
         function loadProfile() {
             db.ref("usuarios_registrados/" + userPhone).once("value", (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     document.getElementById('inputNombre').value = data.nombre || "";
-                    document.getElementById('inputBio').value = data.bio || "";
+                    // Si hay bio en Firebase la carga, si no, mantiene el valor por defecto
+                    if(data.bio) document.getElementById('inputBio').value = data.bio;
                     document.getElementById('inputTel').value = "+" + userPhone;
                     if (data.foto) {
                         document.getElementById('profileImage').src = data.foto;
@@ -229,7 +227,6 @@
             });
         }
 
-        // 2. CAMBIAR FOTO (Vista previa y conversión)
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -242,7 +239,6 @@
             }
         });
 
-        // 3. GUARDAR CAMBIOS
         document.getElementById('btnUpdate').addEventListener('click', function() {
             const btn = this;
             const nombre = document.getElementById('inputNombre').value;
