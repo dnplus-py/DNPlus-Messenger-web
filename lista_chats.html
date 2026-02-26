@@ -28,4 +28,104 @@
             background-color: #176f47; width: 56px; height: 56px;
             border-radius: 50%; display: flex; align-items: center;
             justify-content: center; font-size: 24px; color: white;
-            box-
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 99; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-list-container" id="contenedor-chats-real">
+        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando mensajes de DNPlus...</p>
+    </div>
+
+    <div class="fab-chats" onclick="window.top.location.href='lista_contactos.html'">💬</div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        // ID del usuario actual (tú)
+        const miId = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
+
+        function cargarChats() {
+            if (!miId) {
+                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Sesión no iniciada.</p>";
+                return;
+            }
+
+            // Escuchamos 'chats_privados'
+            db.ref("chats_privados").on("value", (snapshot) => {
+                const container = document.getElementById("contenedor-chats-real");
+                container.innerHTML = "";
+                
+                if (!snapshot.exists()) {
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats todavía.</p>";
+                    return;
+                }
+
+                snapshot.forEach((child) => {
+                    const salaId = child.key;
+                    
+                    // Verificamos si miId participa en esta sala
+                    if (salaId.includes(miId)) {
+                        // Extraemos el ID del otro usuario
+                        // Ejemplo: salaId es "123_456" y miId es "123", idOtro será "456"
+                        const idOtro = salaId.replace(miId, "").replace("_", "");
+                        
+                        // Buscamos los datos de ese otro usuario en usuarios_registrados
+                        db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
+                            const user = uSnap.val() || {};
+                            
+                            // Obtenemos el último mensaje
+                            const mensajesSala = child.val();
+                            const llaves = Object.keys(mensajesSala);
+                            const ultimoMsg = mensajesSala[llaves[llaves.length - 1]];
+                            
+                            let texto = ultimoMsg.mensaje || ultimoMsg.contenido || "Archivo/Imagen";
+                            let hora = "";
+                            
+                            if (ultimoMsg.fecha) {
+                                hora = new Date(ultimoMsg.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            }
+
+                            // Creamos la fila y la insertamos
+                            const rowHTML = `
+                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre || 'Usuario DNPlus'}', '${user.foto || ''}')">
+                                    <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
+                                    <div class="chat-details">
+                                        <div class="chat-header">
+                                            <span class="name">${user.nombre || 'Usuario DNPlus'}</span>
+                                            <span class="time">${hora}</span>
+                                        </div>
+                                        <div class="last-msg-container">
+                                            <span class="message">${texto}</span>
+                                        </div>
+                                    </div>
+                                </div>`;
+                            
+                            container.insertAdjacentHTML('beforeend', rowHTML);
+                        });
+                    }
+                });
+            });
+        }
+
+        function abrirChat(sala, id, nom, foto) {
+            localStorage.setItem("chat_sala_id", sala);
+            localStorage.setItem("chat_destinatario_id", id);
+            localStorage.setItem("chat_destinatario_nombre", nom);
+            localStorage.setItem("chat_destinatario_foto", foto);
+            window.top.location.href = "mensajes.html";
+        }
+
+        window.onload = cargarChats;
+    </script>
+</body>
+</html>
