@@ -9,17 +9,18 @@
         .title { margin-top: 60px; font-size: 22px; font-weight: 500; }
         .desc { color: #8696a0; font-size: 14px; margin-top: 10px; padding: 0 20px; }
         
-        .otp-inputs { display: flex; justify-content: center; gap: 10px; margin: 40px 0; }
+        /* Contenedor ajustado para 5 dígitos */
+        .otp-inputs { display: flex; justify-content: center; gap: 12px; margin: 40px 0; }
         .otp-box { 
-            width: 40px; height: 50px; border: none; 
-            border-bottom: 3px solid #00a884; text-align: center; 
-            font-size: 26px; font-weight: bold; color: #e9edef; 
+            width: 45px; height: 55px; border: none; 
+            border-bottom: 3px solid #176f47; text-align: center; 
+            font-size: 28px; font-weight: bold; color: #e9edef; 
             background: transparent; outline: none; 
         }
-        .otp-box:focus { border-bottom-color: #e9edef; }
+        .otp-box:focus { border-bottom-color: #00a884; }
 
         .btn-confirmar { 
-            background-color: #085f56; color: white; 
+            background-color: #176f47; color: white; 
             padding: 12px 60px; border-radius: 30px; 
             font-weight: bold; border: none; cursor: pointer; 
             text-transform: uppercase; margin-top: 20px;
@@ -29,18 +30,17 @@
 </head>
 <body>
     <h2 class="title">Verifica tu cuenta</h2>
-    <p id="descInfo" class="desc">Introduce el código de 6 dígitos que enviamos a tu correo.</p>
+    <p id="descInfo" class="desc">Introduce el código de 5 dígitos que enviamos a tu correo.</p>
 
     <div class="otp-inputs">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 4)" onkeydown="moveBack(event, 4)">
-        <input type="number" class="otp-box" maxlength="1" oninput="moveNext(this, 5)" onkeydown="moveBack(event, 5)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
+        <input type="number" class="otp-box" oninput="moveNext(this, 4)" onkeydown="moveBack(event, 4)">
     </div>
 
-    <button class="btn-confirmar" onclick="validarYEntrar()">VERIFICAR</button>
+    <button class="btn-confirmar" id="btn-verificar" onclick="validarYEntrar()">VERIFICAR</button>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -60,15 +60,13 @@
             inputs[0].focus();
         };
 
-        // Salto automático al siguiente cuadro
         function moveNext(c, i) {
             if (c.value.length >= 1) {
-                c.value = c.value.slice(0, 1); // Solo permite un número
-                if (i < 5) inputs[i + 1].focus();
+                c.value = c.value.slice(0, 1); 
+                if (i < 4) inputs[i + 1].focus(); // Salto automático hasta el 5to
             }
         }
 
-        // Retroceso con borrar
         function moveBack(e, i) {
             if (e.key === "Backspace" && inputs[i].value === "" && i > 0) {
                 inputs[i - 1].focus();
@@ -79,45 +77,38 @@
             let codeIngresado = "";
             inputs.forEach(input => codeIngresado += input.value);
 
-            // Recuperamos el código REAL que enviamos en la pantalla anterior
-            const codeReal = localStorage.getItem("temp_otp");
+            // Importante: usamos la misma variable que guardamos en correo.html
+            const codeReal = localStorage.getItem("codigo_verificacion");
 
-            if(codeIngresado.length < 6) {
-                alert("Completa los 6 dígitos.");
+            if(codeIngresado.length < 5) {
+                alert("Completa los 5 dígitos.");
                 return;
             }
 
-            // COMPROBACIÓN REAL
-            if(codeIngresado === codeReal) {
-                const btn = document.querySelector('.btn-confirmar');
+            if(codeIngresado === String(codeReal)) {
+                const btn = document.getElementById('btn-verificar');
                 btn.innerText = "VERIFICANDO...";
                 btn.disabled = true;
 
-                const phone = localStorage.getItem("user_phone") || "Sin número";
+                const phone = localStorage.getItem("user_phone") || "000000";
                 const email = localStorage.getItem("user_email") || "Sin correo";
-                const tempId = phone.replace(/\D/g, ""); // Limpiamos el ID
+                const tempId = phone.replace(/\D/g, ""); 
 
-                // GUARDAR EN FIREBASE (Como usuario verificado)
-                db.ref("usuarios/" + tempId).set({
+                db.ref("usuarios/" + tempId).update({
                     telefono: phone,
                     correo: email,
-                    nombre: "Usuario Nuevo",
-                    foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                    estado: "en línea",
-                    registrado: true
+                    verificado: true,
+                    estado: "en línea"
                 }).then(() => {
-                    // Borramos el código temporal por seguridad
-                    localStorage.removeItem("temp_otp");
-                    localStorage.setItem("chat_destId", tempId); 
+                    localStorage.removeItem("codigo_verificacion");
                     window.location.href = 'add_perfil.html';
                 }).catch(e => {
-                    alert("Error: " + e.message);
+                    alert("Error Firebase: " + e.message);
                     btn.innerText = "VERIFICAR";
                     btn.disabled = false;
                 });
             } else {
-                alert("El código es incorrecto. Revisa tu correo.");
-                // Limpiamos los inputs para reintentar
+                alert("Código incorrecto. Revisa tu correo.");
                 inputs.forEach(input => input.value = "");
                 inputs[0].focus();
             }
