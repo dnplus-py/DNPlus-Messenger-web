@@ -35,141 +35,243 @@
             color: #e9edef;
         }
 
-        .form-container { padding: 24px; flex: 1; }
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .input-group { margin-bottom: 25px; position: relative; }
+        .form-container {
+            padding: 24px;
+        }
 
-        .input-label { display: block; color: #8696a0; font-size: 14px; margin-bottom: 8px; }
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            color: #8696a0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
 
         input, .custom-select {
-            width: 100%; background: transparent; border: none;
-            border-bottom: 2px solid #2a3942; color: #e9edef; 
-            padding: 8px 0; font-size: 16px; outline: none; transition: border-color 0.3s;
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #2a3942;
+            color: #e9edef; 
+            padding: 8px 0;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
         }
 
         .search-country {
-            background: #233138; border: 1px solid #2a3942; border-radius: 8px;
-            padding: 10px; margin-bottom: 10px; color: #e9edef; width: 100%;
+            background: #233138;
+            border: 1px solid #2a3942;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: #e9edef;
+            width: 100%;
         }
 
         .country-dropdown {
-            max-height: 250px; overflow-y: auto; background: #233138;
-            border-radius: 8px; border: 1px solid #2a3942; display: none;
-            position: absolute; width: 100%; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            max-height: 200px;
+            overflow-y: auto;
+            background: #233138;
+            border-radius: 8px;
+            border: 1px solid #2a3942;
+            display: none;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
-        .country-option { padding: 12px; cursor: pointer; border-bottom: 1px solid #2a3942; }
-        .country-option:hover { background: #1d282f; }
+        .country-option {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #2a3942;
+        }
 
-        input:focus { border-bottom-color: #00a884; }
+        .country-option:hover {
+            background: #1d282f;
+        }
 
-        .phone-row { display: flex; gap: 15px; }
-        .country-code-box { flex: 0 0 80px; }
+        input::placeholder {
+            color: #8696a0;
+            opacity: 0.8;
+        }
 
-        #codigo { color: #ffffff; border-bottom: 2px solid #3b4a54; font-weight: 500; }
+        input:focus {
+            border-bottom-color: #00a884;
+        }
 
-        .btn-container { display: flex; justify-content: center; padding: 30px 20px; }
+        .phone-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .country-code-box {
+            flex: 0 0 80px;
+        }
+
+        #codigo {
+            color: #ffffff; 
+            border-bottom: 2px solid #3b4a54;
+            font-weight: 500;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            width: auto;
+            margin-right: 12px;
+            accent-color: #00a884;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+        }
 
         .btn-save {
-            background-color: #176f47; color: white; border: none; border-radius: 25px;
-            font-weight: 600; font-size: 16px; cursor: pointer; text-transform: uppercase;
-            width: 230px; height: 50px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.2s;
+            background-color: #176f47; 
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 230px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.2s;
         }
 
-        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Personalización del Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #374045; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="back-icon" onclick="window.history.back()" style="cursor:pointer">
-            <i class="fas fa-arrow-left text-xl"></i>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         </div>
         <div class="header-title">Añadir nuevo contacto</div>
     </div>
 
-    <div class="form-container">
-        <div class="input-group">
-            <label class="input-label">País</label>
-            <div id="selected-country-display" class="custom-select" onclick="toggleDropdown()" style="cursor:pointer">
-                Paraguay
-            </div>
-            <div id="dropdown-container" class="country-dropdown">
-                <div style="padding: 8px;">
-                    <input type="text" id="country-search" class="search-country" placeholder="Buscar país..." onclick="event.stopPropagation()" onkeyup="filterCountries()">
+    <div class="main-content">
+        <div class="form-container">
+            <div class="input-group">
+                <label class="input-label">País</label>
+                <div id="selected-country-display" class="custom-select" onclick="toggleDropdown()" style="cursor:pointer">
+                    Paraguay
                 </div>
-                <div id="options-list"></div>
+                
+                <div id="dropdown-container" class="country-dropdown">
+                    <div style="padding: 8px;">
+                        <input type="text" id="country-search" class="search-country" placeholder="Buscar país..." onclick="event.stopPropagation()" onkeyup="filterCountries()">
+                    </div>
+                    <div id="options-list"></div>
+                </div>
             </div>
-        </div>
 
-        <div class="input-group">
-            <label class="input-label">Nombre y apellido</label>
-            <input type="text" placeholder="Ingresa nombre y apellido" id="nombre">
-        </div>
-
-        <div class="phone-row">
-            <div class="input-group country-code-box">
-                <label class="input-label">Cód.</label>
-                <input type="text" id="codigo" value="+595" readonly>
+            <div class="input-group">
+                <label class="input-label">Nombre y apellido</label>
+                <input type="text" placeholder="Ingresa nombre y apellido" id="nombre">
             </div>
-            <div class="input-group flex-grow">
-                <label class="input-label">Número de teléfono</label>
-                <input type="tel" placeholder="Numero de telefono" id="telefono">
+
+            <div class="phone-row">
+                <div class="input-group country-code-box">
+                    <label class="input-label">Cód.</label>
+                    <input type="text" id="codigo" value="+595" readonly>
+                </div>
+                <div class="input-group flex-grow">
+                    <label class="input-label">Número de teléfono</label>
+                    <input type="tel" placeholder="Numero de telefono" id="telefono">
+                </div>
             </div>
+
+            <label class="checkbox-container">
+                <input type="checkbox" checked id="saveEmail">
+                <span style="font-size: 15px; color: #d1d7db;">Guardar copia en el correo vinculado</span>
+            </label>
         </div>
 
-        <div class="input-group">
-            <label class="input-label">Estado / Info</label>
-            <input type="text" placeholder="Disponible" id="bio">
+        <div class="btn-container">
+            <button class="btn-save" id="btnGuardar" onclick="handleSave()">
+                Guardar
+            </button>
         </div>
-    </div>
-
-    <div class="btn-container">
-        <button class="btn-save" id="btnGuardar" onclick="handleSave()">
-            Guardar
-        </button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Configuración de tu base de datos David Oviedo
+        // Configuración de Firebase para David Oviedo
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
-
-        // Obtener tu propio ID (David)
+        
+        // Obtener tu propio ID para la lista de contactos personal
         const miId = localStorage.getItem("user_phone") || "595992536184";
 
         const countries = [
             { name: "Paraguay", code: "+595" },
             { name: "Argentina", code: "+54" },
             { name: "Brasil", code: "+55" },
-            { name: "Bolivia", code: "+591" },
+            { name: "Uruguay", code: "+598" },
             { name: "Chile", code: "+56" },
-            { name: "Colombia", code: "+57" },
-            { name: "España", code: "+34" },
-            { name: "México", code: "+52" },
+            { name: "Bolivia", code: "+591" },
             { name: "Perú", code: "+51" },
-            { name: "Uruguay", code: "+598" }
+            { name: "Colombia", code: "+57" },
+            { name: "Ecuador", code: "+593" },
+            { name: "Venezuela", code: "+58" },
+            { name: "México", code: "+52" },
+            { name: "España", code: "+34" },
+            { name: "Estados Unidos", code: "+1" }
         ];
 
         function initCountries() {
             const list = document.getElementById('options-list');
+            list.innerHTML = '';
             countries.forEach(c => {
                 const div = document.createElement('div');
                 div.className = 'country-option';
                 div.innerText = `${c.name} (${c.code})`;
-                div.onclick = () => {
-                    document.getElementById('selected-country-display').innerText = c.name;
-                    document.getElementById('codigo').value = c.code;
-                    document.getElementById('dropdown-container').style.display = 'none';
-                };
+                div.onclick = () => selectCountry(c);
                 list.appendChild(div);
             });
         }
@@ -177,61 +279,84 @@
         function toggleDropdown() {
             const drop = document.getElementById('dropdown-container');
             drop.style.display = drop.style.display === 'block' ? 'none' : 'block';
+            if(drop.style.display === 'block') document.getElementById('country-search').focus();
+        }
+
+        function selectCountry(country) {
+            document.getElementById('selected-country-display').innerText = country.name;
+            document.getElementById('codigo').value = country.code;
+            document.getElementById('dropdown-container').style.display = 'none';
+        }
+
+        function filterCountries() {
+            const val = document.getElementById('country-search').value.toLowerCase();
+            const options = document.querySelectorAll('.country-option');
+            options.forEach(opt => {
+                const text = opt.innerText.toLowerCase();
+                opt.style.display = text.includes(val) ? 'block' : 'none';
+            });
         }
 
         async function handleSave() {
             const nombre = document.getElementById('nombre').value.trim();
             const numRaw = document.getElementById('telefono').value.trim();
             const cod = document.getElementById('codigo').value;
-            const bio = document.getElementById('bio').value.trim() || "¡Hola! Estoy usando DNPlus.";
             const btn = document.getElementById('btnGuardar');
 
-            if(!nombre || !numRaw) {
-                showToast("Por favor David, completa los datos");
+            if(!nombre || !numRaw || !cod) {
+                showToast("Por favor David, completa todos los campos");
                 return;
             }
 
+            // Normalizar el número (unir código + número y quitar espacios)
             const telefonoCompleto = (cod + numRaw).replace(/\s+/g, '');
-            btn.innerHTML = "<i class='fas fa-circle-notch fa-spin mr-2'></i> Guardando...";
+
+            btn.innerHTML = "Sincronizando...";
             btn.disabled = true;
 
             try {
-                // 1. Guardar en el nodo global de usuarios registrados
-                // Esto permite que el contacto sea "encontrable" por el sistema
+                // 1. Guardar o actualizar en el nodo global de usuarios para que la app lo reconozca
                 await db.ref("usuarios_registrados/" + telefonoCompleto).update({
                     nombre: nombre,
                     telefono: telefonoCompleto,
-                    bio: bio,
                     foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                    bio: "¡Hola! Estoy usando DNPlus.",
                     ultima_vez: Date.now()
                 });
 
-                // 2. Añadir a TU lista de contactos personal (Opcional, según tu estructura)
+                // 2. Añadir a tu lista personal de contactos agregados
                 await db.ref("contactos_de/" + miId + "/" + telefonoCompleto).set({
                     nombre: nombre,
-                    agregado_el: Date.now()
+                    fecha_agregado: Date.now()
                 });
 
                 btn.innerHTML = "¡Guardado!";
                 btn.style.backgroundColor = "#00a884";
-                showToast("Contacto añadido a DNPlus");
+                showToast("Contacto guardado en la nube");
                 
                 setTimeout(() => window.history.back(), 1500);
 
             } catch (error) {
                 console.error(error);
-                btn.innerHTML = "Reintentar";
+                btn.innerHTML = "Error";
                 btn.disabled = false;
-                showToast("Error al guardar en Firebase");
+                showToast("Error de conexión con Firebase");
             }
         }
 
         function showToast(message) {
             const toast = document.createElement('div');
-            toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#3b4a54] text-[#e9edef] px-6 py-3 rounded-full text-sm z-[1000] shadow-2xl border border-white/10";
+            toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#3b4a54] text-[#e9edef] px-5 py-2.5 rounded-full text-sm z-[1000] shadow-xl border border-white/5";
             toast.innerText = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.custom-select') && !event.target.matches('.search-country')) {
+                const drop = document.getElementById('dropdown-container');
+                if(drop) drop.style.display = 'none';
+            }
         }
 
         initCountries();
