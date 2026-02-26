@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNpPlus - Chat Real</title>
+    <title>DNPlus - Chat Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -11,130 +11,47 @@
     <style>
         :root {
             --whatsapp-teal: #075E54;
-            --whatsapp-bg: #E5DDD5;
+            --whatsapp-bg: #0b141a; /* Fondo oscuro DNPlus */
             --msg-mine: #176f47; /* Tu verde favorito */
-            --msg-theirs: #ffffff;
-            --text-color: #F08927; /* Tu color de texto naranja */
+            --msg-theirs: #202c33;
+            --text-color: #F08927; /* Tu naranja configurado */
             --wa-blue: #34B7F1;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--whatsapp-bg); height: 100vh; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
 
-        header { background-color: var(--whatsapp-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        header { background-color: #202c33; color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #232d36; }
 
         #chat-container {
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 5px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: cover;
+            background-blend-mode: overlay; background-color: #0b141a;
         }
 
-        .bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.15); position: relative; }
-        .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; color: white; }
-        .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; color: #000; }
+        .bubble { max-width: 85%; padding: 6px 10px; border-radius: 8px; font-size: 0.95rem; box-shadow: 0 1px 1px rgba(0,0,0,0.2); position: relative; color: white; }
+        .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; }
+        .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
         
-        .msg-text-custom { color: var(--text-color); font-weight: 500; }
-        .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.65rem; margin-top: 4px; opacity: 0.8; }
-        .double-check { color: var(--wa-blue); }
+        /* Aplicando tu color naranja al texto enviado */
+        .msg-text-mine { color: var(--text-color); font-weight: 400; }
+        .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.65rem; margin-top: 2px; opacity: 0.7; }
+        
+        .input-area { background-color: #202c33; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        .input-box { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 15px; color: white; }
+        .input-box input { background: transparent; border: none; outline: none; flex: 1; color: white; padding: 8px; font-size: 15px; }
+        
+        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; padding: 5px; }
+        .send-btn { background: #176f47; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; }
 
-        /* Menú Ajustes */
-        #menu-opciones { display: none; position: fixed; top: 55px; right: 10px; background: #232d36; border-radius: 8px; min-width: 150px; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-        .menu-item { padding: 12px 20px; color: white; cursor: pointer; border-bottom: 1px solid #2d3a45; }
+        #menu-opciones { display: none; position: fixed; top: 55px; right: 10px; background: #232d36; border-radius: 8px; min-width: 170px; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid #3b4a54; }
+        .menu-item { padding: 12px 20px; color: #e9edef; cursor: pointer; }
+        .menu-item:hover { background: #182229; }
     </style>
 </head>
 <body>
 
     <div id="menu-opciones">
-        <div class="menu-item" onclick="window.location.href='ajustes.html'">⚙️ Ajustes</div>
-        <div class="menu-item" onclick="location.reload()">🔄 Actualizar</div>
-        <div class="menu-item" style="color:#ff4444" onclick="cerrarSesion()">🚪 Salir</div>
-    </div>
-
-    <header>
-        <div class="flex items-center">
-            <i class="fas fa-arrow-left p-2 mr-1"></i>
-            <img id="header-photo" src="" class="avatar">
-            <div class="ml-3">
-                <div id="header-name" class="font-bold text-sm">Cargando...</div>
-                <div class="text-[11px] opacity-80">en línea</div>
-            </div>
-        </div>
-        <div class="flex items-center gap-6">
-            <i class="fas fa-phone text-lg"></i>
-            <i class="fas fa-ellipsis-v text-lg cursor-pointer" onclick="toggleMenu()"></i>
-        </div>
-    </header>
-
-    <main id="chat-container"></main>
-
-    <div class="bg-[#f0f0f0] p-2 flex items-center gap-2">
-        <div class="bg-white flex-1 rounded-full flex items-center px-4 h-12">
-            <input type="text" id="chat-input" class="flex-1 outline-none" placeholder="Mensaje">
-        </div>
-        <button class="w-12 h-12 rounded-full bg-[#075E54] text-white flex items-center justify-center" onclick="enviarMensaje()">
-            <i id="action-icon" class="fas fa-paper-plane"></i>
-        </button>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        const input = document.getElementById('chat-input');
-        const container = document.getElementById('chat-container');
-
-        // ID del contacto que estamos viendo
-        const contactoId = localStorage.getItem("chat_con_id") || "12345";
-
-        window.onload = () => {
-            // CARGAR PERFIL
-            db.ref("usuarios/" + contactoId).on("value", (snapshot) => {
-                const data = snapshot.val();
-                if(data) {
-                    document.getElementById('header-name').innerText = data.nombre || "Usuario";
-                    document.getElementById('header-photo').src = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                }
-            });
-
-            // ESCUCHAR MENSAJES
-            db.ref("mensajes").on("child_added", (snapshot) => {
-                const msg = snapshot.val();
-                if (msg.usuario !== localStorage.getItem("user_phone")) {
-                    dibujarBurbuja(msg.texto, msg.hora, false);
-                }
-            });
-        };
-
-        function enviarMensaje() {
-            const texto = input.value.trim();
-            if(!texto) return;
-            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            db.ref("mensajes").push({ texto: texto, hora: hora, usuario: localStorage.getItem("user_phone") });
-            dibujarBurbuja(texto, hora, true);
-            input.value = "";
-        }
-
-        function dibujarBurbuja(texto, hora, esMio) {
-            const b = document.createElement('div');
-            b.className = esMio ? "bubble bubble-mine" : "bubble bubble-theirs";
-            b.innerHTML = `<div class="${esMio ? 'msg-text-custom' : ''}">${texto}</div><div class="msg-info"><span>${hora}</span></div>`;
-            container.appendChild(b);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function toggleMenu() {
-            const m = document.getElementById('menu-opciones');
-            m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'registro.html';
-        }
-    </script>
-</body>
-</html>
+        <div class="menu-item" onclick="window.location.href='perfil_contacto.html'">👤 Ver contacto</div>
+        <div class="menu-item" onclick="location.reload()">🔄 Actualizar chat</div>
+        <div class="menu-item" style="color:#f15c5c" onclick="cerrarSesion()">🚪 Sal
