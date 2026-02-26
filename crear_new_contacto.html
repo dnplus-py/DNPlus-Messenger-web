@@ -3,122 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Añadir Contacto - DNPlus</title>
+    <title>Crear Nuevo Contacto - DNPlus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b141a; color: white; font-family: sans-serif; margin: 0; padding: 0; }
-        .header-c { background-color: #085f56; padding: 15px; display: flex; align-items: center; gap: 15px; }
-        
-        .container { padding: 25px; display: flex; flex-direction: column; gap: 25px; }
-
-        /* PAÍS ARRIBA SOLO */
-        .pais-seccion { background: #1d272e; padding: 15px; border-radius: 12px; }
-        .label-mini { color: #00a884; font-size: 11px; font-weight: bold; display: block; margin-bottom: 8px; text-transform: uppercase; }
-        
-        select { 
-            width: 100%; background: transparent; border: none; color: white; 
-            font-size: 16px; outline: none; cursor: pointer; appearance: none;
+        body {
+            background-color: #0b141a;
+            color: #e9edef;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* LÍNEA DE TELÉFONO CON CÓDIGO ABAJO */
-        .input-box { border-bottom: 1.5px solid #3b4a54; padding: 10px 0; position: relative; }
-        .input-row { display: flex; align-items: center; gap: 10px; }
-        .codigo-preview { color: #8696a0; font-size: 16px; border-right: 1px solid #3b4a54; padding-right: 10px; min-width: 45px; }
-        
-        input { 
-            flex: 1; background: transparent; border: none; color: white; 
-            font-size: 16px; outline: none;
+        .header {
+            background-color: #085f56;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
-        input::placeholder { color: #50616b; }
 
-        .btn-guardar { 
-            background: #00a884; color: #0b141a; padding: 16px; border: none; 
-            border-radius: 30px; font-weight: bold; cursor: pointer; 
-            margin-top: 20px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;
+        .header-title {
+            margin-left: 20px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #e9edef;
         }
+
+        .form-container { padding: 24px; flex: 1; }
+
+        .input-group { margin-bottom: 25px; position: relative; }
+
+        .input-label { display: block; color: #8696a0; font-size: 14px; margin-bottom: 8px; }
+
+        input, .custom-select {
+            width: 100%; background: transparent; border: none;
+            border-bottom: 2px solid #2a3942; color: #e9edef; 
+            padding: 8px 0; font-size: 16px; outline: none; transition: border-color 0.3s;
+        }
+
+        .search-country {
+            background: #233138; border: 1px solid #2a3942; border-radius: 8px;
+            padding: 10px; margin-bottom: 10px; color: #e9edef; width: 100%;
+        }
+
+        .country-dropdown {
+            max-height: 250px; overflow-y: auto; background: #233138;
+            border-radius: 8px; border: 1px solid #2a3942; display: none;
+            position: absolute; width: 100%; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .country-option { padding: 12px; cursor: pointer; border-bottom: 1px solid #2a3942; }
+        .country-option:hover { background: #1d282f; }
+
+        input:focus { border-bottom-color: #00a884; }
+
+        .phone-row { display: flex; gap: 15px; }
+        .country-code-box { flex: 0 0 80px; }
+
+        #codigo { color: #ffffff; border-bottom: 2px solid #3b4a54; font-weight: 500; }
+
+        .btn-container { display: flex; justify-content: center; padding: 30px 20px; }
+
+        .btn-save {
+            background-color: #176f47; color: white; border: none; border-radius: 25px;
+            font-weight: 600; font-size: 16px; cursor: pointer; text-transform: uppercase;
+            width: 230px; height: 50px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.2s;
+        }
+
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="header-c">
-        <span onclick="window.history.back()" style="cursor:pointer; font-size: 22px;">←</span>
-        <span style="font-weight: bold; font-size: 18px;">Añadir contacto</span>
+    <div class="header">
+        <div class="back-icon" onclick="window.history.back()" style="cursor:pointer">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </div>
+        <div class="header-title">Añadir nuevo contacto</div>
     </div>
 
-    <div class="container">
-        
-        <div class="pais-seccion">
-            <span class="label-mini">ELEGIR PAÍS</span>
-            <select id="paisSel" onchange="actualizarCodigo()">
-                <option value="595">Paraguay</option>
-                <option value="54">Argentina</option>
-                <option value="55">Brasil</option>
-                <option value="591">Bolivia</option>
-                <option value="56">Chile</option>
-                <option value="57">Colombia</option>
-                <option value="34">España</option>
-                <option value="52">México</option>
-                <option value="598">Uruguay</option>
-                <option value="1">Estados Unidos</option>
-            </select>
-        </div>
-
-        <div class="input-box">
-            <span class="label-mini">NOMBRE</span>
-            <input type="text" id="nomCont" placeholder="Nombre del contacto">
-        </div>
-
-        <div class="input-box">
-            <span class="label-mini">TELÉFONO</span>
-            <div class="input-row">
-                <span id="txtCodigo" class="codigo-preview">+595</span>
-                <input type="number" id="telCont" placeholder="Ej: 981123456">
+    <div class="form-container">
+        <div class="input-group">
+            <label class="input-label">País</label>
+            <div id="selected-country-display" class="custom-select" onclick="toggleDropdown()" style="cursor:pointer">
+                Paraguay
+            </div>
+            <div id="dropdown-container" class="country-dropdown">
+                <div style="padding: 8px;">
+                    <input type="text" id="country-search" class="search-country" placeholder="Buscar país..." onclick="event.stopPropagation()" onkeyup="filterCountries()">
+                </div>
+                <div id="options-list"></div>
             </div>
         </div>
 
-        <button class="btn-guardar" onclick="guardarContacto()">Guardar en DNPlus</button>
+        <div class="input-group">
+            <label class="input-label">Nombre y apellido</label>
+            <input type="text" placeholder="Ingresa nombre y apellido" id="nombre">
+        </div>
 
+        <div class="phone-row">
+            <div class="input-group country-code-box">
+                <label class="input-label">Cód.</label>
+                <input type="text" id="codigo" value="+595" readonly>
+            </div>
+            <div class="input-group flex-grow">
+                <label class="input-label">Número de teléfono</label>
+                <input type="tel" placeholder="Numero de telefono" id="telefono">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Estado / Info</label>
+            <input type="text" placeholder="Disponible" id="bio">
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn-save" id="btnGuardar" onclick="handleSave()">
+            Guardar
+        </button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // Configuración de tu base de datos David Oviedo
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Esta función cambia el numerito (+595) cuando eliges otro país
-        function actualizarCodigo() {
-            const p = document.getElementById('paisSel').value;
-            document.getElementById('txtCodigo').innerText = "+" + p;
-        }
+        // Obtener tu propio ID (David)
+        const miId = localStorage.getItem("user_phone") || "595992536184";
 
-        function guardarContacto() {
-            const miId = localStorage.getItem("user_temp_id");
-            const prefijo = document.getElementById('paisSel').value;
-            const nombre = document.getElementById('nomCont').value.trim();
-            const numero = document.getElementById('telCont').value.trim();
+        const countries = [
+            { name: "Paraguay", code: "+595" },
+            { name: "Argentina", code: "+54" },
+            { name: "Brasil", code: "+55" },
+            { name: "Bolivia", code: "+591" },
+            { name: "Chile", code: "+56" },
+            { name: "Colombia", code: "+57" },
+            { name: "España", code: "+34" },
+            { name: "México", code: "+52" },
+            { name: "Perú", code: "+51" },
+            { name: "Uruguay", code: "+598" }
+        ];
 
-            if(!nombre || !numero) return alert("David, completa los campos");
-
-            // Se guarda como 595 + número
-            const telefonoFinal = prefijo + numero;
-
-            db.ref("mis_contactos/" + miId + "/" + telefonoFinal).set({
-                nombre: nombre,
-                telefono: telefonoFinal
-            }).then(() => {
-                window.location.href = "lista_contactos.html";
+        function initCountries() {
+            const list = document.getElementById('options-list');
+            countries.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'country-option';
+                div.innerText = `${c.name} (${c.code})`;
+                div.onclick = () => {
+                    document.getElementById('selected-country-display').innerText = c.name;
+                    document.getElementById('codigo').value = c.code;
+                    document.getElementById('dropdown-container').style.display = 'none';
+                };
+                list.appendChild(div);
             });
         }
+
+        function toggleDropdown() {
+            const drop = document.getElementById('dropdown-container');
+            drop.style.display = drop.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function handleSave() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const numRaw = document.getElementById('telefono').value.trim();
+            const cod = document.getElementById('codigo').value;
+            const bio = document.getElementById('bio').value.trim() || "¡Hola! Estoy usando DNPlus.";
+            const btn = document.getElementById('btnGuardar');
+
+            if(!nombre || !numRaw) {
+                showToast("Por favor David, completa los datos");
+                return;
+            }
+
+            const telefonoCompleto = (cod + numRaw).replace(/\s+/g, '');
+            btn.innerHTML = "<i class='fas fa-circle-notch fa-spin mr-2'></i> Guardando...";
+            btn.disabled = true;
+
+            try {
+                // 1. Guardar en el nodo global de usuarios registrados
+                // Esto permite que el contacto sea "encontrable" por el sistema
+                await db.ref("usuarios_registrados/" + telefonoCompleto).update({
+                    nombre: nombre,
+                    telefono: telefonoCompleto,
+                    bio: bio,
+                    foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                    ultima_vez: Date.now()
+                });
+
+                // 2. Añadir a TU lista de contactos personal (Opcional, según tu estructura)
+                await db.ref("contactos_de/" + miId + "/" + telefonoCompleto).set({
+                    nombre: nombre,
+                    agregado_el: Date.now()
+                });
+
+                btn.innerHTML = "¡Guardado!";
+                btn.style.backgroundColor = "#00a884";
+                showToast("Contacto añadido a DNPlus");
+                
+                setTimeout(() => window.history.back(), 1500);
+
+            } catch (error) {
+                console.error(error);
+                btn.innerHTML = "Reintentar";
+                btn.disabled = false;
+                showToast("Error al guardar en Firebase");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#3b4a54] text-[#e9edef] px-6 py-3 rounded-full text-sm z-[1000] shadow-2xl border border-white/10";
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        initCountries();
     </script>
 </body>
 </html>
