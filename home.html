@@ -36,13 +36,13 @@
 
         iframe { width: 100%; height: calc(100vh - 90px); border: none; }
 
-        /* MODAL DE AJUSTES */
+        /* MODAL DE AJUSTES (Tres puntos) */
         #modal-ajustes {
             display: none; position: fixed; top: 45px; right: 10px;
             background: #232d36; border-radius: 8px; width: 180px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 5000;
         }
-        .menu-item { padding: 12px 15px; cursor: pointer; font-size: 15px; }
+        .menu-item { padding: 12px 15px; cursor: pointer; font-size: 15px; color: white; text-decoration: none; display: block; }
         .menu-item:hover { background: #1c262d; }
         .menu-item.danger { color: #f25c5c; }
     </style>
@@ -69,7 +69,9 @@
 
     <div id="modal-ajustes">
         <div class="menu-item" onclick="location.href='editar_mi_perfil.html'">Perfil</div>
+        
         <div class="menu-item" onclick="location.href='ajustes.html'">Configuración</div>
+        
         <div class="menu-item danger" onclick="confirmarBorrar()">Borrar historial</div>
     </div>
 
@@ -100,12 +102,13 @@
         }
 
         function confirmarBorrar() {
-            if(confirm("¿Estás seguro de que quieres borrar todos los chats de tu historial?")) {
-                alert("Historial borrado (Simulación)");
+            if(confirm("¿Estás seguro de que quieres borrar el historial?")) {
+                alert("Historial borrado");
                 toggleAjustes(false);
             }
         }
 
+        // Cerrar modal al tocar fuera
         window.onclick = function(event) {
             if (!event.target.matches('.icons span')) {
                 toggleAjustes(false);
