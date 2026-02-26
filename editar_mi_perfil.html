@@ -3,200 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Perfil - DNPlus Dark</title>
+    <title>Editar Perfil - DNPlus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-
     <style>
+        /* Mantenemos tus estilos de colores */
         :root {
             --primary-header: #085f56;
             --button-color: #176f47;
             --bg-dark: #0b141a;
-            --bg-secondary: #111b21;
-            --text-custom: #F08927;
             --text-main: #e9edef;
             --text-muted: #8696a0;
             --input-underline: #2a3942;
         }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        .header {
-            background-color: var(--primary-header);
-            padding: 20px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 20px;
-            flex-grow: 1;
-        }
-
-        .profile-pic-wrapper {
-            position: relative;
-            margin-bottom: 30px;
-        }
-
-        .profile-pic {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--bg-dark);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            background-color: var(--bg-secondary);
-        }
-
-        .camera-icon {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background-color: var(--button-color);
-            color: white;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid var(--bg-dark);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .input-group {
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 25px;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 2px;
-        }
-
-        .custom-input {
-            width: 100%;
-            padding: 10px 0;
-            border: none;
-            border-bottom: 1px solid var(--input-underline);
-            background: transparent;
-            font-size: 1.05rem;
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .custom-input:focus {
-            border-bottom-color: var(--button-color);
-        }
-
-        .update-button {
-            width: 230px;
-            height: 50px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-weight: 600;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin-top: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .update-button:disabled {
-            opacity: 0.6;
-        }
-
-        .field-container {
-            display: flex;
-            align-items: flex-end;
-            width: 100%;
-        }
-
-        .icon-color {
-            color: var(--text-muted);
-            margin-right: 15px;
-            min-width: 24px;
-        }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .header { background-color: var(--primary-header); padding: 20px; display: flex; align-items: center; gap: 15px; }
+        .profile-container { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+        .profile-pic { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; background-color: #111b21; }
+        .input-group { width: 100%; max-width: 400px; margin-bottom: 25px; }
+        .custom-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid var(--input-underline); background: transparent; color: var(--text-main); outline: none; }
+        .update-button { width: 230px; height: 50px; background-color: var(--button-color); color: white; border-radius: 25px; font-weight: 600; cursor: pointer; margin-top: 30px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div onclick="window.history.back()" style="cursor:pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
         </div>
         <h1 class="text-xl font-semibold">Perfil</h1>
     </div>
 
     <div class="profile-container">
-        
-        <div class="profile-pic-wrapper">
-            <img src="https://ui-avatars.com/api/?name=David+Oviedo&background=111b21&color=e9edef&size=200" id="profileImage" class="profile-pic">
-            <label for="fileInput" class="camera-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        <div style="position: relative; margin-bottom: 30px;">
+            <img src="https://ui-avatars.com/api/?name=User&background=111b21&color=e9edef" id="profileImage" class="profile-pic">
+            <label for="fileInput" style="position: absolute; bottom: 5px; right: 5px; background: var(--button-color); border-radius: 50%; padding: 8px; cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
             </label>
             <input type="file" id="fileInput" accept="image/*" style="display: none;">
         </div>
 
         <div class="input-group">
-            <div class="field-container">
-                <div class="icon-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </div>
-                <div class="flex-grow">
-                    <label class="input-label">Nombre</label>
-                    <input type="text" id="inputNombre" class="custom-input" placeholder="Tu nombre">
-                </div>
-            </div>
+            <label style="color: var(--text-muted); font-size: 13px;">Nombre</label>
+            <input type="text" id="inputNombre" class="custom-input" placeholder="Cargando nombre...">
         </div>
 
         <div class="input-group">
-            <div class="field-container">
-                <div class="icon-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                </div>
-                <div class="flex-grow">
-                    <label class="input-label">Información</label>
-                    <input type="text" id="inputBio" class="custom-input" value="!Hola estoy usando DNPlus">
-                </div>
-            </div>
+            <label style="color: var(--text-muted); font-size: 13px;">Información</label>
+            <input type="text" id="inputBio" class="custom-input" placeholder="!Hola estoy usando DNPlus">
         </div>
 
         <div class="input-group">
-            <div class="field-container">
-                <div class="icon-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                </div>
-                <div class="flex-grow">
-                    <label class="input-label">Teléfono</label>
-                    <input type="tel" id="inputTel" class="custom-input" readonly style="opacity: 0.7;">
-                </div>
-            </div>
+            <label style="color: var(--text-muted); font-size: 13px;">Teléfono</label>
+            <input type="text" id="inputTel" class="custom-input" readonly style="opacity: 0.8; border-bottom: 1px dashed #444;">
         </div>
 
         <button class="update-button" id="btnUpdate">Actualizar</button>
-        <p id="statusMsg" style="display: none; color: #F08927; margin-top: 15px; font-style: italic;">✓ Perfil actualizado</p>
-
+        <p id="statusMsg" style="display: none; color: #F08927; margin-top: 15px;">✓ Perfil actualizado</p>
     </div>
 
     <script>
@@ -204,38 +68,49 @@
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
-
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Obtener el número del almacenamiento o usar el tuyo por defecto
         const userPhone = localStorage.getItem("user_phone") || "595992536184";
         let base64Image = "";
 
-        function loadProfile() {
-            // Muestro el teléfono de inmediato antes de llamar a la base de datos
+        // CARGA INICIAL
+        window.onload = function() {
+            // 1. Mostrar el teléfono INMEDIATAMENTE
             document.getElementById('inputTel').value = "+" + userPhone;
 
+            // 2. Traer datos de Firebase
             db.ref("usuarios_registrados/" + userPhone).once("value", (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    document.getElementById('inputNombre').value = data.nombre || "";
                     
-                    const bioFirebase = data.bio;
-                    document.getElementById('inputBio').value = (bioFirebase && bioFirebase.trim() !== "") ? bioFirebase : "!Hola estoy usando DNPlus";
+                    // Solo si hay datos en Firebase, reemplazamos los placeholders
+                    if(data.nombre) document.getElementById('inputNombre').value = data.nombre;
                     
+                    if(data.bio) {
+                        document.getElementById('inputBio').value = data.bio;
+                    } else {
+                        document.getElementById('inputBio').value = "!Hola estoy usando DNPlus";
+                    }
+
                     if (data.foto) {
                         document.getElementById('profileImage').src = data.foto;
                         base64Image = data.foto;
                     }
+                } else {
+                    // Si el usuario es nuevo, dejamos la bio por defecto
+                    document.getElementById('inputBio').value = "!Hola estoy usando DNPlus";
                 }
             });
-        }
+        };
 
+        // SUBIR FOTO
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = (event) => {
                     base64Image = event.target.result;
                     document.getElementById('profileImage').src = base64Image;
                 };
@@ -243,22 +118,28 @@
             }
         });
 
-        document.getElementById('btnUpdate').addEventListener('click', function() {
+        // BOTÓN ACTUALIZAR
+        document.getElementById('btnUpdate').onclick = function() {
             const btn = this;
-            const nombre = document.getElementById('inputNombre').value;
-            const bio = document.getElementById('inputBio').value;
+            const nuevoNombre = document.getElementById('inputNombre').value;
+            const nuevaBio = document.getElementById('inputBio').value;
 
-            btn.innerText = 'Guardando...';
             btn.disabled = true;
+            btn.innerText = "Guardando...";
 
             db.ref("usuarios_registrados/" + userPhone).update({
-                nombre: nombre,
-                bio: bio,
-                foto: base64Image
-            }, (error) => {
-                btn.innerText = 'Actualizar';
+                nombre: nuevoNombre,
+                bio: nuevaBio,
+                foto: base64Image,
+                telefono: userPhone // Guardamos el número también por si acaso
+            }).then(() => {
                 btn.disabled = false;
-                if (!error) {
-                    const msg = document.getElementById('statusMsg');
-                    msg.style.display = 'block';
-                    setTimeout(()
+                btn.innerText = "Actualizar";
+                const msg = document.getElementById('statusMsg');
+                msg.style.display = "block";
+                setTimeout(() => msg.style.display = "none", 3000);
+            });
+        };
+    </script>
+</body>
+</html>
