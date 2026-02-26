@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus - Nuevo Contacto</title>
+    <title>DNPlus - Contactos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,71 +11,63 @@
         
         header { 
             height: 60px; background-color: #202c33; display: flex; 
-            align-items: center; padding: 0 15px; gap: 20px; 
+            align-items: center; padding: 0 15px; gap: 20px; position: sticky; top: 0; z-index: 50;
         }
 
-        .form-container { padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        .contact-item { 
+            display: flex; align-items: center; padding: 12px 16px; gap: 15px; 
+            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
+        .contact-item:active { background-color: #202c33; }
         
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        .input-group label { color: #00a884; font-size: 14px; font-weight: 500; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; }
         
-        .input-field { 
-            background: #2a3942; border: none; border-bottom: 2px solid transparent; 
-            padding: 12px; border-radius: 8px; color: white; outline: none; 
-            transition: border-color 0.3s;
-        }
-        .input-field:focus { border-bottom-color: #00a884; }
+        .info { flex: 1; }
+        .name { font-weight: 500; font-size: 16px; }
+        .status { color: #8696a0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .btn-save { 
-            background-color: #00a884; color: #0b141a; font-weight: bold; 
-            padding: 15px; border-radius: 30px; border: none; cursor: pointer;
-            margin-top: 20px; font-size: 16px;
+        /* BOTÓN FLOTANTE (FAB) */
+        .fab-add {
+            position: fixed;
+            bottom: 30px;
+            right: 25px;
+            background-color: #00a884;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 100;
+            color: #0b141a;
+            font-size: 20px;
+            transition: transform 0.2s;
         }
+        .fab-add:active { transform: scale(0.9); }
 
-        .avatar-picker {
-            width: 100px; height: 100px; border-radius: 50%; background: #2a3942;
-            margin: 0 auto 10px auto; display: flex; align-items: center;
-            justify-content: center; overflow: hidden; position: relative;
-            border: 2px dashed #8696a0;
-        }
-        #preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .section-title { padding: 15px 16px 8px; color: #8696a0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
 
     <header>
         <i class="fas fa-arrow-left cursor-pointer" onclick="history.back()"></i>
-        <h1 class="text-lg font-medium">Añadir nuevo contacto</h1>
+        <div>
+            <h1 class="text-lg font-medium leading-tight">Seleccionar contacto</h1>
+            <p class="text-xs text-[#8696a0]" id="count-contactos">Cargando...</p>
+        </div>
     </header>
 
-    <div class="form-container">
-        <div class="text-center">
-            <div class="avatar-picker" onclick="document.getElementById('foto-input').click()">
-                <i id="placeholder-icon" class="fas fa-camera text-2xl text-[#8696a0]"></i>
-                <img id="preview-img" src="">
-            </div>
-            <p class="text-sm text-[#8696a0]">Toca para subir foto</p>
-            <input type="file" id="foto-input" accept="image/*" hidden onchange="previewFoto(event)">
+    <div id="lista-contactos">
+        <div class="flex justify-center items-center h-40">
+            <p class="text-[#8696a0] animate-pulse">Buscando contactos...</p>
         </div>
+    </div>
 
-        <div class="input-group">
-            <label>Nombre del contacto</label>
-            <input type="text" id="nombre" class="input-field" placeholder="Ej: Juan Pérez">
-        </div>
-
-        <div class="input-group">
-            <label>Número de teléfono / ID</label>
-            <input type="tel" id="telefono" class="input-field" placeholder="Ej: 595981000000">
-        </div>
-
-        <div class="input-group">
-            <label>Estado (Bio)</label>
-            <input type="text" id="bio" class="input-field" placeholder="Disponible">
-        </div>
-
-        <button class="btn-save" onclick="guardarContacto()">
-            GUARDAR CONTACTO
-        </button>
+    <div class="fab-add" onclick="location.href='crear_new_contacto.html'">
+        <i class="fas fa-user-plus"></i>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -89,45 +81,46 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let fotoBase64 = "";
+        function cargarContactos() {
+            db.ref("usuarios_registrados").on("value", snapshot => {
+                const container = document.getElementById("lista-contactos");
+                const countLabel = document.getElementById("count-contactos");
+                container.innerHTML = "";
+                
+                if (!snapshot.exists()) {
+                    container.innerHTML = "<p class='p-5 text-center text-[#8696a0]'>No hay contactos aún.</p>";
+                    countLabel.innerText = "0 contactos";
+                    return;
+                }
 
-        function previewFoto(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const img = document.getElementById('preview-img');
-                img.src = reader.result;
-                img.style.display = 'block';
-                document.getElementById('placeholder-icon').style.display = 'none';
-                fotoBase64 = reader.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        function guardarContacto() {
-            const nombre = document.getElementById('nombre').value.trim();
-            const tel = document.getElementById('telefono').value.trim();
-            const bio = document.getElementById('bio').value.trim() || "¡Hola! Estoy usando DNPlus.";
-
-            if(!nombre || !tel) {
-                alert("Por favor, David, completa nombre y teléfono.");
-                return;
-            }
-
-            // Guardamos en el nodo global de usuarios para que el sistema lo reconozca
-            db.ref("usuarios_registrados/" + tel).set({
-                nombre: nombre,
-                telefono: tel,
-                foto: fotoBase64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                bio: bio,
-                online: false,
-                ultima_vez: Date.now()
-            }).then(() => {
-                alert("¡Contacto guardado con éxito!");
-                history.back();
-            }).catch(err => {
-                alert("Error al guardar. Revisa tu conexión.");
+                let total = 0;
+                snapshot.forEach(child => {
+                    const user = child.val();
+                    total++;
+                    
+                    const item = document.createElement("div");
+                    item.className = "contact-item";
+                    item.onclick = () => {
+                        // Aquí podrías redirigir al chat con este usuario
+                        localStorage.setItem("chat_con", user.telefono);
+                        location.href = "chat.html";
+                    };
+                    
+                    item.innerHTML = `
+                        <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
+                        <div class="info">
+                            <div class="name">${user.nombre}</div>
+                            <div class="status">${user.bio || '¡Hola! Estoy usando DNPlus.'}</div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+                
+                countLabel.innerText = total + " contactos";
             });
         }
+
+        window.onload = cargarContactos;
     </script>
 </body>
 </html>
