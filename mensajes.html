@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DNPlus - Chat Profesional</title>
+    <title>DNpPlus - Chat Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --whatsapp-bg: #0b141a; /* Fondo oscuro real de tu captura */
-            --msg-mine: #176f47; /* Tu verde favorito para la burbuja */
-            --text-orange: #F08927; /* Tu color naranja para el texto */
+            --whatsapp-bg: #0b141a;
+            --msg-mine: #176f47;
             --msg-theirs: #202c33;
-            --header-bg: #202c33;
+            --text-color-mine: #F08927; /* Tu naranja personalizado */
+            --header-color: #085f56;
+            --wa-blue: #34B7F1;
         }
 
         body { 
@@ -27,132 +28,156 @@
             overflow: hidden; 
         }
 
-        /* CABECERA SEGÚN CAPTURA */
         header { 
-            height: 60px; 
-            background-color: var(--header-bg); 
+            height: 62px;
+            background-color: var(--header-color); 
             color: white; 
-            padding: 0 12px; 
+            padding: 0 10px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            flex-shrink: 0; 
+            flex-shrink: 0;
+            z-index: 1000;
         }
 
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .header-left { display: flex; align-items: center; gap: 2px; flex: 1; }
+        .header-info { display: flex; align-items: center; gap: 10px; padding: 5px; border-radius: 8px; cursor: pointer; }
 
-        /* CONTENEDOR DE CHAT */
         #chat-container {
             flex: 1; 
             overflow-y: auto; 
             padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            gap: 10px;
-            background-color: var(--whatsapp-bg);
+            gap: 12px;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay; 
+            background-color: #0b141a;
         }
 
-        /* BURBUJAS ESTILO REAL */
         .bubble { 
-            max-width: 85%; 
-            padding: 8px 12px; 
+            max-width: 90%; 
+            padding: 6px 10px; 
             border-radius: 12px; 
-            font-size: 16px; 
+            font-size: 0.95rem; 
+            color: white; 
             position: relative; 
-            box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3); 
         }
-        .bubble-mine { 
-            align-self: flex-end; 
-            background-color: var(--msg-mine); 
-            color: var(--text-orange); /* Texto naranja en tus mensajes */
-            border-top-right-radius: 2px; 
+        .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; }
+        .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
+        
+        /* Ajuste para que el texto naranja solo se vea en tus mensajes */
+        .bubble-mine .text-content { color: var(--text-color-mine); font-weight: 500; }
+
+        .audio-wrapper { width: 270px; height: 45px; display: flex; align-items: center; gap: 10px; }
+        .audio-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+        .audio-mic-icon { position: absolute; bottom: -2px; right: -2px; color: var(--wa-blue); font-size: 11px; background: #202c33; border-radius: 50%; padding: 2px; }
+        .visualizer { flex: 1; display: flex; align-items: center; gap: 2px; height: 15px; }
+        .v-bar { width: 2px; background: rgba(255,255,255,0.4); border-radius: 1px; }
+
+        .media-container { width: 180px; height: 210px; border-radius: 8px; overflow: hidden; background: #000; position: relative; }
+        .media-content { width: 100%; height: 100%; object-fit: cover; }
+        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); width: 45px; height: 45px; border-radius: 50%; display: flex; items-center: center; justify-content: center; color: white; font-size: 20px; }
+
+        .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.62rem; margin-top: 2px; opacity: 0.7; }
+
+        .input-area { background-color: #111b21; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 100; }
+        .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
+        .emoji-btn { color: #8696a0; font-size: 24px; cursor: pointer; margin-right: 12px; }
+        .input-card input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; }
+        
+        .action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; flex-shrink: 0; }
+
+        #menu-dots {
+            position: absolute; top: 50px; right: 10px; background: #232d36; 
+            border-radius: 8px; display: none; flex-direction: column; 
+            width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 2000;
         }
-        .bubble-theirs { 
-            align-self: flex-start; 
-            background-color: var(--msg-theirs); 
-            color: white; 
-            border-top-left-radius: 2px; 
+        .menu-item { padding: 12px 16px; color: #e9edef; cursor: pointer; font-size: 15px; }
+        .menu-item:hover { background: #182229; }
+
+        #emoji-panel {
+            display: none; height: 200px; background: #111b21; overflow-y: auto; 
+            padding: 10px; grid-template-columns: repeat(8, 1fr); gap: 8px;
+        }
+        .emoji-item { font-size: 24px; cursor: pointer; text-align: center; }
+
+        #call-screen {
+            position: fixed; inset: 0; background: #075e54; z-index: 3000;
+            display: none; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 60px 0; color: white;
         }
 
-        .msg-info { 
-            display: flex; 
-            align-items: center; 
-            justify-content: flex-end; 
-            gap: 4px; 
-            font-size: 11px; 
-            margin-top: 4px; 
-            opacity: 0.8;
-            color: white;
+        #rec-overlay { 
+            position: absolute; left: 10px; right: 70px; top: 8px; bottom: 8px; 
+            background: #111b21; border-radius: 25px; display: none; align-items: center; 
+            padding: 0 20px; z-index: 10; 
         }
 
-        /* BARRA DE ENTRADA GRIS */
-        .input-area { 
-            background-color: #111b21; 
-            padding: 8px 10px; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        .input-card { 
-            background: #2a3942; 
-            border-radius: 25px; 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 15px; 
-            height: 48px; 
-        }
-        .input-card input { 
-            background: transparent; 
-            border: none; 
-            outline: none; 
-            flex: 1; 
-            color: white; 
-            font-size: 16px; 
-        }
-        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; }
-        .send-btn { 
-            background: #00a884; 
-            width: 48px; 
-            height: 48px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            border: none; 
-        }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="flex items-center gap-2">
-            <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
-            <img id="header-photo" src="" class="avatar">
-            <div class="ml-1">
-                <div id="header-name" class="font-medium text-[17px]">Cargando...</div>
-                <div class="text-[12px] opacity-70">en línea</div>
+    <div id="menu-dots">
+        <div class="menu-item" onclick="window.location.href='perfil_contacto.html'">Info. del contacto</div>
+        <div class="menu-item">Archivos, enlaces y docs</div>
+        <div class="menu-item">Buscar</div>
+        <div class="menu-item" onclick="toggleSettings()">Ajustes</div>
+        <div class="menu-item" onclick="vaciarChat()">Vaciar chat</div>
+    </div>
+
+    <div id="call-screen">
+        <div class="text-center">
+            <div class="text-sm opacity-80 mb-2 uppercase">Llamada de DNPlus</div>
+            <img id="call-photo" src="" class="w-32 h-32 rounded-full border-4 border-white/20 mb-4 mx-auto object-cover">
+            <div id="call-name" class="text-2xl font-bold">Cargando...</div>
+            <div id="call-status" class="text-lg opacity-90 mt-2">Llamando...</div>
+        </div>
+        <div class="flex gap-12">
+            <div class="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl cursor-pointer" onclick="endCall()">
+                <i class="fas fa-phone-slash"></i>
+            </div>
+            <div class="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl cursor-pointer">
+                <i class="fas fa-volume-up"></i>
             </div>
         </div>
-        <div class="flex items-center gap-6 pr-2 text-[#8696a0]">
-            <i class="fas fa-video"></i>
-            <i class="fas fa-phone"></i>
-            <i class="fas fa-ellipsis-v"></i>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
+            <div class="header-info">
+                <img id="header-photo" src="" class="avatar">
+                <div>
+                    <div id="header-name" class="font-bold text-[16px]">Cargando...</div>
+                    <div id="header-status" class="text-[12px] opacity-70">en línea</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-6 pr-2">
+            <i class="fas fa-phone text-lg opacity-90 cursor-pointer" onclick="startCall()"></i>
+            <i class="fas fa-ellipsis-v text-lg opacity-90 cursor-pointer p-1" onclick="toggleMenu()"></i>
         </div>
     </header>
 
     <main id="chat-container"></main>
 
+    <div id="emoji-panel"></div>
+
     <div class="input-area">
-        <div class="input-card">
-            <i class="far fa-smile icon-btn mr-3"></i>
-            <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
-            <i class="fas fa-paperclip icon-btn -rotate-45 ml-2"></i>
+        <div id="rec-overlay">
+            <i class="fas fa-microphone text-red-500 animate-pulse mr-3 text-lg"></i>
+            <span id="rec-timer" class="text-white font-medium flex-1">0:00</span>
         </div>
-        <button id="main-btn" class="send-btn" onclick="manejarEnvio()">
-            <i id="action-icon" class="fas fa-microphone"></i>
-        </button>
+        <div class="input-card">
+            <i class="far fa-smile emoji-btn" id="emoji-toggle"></i>
+            <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
+            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl rotate-[-45deg] cursor-pointer mx-2"></i></label>
+            <input type="file" id="file-input" accept="image/*,video/*" hidden onchange="handleFileUpload(this)">
+        </div>
+        <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
     </div>
 
     <script>
@@ -163,66 +188,105 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Variables desde tu Firebase Console
+        // RECONOCIMIENTO DE IDS REALES
         const miId = localStorage.getItem("user_phone") || "595992536184";
         const idOtro = localStorage.getItem("chat_destinatario_id");
         const salaId = localStorage.getItem("chat_sala_id");
 
         const input = document.getElementById('chat-input');
         const container = document.getElementById('chat-container');
+        const actionBtn = document.getElementById('action-btn');
         const actionIcon = document.getElementById('action-icon');
 
+        // CARGA DE DATOS DE CABECERA
         window.onload = () => {
-            if(!idOtro || !salaId) return;
+            if(!idOtro || !salaId) { window.location.href="lista_chats.html"; return; }
 
-            // Cargar datos del contacto desde usuarios_registrados
             db.ref("usuarios_registrados/" + idOtro).on("value", (snap) => {
-                const user = snap.val();
-                if(user) {
-                    document.getElementById('header-name').innerText = user.nombre || "Usuario";
-                    document.getElementById('header-photo').src = user.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                const data = snap.val();
+                if(data) {
+                    const nombre = data.nombre || idOtro;
+                    const foto = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                    document.getElementById('header-name').innerText = nombre;
+                    document.getElementById('header-photo').src = foto;
+                    document.getElementById('call-name').innerText = nombre;
+                    document.getElementById('call-photo').src = foto;
                 }
             });
 
-            // Escuchar mensajes de chats_privados
+            // ESCUCHAR MENSAJES REALES
             db.ref("chats_privados/" + salaId).on("child_added", (snap) => {
-                const data = snap.val();
-                const esMio = data.emisor === miId;
-                
-                const b = document.createElement('div');
-                b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
-                b.innerHTML = `
-                    <div>${data.mensaje}</div>
-                    <div class="msg-info">
-                        <span>${data.hora}</span>
-                        ${esMio ? '<i class="fas fa-check-double text-[#34B7F1]"></i>' : ''}
-                    </div>
-                `;
-                container.appendChild(b);
-                container.scrollTop = container.scrollHeight;
+                dibujarBurbuja(snap.val());
             });
         };
 
-        function manejarEnvio() {
-            const texto = input.value.trim();
-            if(!texto) return;
-
-            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        function dibujarBurbuja(data) {
+            const esMio = data.emisor === miId;
+            const b = document.createElement('div');
+            b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
             
-            db.ref("chats_privados/" + salaId).push({
-                mensaje: texto,
-                emisor: miId,
-                hora: hora,
-                fecha: Date.now()
-            });
+            if(data.tipo === 'audio') {
+                let bars = Array(26).fill(0).map(() => `<div class="v-bar" style="height:${Math.random()*10+4}px"></div>`).join('');
+                b.innerHTML = `<div class="audio-wrapper">
+                    <div class="relative"><img src="${esMio ? 'https://i.postimg.cc/mD8zM1vW/david-profile.jpg' : document.getElementById('header-photo').src}" class="audio-avatar"><i class="fas fa-microphone audio-mic-icon"></i></div>
+                    <i class="fas fa-play text-white/90 text-lg"></i>
+                    <div class="visualizer">${bars}</div>
+                    <span class="text-[10px] opacity-80 pr-1">${data.duracion}</span>
+                </div>`;
+            } 
+            else if(data.tipo === 'imagen' || data.tipo === 'video') {
+                b.innerHTML = `<div class="media-container">${data.tipo==='video'?'<div class="play-overlay"><i class="fas fa-play"></i></div>':''}<img src="${data.url}" class="media-content"></div>`;
+            }
+            else {
+                // Aplicamos tu color naranja solo si el mensaje es tuyo
+                const contentClass = esMio ? 'text-content' : '';
+                b.innerHTML = `<div class="${contentClass}">${data.mensaje}</div>`;
+            }
 
-            input.value = "";
-            actionIcon.className = "fas fa-microphone";
+            b.innerHTML += `<div class="msg-info"><span>${data.hora}</span><i class="fas fa-check-double ${esMio ? 'text-sky-400' : 'hidden'}"></i></div>`;
+            container.appendChild(b);
+            container.scrollTop = container.scrollHeight;
         }
 
-        input.oninput = () => {
-            actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
-        };
+        function sendData(payload) {
+            db.ref("chats_privados/" + salaId).push({
+                ...payload, emisor: miId,
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                fecha: Date.now()
+            });
+        }
+
+        // FUNCIONALIDADES EXTRA
+        const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕","😈","👿","👹","👺","💀","☠️","👻","👽","👾","🤖","💩","😺","😸","😻","😼","😽","🙀","😿","😾","🙈","🙉","🙊","💋","💌","💘","💝","💖","💗","💓","💞","💕","💟","❣️","💔","❤️","🧡","💛","💚","💙","💜","🖤"];
+        const ep = document.getElementById('emoji-panel');
+        emojis.forEach(e => {
+            const s = document.createElement('span'); s.className='emoji-item'; s.innerText=e;
+            s.onclick=()=>{input.value+=e; input.dispatchEvent(new Event('input'));};
+            ep.appendChild(s);
+        });
+
+        document.getElementById('emoji-toggle').onclick = () => ep.style.display = ep.style.display === 'grid' ? 'none' : 'grid';
+        function toggleMenu() { document.getElementById('menu-dots').style.display = (document.getElementById('menu-dots').style.display === 'flex' ? 'none' : 'flex'); }
+        function vaciarChat() { if(confirm("¿Vaciar?")) { db.ref("chats_privados/" + salaId).remove(); container.innerHTML=""; } }
+        function startCall() { document.getElementById('call-screen').style.display = 'flex'; }
+        function endCall() { document.getElementById('call-screen').style.display = 'none'; }
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => sendData({ tipo: file.type.startsWith('image') ? 'imagen' : 'video', url: e.target.result });
+            reader.readAsDataURL(file);
+        }
+
+        // LÓGICA DE AUDIO
+        let pressTimer, recInterval, startTime, isRecording = false;
+        const startRec = () => { if (input.value.trim()) return; isRecording = true; document.getElementById('rec-overlay').style.display = 'flex'; startTime = Date.now(); recInterval = setInterval(() => { const s = Math.floor((Date.now() - startTime) / 1000); document.getElementById('rec-timer').innerText = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }, 500); };
+        const stopRec = (send) => { if(!isRecording) return; clearInterval(recInterval); if(send) sendData({ tipo: 'audio', duracion: document.getElementById('rec-timer').innerText }); isRecording = false; document.getElementById('rec-overlay').style.display = 'none'; };
+
+        actionBtn.onmousedown = () => pressTimer = setTimeout(startRec, 200);
+        actionBtn.onmouseup = () => { clearTimeout(pressTimer); stopRec(true); };
+        actionBtn.onclick = () => { if(input.value.trim()) { sendData({ tipo: 'texto', mensaje: input.value.trim() }); input.value = ""; input.dispatchEvent(new Event('input')); } };
+        input.oninput = () => actionIcon.className = input.value.trim() ? "fas fa-paper-plane ml-1" : "fas fa-microphone";
     </script>
 </body>
 </html>
