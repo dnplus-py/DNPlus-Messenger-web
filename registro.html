@@ -17,11 +17,11 @@
         .instruccion { color: #8696a0; font-size: 14px; margin-bottom: 30px; padding: 0 40px; line-height: 1.5; }
         
         .phone-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 40px; }
-        .country-select { border-bottom: 2px solid #085f56; padding: 5px 0; width: 90px; font-size: 18px; color: #e9edef; }
-        .number-input { background: transparent; border: none; border-bottom: 2px solid #085f56; padding: 5px 0; font-size: 18px; width: 180px; outline: none; color: #e9edef; }
+        .country-select { border-bottom: 2px solid #176f47; padding: 5px 0; width: 90px; font-size: 18px; color: #e9edef; }
+        .number-input { background: transparent; border: none; border-bottom: 2px solid #176f47; padding: 5px 0; font-size: 18px; width: 180px; outline: none; color: #e9edef; }
         
         .btn-confirmar { 
-            background-color: #085f56; 
+            background-color: #176f47; /* Tu verde favorito ✅ */
             color: white; 
             padding: 12px 60px; 
             border-radius: 30px; 
@@ -35,13 +35,13 @@
         /* Modal DNPlus Oscuro */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; }
         .modal-box { background: #232d36; width: 85%; max-width: 320px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px 24px; border-radius: 3px; text-align: left; box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
-        .btn-flat { background: none; border: none; color: #00a884; font-weight: bold; cursor: pointer; text-transform: uppercase; padding: 10px; font-size: 14px; }
+        .btn-flat { background: none; border: none; color: #176f47; font-weight: bold; cursor: pointer; text-transform: uppercase; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <h2 class="title">Introduce tu número</h2>
-    <p class="instruccion">DNPlus Messenger enviará un SMS para verificar tu número de teléfono.</p>
+    <p class="instruccion">DNPlus Messenger usará tu número para conectar con tus contactos.</p>
 
     <div class="phone-container">
         <div class="country-select"><span>🇵🇾 +595</span></div>
@@ -62,7 +62,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Configuración de tu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -76,17 +75,17 @@
         const modalButtons = document.getElementById('modalButtons');
 
         function validarNumero() {
-            let num = document.getElementById('phoneInput').value.replace(/\s+/g, '');
+            let num = document.getElementById('phoneInput').value.replace(/\s+/g, '').replace(/\D/g, '');
             
             if(num.length >= 9) {
                 modalTitulo.innerText = "¿Es este su número?";
                 modalMensaje.innerHTML = `
                     <div style="color:#e9edef; font-size: 17px; margin-bottom: 10px;">+595 ${num}</div>
-                    Te enviaremos un código para verificar tu cuenta de DNPlus.
+                    Usaremos este número para identificarte en DNPlus.
                 `;
                 modalButtons.innerHTML = `
                     <button class="btn-flat" onclick="cerrarModal()">EDITAR</button>
-                    <button class="btn-flat" id="btnOk">OK</button>
+                    <button class="btn-flat" id="btnOk">SÍ</button>
                 `;
                 modal.style.display = 'block';
                 
@@ -95,7 +94,7 @@
                 };
             } else {
                 modalTitulo.innerText = "Número no válido";
-                modalMensaje.innerText = "Por favor, introduce un número válido.";
+                modalMensaje.innerText = "Introduce un número válido de Paraguay.";
                 modalButtons.innerHTML = `<button class="btn-flat" onclick="cerrarModal()">OK</button>`;
                 modal.style.display = 'block';
             }
@@ -103,28 +102,18 @@
 
         function cerrarModal() { modal.style.display = 'none'; }
         
-        // LA FUNCIÓN CLAVE: Guarda y salta a correo.html
         function guardarYIrACorreo(num) {
-            const numCompleto = "+595" + num;
+            // El ID limpio para Firebase será el número completo sin el +
+            const idUsuario = "595" + num; 
             const btn = document.getElementById('btnOk');
             btn.innerText = "CONECTANDO...";
             btn.disabled = true;
 
-            // Guardamos el número en Firebase
-            db.ref("registros_pendientes").push({
-                telefono: numCompleto,
-                fecha: Date.now()
-            }).then(() => {
-                // Guardamos en LocalStorage para que correo.html sepa a quién pertenece
-                localStorage.setItem("user_phone", numCompleto);
-                
-                // SALTADO A CORREO.HTML
-                window.location.href = 'correo.html';
-            }).catch(e => {
-                alert("Error: " + e.message);
-                btn.innerText = "OK";
-                btn.disabled = false;
-            });
+            // Guardamos el número temporalmente para el flujo de registro
+            localStorage.setItem("user_phone", idUsuario);
+            
+            // Pasamos a la verificación por correo
+            window.location.href = 'correo.html';
         }
     </script>
 </body>
