@@ -3,34 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNPlus - Contactos</title>
+    <title>DNPlus - Llamadas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0b141a; color: #e9edef; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
         
-        header { 
-            height: 60px; background-color: #202c33; display: flex; 
-            align-items: center; padding: 0 15px; gap: 20px; position: sticky; top: 0; z-index: 50;
+        /* Contenedor principal sin bordes ni elementos sobrantes */
+        .call-list-container { min-height: 100vh; padding-bottom: 100px; }
+        
+        .call-item { 
+            display: flex; align-items: center; padding: 14px 16px; gap: 15px; 
+            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); 
         }
-
-        .contact-item { 
-            display: flex; align-items: center; padding: 12px 16px; gap: 15px; 
-            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); 
-        }
-        .contact-item:active { background-color: #202c33; }
+        .call-item:active { background-color: #202c33; }
         
-        .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; }
-        
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #232d36; }
         .info { flex: 1; }
         .name { font-weight: 500; font-size: 16px; }
-        .status { color: #8696a0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .details { color: #8696a0; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        
+        .icon-call { color: #00a884; font-size: 20px; padding: 10px; }
 
-        /* BOTÓN FLOTANTE (FAB) */
-        .fab-add {
+        /* BOTÓN FLOTANTE (FAB) - Fuera de cualquier contenedor relativo */
+        .fab-calls {
             position: fixed;
             bottom: 30px;
-            right: 25px;
+            right: 20px;
             background-color: #00a884;
             width: 56px;
             height: 56px;
@@ -40,34 +39,20 @@
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             cursor: pointer;
-            z-index: 100;
-            color: #0b141a;
-            font-size: 20px;
+            z-index: 9999; /* Máxima prioridad para que flote sobre todo */
+            color: white;
             transition: transform 0.2s;
         }
-        .fab-add:active { transform: scale(0.9); }
-
-        .section-title { padding: 15px 16px 8px; color: #8696a0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .fab-calls:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
 
-    <header>
-        <i class="fas fa-arrow-left cursor-pointer" onclick="history.back()"></i>
-        <div>
-            <h1 class="text-lg font-medium leading-tight">Seleccionar contacto</h1>
-            <p class="text-xs text-[#8696a0]" id="count-contactos">Cargando...</p>
-        </div>
-    </header>
+    <div class="call-list-container" id="contenedor-llamadas"></div>
 
-    <div id="lista-contactos">
-        <div class="flex justify-center items-center h-40">
-            <p class="text-[#8696a0] animate-pulse">Buscando contactos...</p>
-        </div>
-    </div>
-
-    <div class="fab-add" onclick="location.href='crear_new_contacto.html'">
-        <i class="fas fa-user-plus"></i>
+    <div class="fab-calls" onclick="window.open('crear_new_contacto.html', '_self')">
+        <i class="fas fa-phone-plus"></i>
+        <span class="absolute top-3 right-3 text-[10px]"><i class="fas fa-plus"></i></span>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -78,49 +63,39 @@
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
+        const miId = localStorage.getItem("user_phone") || "595992536184";
 
-        function cargarContactos() {
-            db.ref("usuarios_registrados").on("value", snapshot => {
-                const container = document.getElementById("lista-contactos");
-                const countLabel = document.getElementById("count-contactos");
-                container.innerHTML = "";
+        function cargarHistorial() {
+            db.ref("historial_llamadas/" + miId).on("value", snapshot => {
+                const container = document.getElementById("contenedor-llamadas");
+                container.innerHTML = ""; // Se mantiene vacío si no hay datos
                 
-                if (!snapshot.exists()) {
-                    container.innerHTML = "<p class='p-5 text-center text-[#8696a0]'>No hay contactos aún.</p>";
-                    countLabel.innerText = "0 contactos";
-                    return;
-                }
+                if (!snapshot.exists()) return;
 
-                let total = 0;
                 snapshot.forEach(child => {
-                    const user = child.val();
-                    total++;
-                    
-                    const item = document.createElement("div");
-                    item.className = "contact-item";
-                    item.onclick = () => {
-                        // Aquí podrías redirigir al chat con este usuario
-                        localStorage.setItem("chat_con", user.telefono);
-                        location.href = "chat.html";
-                    };
-                    
-                    item.innerHTML = `
-                        <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
-                        <div class="info">
-                            <div class="name">${user.nombre}</div>
-                            <div class="status">${user.bio || '¡Hola! Estoy usando DNPlus.'}</div>
-                        </div>
-                    `;
-                    container.appendChild(item);
+                    const call = child.val();
+                    const esPerdida = call.tipo === "perdida";
+                    const fecha = new Date(call.fecha).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
+
+                    container.innerHTML += `
+                        <div class="call-item">
+                            <img src="${call.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
+                            <div class="info">
+                                <div class="name">${call.nombre}</div>
+                                <div class="details">
+                                    <i class="fas ${esPerdida ? 'fa-arrow-down-left text-red-500' : 'fa-arrow-up-right text-[#00a884]'}"></i>
+                                    <span>${fecha}</span>
+                                </div>
+                            </div>
+                            <div class="icon-call"><i class="fas fa-phone-alt"></i></div>
+                        </div>`;
                 });
-                
-                countLabel.innerText = total + " contactos";
             });
         }
 
-        window.onload = cargarContactos;
+        window.onload = cargarHistorial;
     </script>
 </body>
 </html>
