@@ -106,10 +106,8 @@
             textoBoton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
-            // GENERACIÓN DE 6 DÍGITOS REAL ✅
-            const codigoOTP = Math.floor(100000 + Math.random() * 900000);
-            localStorage.setItem("codigo_verificacion", codigoOTP);
-
+            // Generamos exactamente 5 dígitos ✅
+const codigoOTP = Math.floor(10000 + Math.random() * 90000);
             const serviceID = 'service_eakuydh'; 
             const templateID = 'template_7nnvz18'; 
 
