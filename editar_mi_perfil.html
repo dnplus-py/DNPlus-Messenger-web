@@ -1,177 +1,274 @@
+Bro ahi donde dice estado podes poner !Hola estoy usando DNPlus
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustes - DNPlus</title>
+    <title>Editar Perfil - DNPlus Dark</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    
+
     <style>
         :root {
-            --header-bg: #202c33;
+            --primary-header: #085f56;
+            --button-color: #176f47;
             --bg-dark: #0b141a;
+            --bg-secondary: #111b21;
+            --text-custom: #F08927;
             --text-main: #e9edef;
             --text-muted: #8696a0;
-            --danger: #f15c5c;
-            --accent: #00a884;
+            --input-underline: #2a3942;
         }
 
-        body { 
-            margin: 0; 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg-dark); 
-            color: var(--text-main); 
-            user-select: none; /* Evita selección de texto accidental */
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        /* Cabecera estilo WhatsApp */
-        .header { 
-            background-color: var(--header-bg); 
-            padding: 15px; 
-            display: flex; 
-            align-items: center; 
-            gap: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        .header {
+            background-color: var(--primary-header);
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        .back-btn { cursor: pointer; font-size: 22px; color: var(--text-main); }
-
-        /* Tarjeta de Perfil mejorada */
-        .profile-card { 
-            display: flex; 
-            align-items: center; 
-            padding: 20px 16px; 
-            gap: 15px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-            cursor: pointer; 
-            transition: background 0.2s;
-        }
-        .profile-card:active { background-color: #202c33; }
-
-        .avatar { 
-            width: 65px; 
-            height: 65px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            background-color: #2a3942;
-            border: 1px solid rgba(255,255,255,0.1);
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px;
+            flex-grow: 1;
         }
 
-        .user-info { flex: 1; overflow: hidden; }
-        .user-name { font-size: 18px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-status { color: var(--text-muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Opciones */
-        .option { 
-            display: flex; 
-            align-items: center; 
-            padding: 18px 16px; 
-            gap: 20px; 
-            cursor: pointer; 
+        .profile-pic-wrapper {
+            position: relative;
+            margin-bottom: 30px;
         }
-        .option:active { background-color: #202c33; }
-        
-        .option-icon { font-size: 20px; color: var(--text-muted); width: 24px; text-align: center; }
-        .option-title { font-size: 16px; }
-        .option-desc { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
 
-        .logout-text { color: var(--danger); font-weight: 600; }
-        
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--bg-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            background-color: var(--bg-secondary);
+        }
+
+        .camera-icon {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: var(--button-color);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--bg-dark);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .input-group {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid var(--input-underline);
+            background: transparent;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .custom-input:focus {
+            border-bottom-color: var(--button-color);
+        }
+
+        .update-button {
+            width: 230px;
+            height: 50px;
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .update-button:disabled {
+            opacity: 0.6;
+        }
+
+        .field-container {
+            display: flex;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .icon-color {
+            color: var(--text-muted);
+            margin-right: 15px;
+            min-width: 24px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span class="back-btn" onclick="window.history.back()">←</span>
-        <h2 style="margin:0; font-size:19px; font-weight: 500;">Ajustes</h2>
-    </div>
-
-    <div class="profile-card" onclick="irAPerfil()">
-        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar" id="myAvatar">
-        <div class="user-info">
-            <div id="myName" class="user-name">Cargando...</div>
-            <div id="myBio" class="user-status">Toca para editar tu perfil</div>
+        <div onclick="window.history.back()" style="cursor:pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </div>
-        <span style="color: var(--accent); font-size: 18px; font-weight: bold; opacity: 0.8;">QR</span>
+        <h1 class="text-xl font-semibold">Perfil</h1>
     </div>
 
-    <div class="option">
-        <span class="option-icon">🔑</span>
-        <div class="user-info">
-            <div class="option-title">Cuenta</div>
-            <div class="option-desc">Privacidad, seguridad, cambiar número</div>
+    <div class="profile-container">
+        
+        <div class="profile-pic-wrapper">
+            <img src="https://ui-avatars.com/api/?name=David+Oviedo&background=111b21&color=e9edef&size=200" id="profileImage" class="profile-pic">
+            <label for="fileInput" class="camera-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </label>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
         </div>
-    </div>
 
-    <div class="option">
-        <span class="option-icon">💬</span>
-        <div class="user-info">
-            <div class="option-title">Chats</div>
-            <div class="option-desc">Tema, fondos de pantalla, historial</div>
+        <div class="input-group">
+            <div class="field-container">
+                <div class="icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="flex-grow">
+                    <label class="input-label">Nombre</label>
+                    <input type="text" id="inputNombre" class="custom-input" placeholder="Tu nombre">
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="option" onclick="cerrarSesion()">
-        <span class="option-icon">🚪</span>
-        <div class="user-info">
-            <div class="option-title logout-text">Cerrar sesión</div>
-            <div class="option-desc">Salir de tu cuenta en este dispositivo</div>
+        <div class="input-group">
+            <div class="field-container">
+                <div class="icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <div class="flex-grow">
+                    <label class="input-label">Información</label>
+                    <input type="text" id="inputBio" class="custom-input" placeholder="Estado">
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="footer">
-        de <br> <b style="color: var(--text-main)">DNPlus Messenger</b>
+        <div class="input-group">
+            <div class="field-container">
+                <div class="icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div class="flex-grow">
+                    <label class="input-label">Teléfono</label>
+                    <input type="tel" id="inputTel" class="custom-input" readonly style="opacity: 0.7;">
+                </div>
+            </div>
+        </div>
+
+        <button class="update-button" id="btnUpdate">Actualizar</button>
+        <p id="statusMsg" style="display: none; color: #F08927; margin-top: 15px; font-style: italic;">✓ Perfil actualizado</p>
+
     </div>
 
     <script>
+        // Configuración de tu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
+
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // El ID de usuario (tu número por defecto)
         const userPhone = localStorage.getItem("user_phone") || "595992536184";
+        let base64Image = "";
 
-        // Función de navegación mejorada
-        function irAPerfil() {
-            // Intentamos abrir en el nivel superior para evitar quedar atrapados en pestañas
-            window.parent.location.href = 'editar_mi_perfil.html';
-        }
-
-        window.onload = function() {
-            db.ref("usuarios_registrados/" + userPhone).on("value", (snapshot) => {
+        // 1. CARGAR DATOS REALES
+        function loadProfile() {
+            db.ref("usuarios_registrados/" + userPhone).once("value", (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    document.getElementById('myName').innerText = data.nombre || "Usuario";
-                    // Si el usuario tiene una bio en Firebase, la mostramos, sino el mensaje de ayuda
-                    const bioFirebase = data.bio;
-                    document.getElementById('myBio').innerText = bioFirebase ? bioFirebase : "Toca para editar tu perfil";
-                    
+                    document.getElementById('inputNombre').value = data.nombre || "";
+                    document.getElementById('inputBio').value = data.bio || "";
+                    document.getElementById('inputTel').value = "+" + userPhone;
                     if (data.foto) {
-                        document.getElementById('myAvatar').src = data.foto;
+                        document.getElementById('profileImage').src = data.foto;
+                        base64Image = data.foto;
                     }
                 }
             });
         }
 
-        function cerrarSesion() {
-            if(confirm("¿David, estás seguro de que quieres cerrar sesión?")) {
-                localStorage.clear();
-                window.parent.location.href = 'index.html'; 
+        // 2. CAMBIAR FOTO (Vista previa y conversión)
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    base64Image = event.target.result;
+                    document.getElementById('profileImage').src = base64Image;
+                };
+                reader.readAsDataURL(file);
             }
-        }
+        });
+
+        // 3. GUARDAR CAMBIOS
+        document.getElementById('btnUpdate').addEventListener('click', function() {
+            const btn = this;
+            const nombre = document.getElementById('inputNombre').value;
+            const bio = document.getElementById('inputBio').value;
+
+            btn.innerText = 'Guardando...';
+            btn.disabled = true;
+
+            db.ref("usuarios_registrados/" + userPhone).update({
+                nombre: nombre,
+                bio: bio,
+                foto: base64Image
+            }, (error) => {
+                btn.innerText = 'Actualizar';
+                btn.disabled = false;
+                if (!error) {
+                    const msg = document.getElementById('statusMsg');
+                    msg.style.display = 'block';
+                    setTimeout(() => msg.style.display = 'none', 3000);
+                }
+            });
+        });
+
+        loadProfile();
     </script>
 </body>
 </html>
