@@ -22,6 +22,7 @@
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg-dark); 
             color: var(--text-main); 
+            user-select: none; /* Evita selección de texto accidental */
         }
 
         /* Cabecera estilo WhatsApp */
@@ -38,7 +39,7 @@
 
         .back-btn { cursor: pointer; font-size: 22px; color: var(--text-main); }
 
-        /* Tarjeta de Perfil */
+        /* Tarjeta de Perfil mejorada */
         .profile-card { 
             display: flex; 
             align-items: center; 
@@ -51,16 +52,17 @@
         .profile-card:active { background-color: #202c33; }
 
         .avatar { 
-            width: 60px; 
-            height: 60px; 
+            width: 65px; 
+            height: 65px; 
             border-radius: 50%; 
             object-fit: cover; 
             background-color: #2a3942;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .user-info { flex: 1; }
-        .user-name { font-size: 18px; font-weight: 500; margin-bottom: 2px; }
-        .user-status { color: var(--text-muted); font-size: 14px; }
+        .user-info { flex: 1; overflow: hidden; }
+        .user-name { font-size: 18px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-status { color: var(--text-muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* Opciones */
         .option { 
@@ -95,13 +97,13 @@
         <h2 style="margin:0; font-size:19px; font-weight: 500;">Ajustes</h2>
     </div>
 
-    <div class="profile-card" onclick="location.href='editar_mi_perfil.html'">
+    <div class="profile-card" onclick="irAPerfil()">
         <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar" id="myAvatar">
         <div class="user-info">
             <div id="myName" class="user-name">Cargando...</div>
             <div id="myBio" class="user-status">Toca para editar tu perfil</div>
         </div>
-        <span style="color: var(--accent); font-size: 20px;">QR</span>
+        <span style="color: var(--accent); font-size: 18px; font-weight: bold; opacity: 0.8;">QR</span>
     </div>
 
     <div class="option">
@@ -133,7 +135,6 @@
     </div>
 
     <script>
-        // Configuración de Firebase David Oviedo
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -141,16 +142,23 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Obtenemos el teléfono del usuario (ID)
         const userPhone = localStorage.getItem("user_phone") || "595992536184";
 
+        // Función de navegación mejorada
+        function irAPerfil() {
+            // Intentamos abrir en el nivel superior para evitar quedar atrapados en pestañas
+            window.parent.location.href = 'editar_mi_perfil.html';
+        }
+
         window.onload = function() {
-            // Escuchar cambios en tiempo real desde Firebase
             db.ref("usuarios_registrados/" + userPhone).on("value", (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     document.getElementById('myName').innerText = data.nombre || "Usuario";
-                    document.getElementById('myBio').innerText = data.bio || "Disponible";
+                    // Si el usuario tiene una bio en Firebase, la mostramos, sino el mensaje de ayuda
+                    const bioFirebase = data.bio;
+                    document.getElementById('myBio').innerText = bioFirebase ? bioFirebase : "Toca para editar tu perfil";
+                    
                     if (data.foto) {
                         document.getElementById('myAvatar').src = data.foto;
                     }
@@ -161,7 +169,7 @@
         function cerrarSesion() {
             if(confirm("¿David, estás seguro de que quieres cerrar sesión?")) {
                 localStorage.clear();
-                window.parent.location.href = 'index.html'; // Usamos parent por si estás en un iframe
+                window.parent.location.href = 'index.html'; 
             }
         }
     </script>
