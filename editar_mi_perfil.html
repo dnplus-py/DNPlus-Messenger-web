@@ -212,16 +212,17 @@
         let base64Image = "";
 
         function loadProfile() {
+            // Muestro el teléfono de inmediato antes de llamar a la base de datos
+            document.getElementById('inputTel').value = "+" + userPhone;
+
             db.ref("usuarios_registrados/" + userPhone).once("value", (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     document.getElementById('inputNombre').value = data.nombre || "";
                     
-                    // Lógica arreglada: si data.bio está vacío o no existe, pone la frase por defecto
                     const bioFirebase = data.bio;
                     document.getElementById('inputBio').value = (bioFirebase && bioFirebase.trim() !== "") ? bioFirebase : "!Hola estoy usando DNPlus";
                     
-                    document.getElementById('inputTel').value = "+" + userPhone;
                     if (data.foto) {
                         document.getElementById('profileImage').src = data.foto;
                         base64Image = data.foto;
@@ -260,12 +261,4 @@
                 if (!error) {
                     const msg = document.getElementById('statusMsg');
                     msg.style.display = 'block';
-                    setTimeout(() => msg.style.display = 'none', 3000);
-                }
-            });
-        });
-
-        loadProfile();
-    </script>
-</body>
-</html>
+                    setTimeout(()
