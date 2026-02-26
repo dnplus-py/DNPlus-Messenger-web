@@ -54,4 +54,130 @@
     <div id="menu-opciones">
         <div class="menu-item" onclick="window.location.href='perfil_contacto.html'">👤 Ver contacto</div>
         <div class="menu-item" onclick="location.reload()">🔄 Actualizar chat</div>
-        <div class="menu-item" style="color:#f15c5c" onclick="cerrarSesion()">🚪 Sal
+        <div class="menu-item" style="color:#f15c5c" onclick="cerrarSesion()">🚪 Salir</div>
+    </div>
+
+    <header>
+        <div class="flex items-center">
+            <i class="fas fa-arrow-left p-2 mr-1 cursor-pointer" onclick="history.back()"></i>
+            <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
+            <div class="ml-3">
+                <div id="header-name" class="font-bold text-[15px] text-[#e9edef]">Cargando...</div>
+                <div id="status-text" class="text-[11px] text-[#8696a0]">en línea</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-5 text-[#8696a0]">
+            <i class="fas fa-video cursor-pointer"></i>
+            <i class="fas fa-phone cursor-pointer"></i>
+            <i class="fas fa-ellipsis-v cursor-pointer p-1" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main id="chat-container"></main>
+
+    <div class="input-area">
+        <div class="input-box">
+            <i class="far fa-smile icon-btn"></i>
+            <input type="text" id="chat-input" placeholder="Mensaje" oninput="cambiarIcono()">
+            <i class="fas fa-paperclip icon-btn" style="transform: rotate(-45deg);"></i>
+            <i class="fas fa-camera icon-btn"></i>
+        </div>
+        <button id="main-action-btn" class="send-btn" onclick="manejarAccion()">
+            <i id="action-icon" class="fas fa-microphone"></i>
+        </button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        const input = document.getElementById('chat-input');
+        const container = document.getElementById('chat-container');
+        const actionIcon = document.getElementById('action-icon');
+
+        const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
+        const salaId = localStorage.getItem("chat_sala_id");
+        const idOtro = localStorage.getItem("chat_destinatario_id");
+
+        window.onload = () => {
+            if(!miId || !idOtro) { window.location.href="lista_chats.html"; return; }
+
+            // CARGAR DATOS DEL CONTACTO DESDE USUARIOS_REGISTRADOS
+            db.ref("usuarios_registrados/" + idOtro).on("value", (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    document.getElementById('header-name').innerText = data.nombre || "Usuario DNPlus";
+                    document.getElementById('header-photo').src = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                }
+            });
+
+            // ESCUCHAR MENSAJES DE LA SALA REAL
+            db.ref("chats_privados/" + salaId).on("child_added", (snapshot) => {
+                const msg = snapshot.val();
+                dibujarBurbuja(msg.mensaje || msg.texto, msg.hora, msg.emisor === miId);
+            });
+        };
+
+        function cambiarIcono() {
+            if(input.value.trim() !== "") {
+                actionIcon.className = "fas fa-paper-plane";
+            } else {
+                actionIcon.className = "fas fa-microphone";
+            }
+        }
+
+        function manejarAccion() {
+            const texto = input.value.trim();
+            if(texto === "") {
+                console.log("Grabando audio..."); // Aquí iría tu lógica de audio
+            } else {
+                enviarMensaje(texto);
+            }
+        }
+
+        function enviarMensaje(texto) {
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            db.ref("chats_privados/" + salaId).push({
+                mensaje: texto,
+                hora: hora,
+                emisor: miId,
+                fecha: Date.now()
+            });
+            input.value = "";
+            cambiarIcono();
+        }
+
+        function dibujarBurbuja(texto, hora, esMio) {
+            const b = document.createElement('div');
+            b.className = esMio ? "bubble bubble-mine" : "bubble bubble-theirs";
+            
+            // Si es mío, aplicamos tu color naranja personalizado
+            const textoClase = esMio ? "msg-text-mine" : "";
+            
+            b.innerHTML = `
+                <div class="${textoClase}">${texto}</div>
+                <div class="msg-info">
+                    <span>${hora}</span>
+                    ${esMio ? '<i class="fas fa-check-double ml-1 text-[#34B7F1]"></i>' : ''}
+                </div>
+            `;
+            container.appendChild(b);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleMenu() {
+            const m = document.getElementById('menu-opciones');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
