@@ -10,112 +10,149 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --whatsapp-bg: #0b141a;
-            --msg-mine: #176f47;
+            --whatsapp-bg: #0b141a; /* Fondo oscuro real de tu captura */
+            --msg-mine: #176f47; /* Tu verde favorito para la burbuja */
+            --text-orange: #F08927; /* Tu color naranja para el texto */
             --msg-theirs: #202c33;
-            --header-color: #202c33;
-            --wa-blue: #34B7F1;
-            --text-color: #F08927; /* Tu color de texto naranja */
+            --header-bg: #202c33;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--whatsapp-bg); height: 100vh; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
-
-        header { height: 62px; background-color: var(--header-color); color: white; padding: 0 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .header-left { display: flex; align-items: center; gap: 2px; flex: 1; }
-        .header-info { display: flex; align-items: center; gap: 10px; padding: 5px; border-radius: 8px; cursor: pointer; }
-
-        #chat-container {
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px;
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay; background-color: #0b141a;
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--whatsapp-bg); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            margin: 0; 
+            overflow: hidden; 
         }
 
-        .bubble { max-width: 90%; padding: 6px 10px; border-radius: 12px; font-size: 0.95rem; color: white; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; }
-        .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
-        
-        .msg-text-mine { color: var(--text-color); font-weight: 500; }
-        .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.62rem; margin-top: 2px; opacity: 0.7; }
+        /* CABECERA SEGÚN CAPTURA */
+        header { 
+            height: 60px; 
+            background-color: var(--header-bg); 
+            color: white; 
+            padding: 0 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            flex-shrink: 0; 
+        }
 
-        /* MULTIMEDIA Y AUDIO */
-        .audio-wrapper { width: 270px; height: 45px; display: flex; align-items: center; gap: 10px; }
-        .audio-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-        .visualizer { flex: 1; display: flex; align-items: center; gap: 2px; height: 15px; }
-        .v-bar { width: 2px; background: rgba(255,255,255,0.4); border-radius: 1px; }
-        .media-container { width: 180px; height: 210px; border-radius: 8px; overflow: hidden; background: #000; position: relative; }
-        .media-content { width: 100%; height: 100%; object-fit: cover; }
-
-        /* INPUT */
-        .input-area { background-color: #111b21; padding: 8px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; z-index: 100; }
-        .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
-        .input-card input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; }
-        .action-btn { background: #176f47; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; flex-shrink: 0; }
-
-        #menu-dots { position: absolute; top: 55px; right: 10px; background: #232d36; border-radius: 8px; display: none; flex-direction: column; width: 190px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 2000; border: 1px solid #3b4a54; }
-        .menu-item { padding: 12px 16px; color: #e9edef; cursor: pointer; font-size: 15px; }
-        
-        #emoji-panel { display: none; height: 250px; background: #111b21; overflow-y: auto; padding: 10px; grid-template-columns: repeat(8, 1fr); gap: 8px; border-top: 1px solid #2a3942; }
-        .emoji-item { font-size: 24px; cursor: pointer; text-align: center; }
-
-        #call-screen { position: fixed; inset: 0; background: #075e54; z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 0; color: white; }
-        #rec-overlay { position: absolute; left: 10px; right: 70px; top: 8px; bottom: 8px; background: #111b21; border-radius: 25px; display: none; align-items: center; padding: 0 20px; z-index: 10; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+
+        /* CONTENEDOR DE CHAT */
+        #chat-container {
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px;
+            background-color: var(--whatsapp-bg);
+        }
+
+        /* BURBUJAS ESTILO REAL */
+        .bubble { 
+            max-width: 85%; 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            position: relative; 
+            box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        }
+        .bubble-mine { 
+            align-self: flex-end; 
+            background-color: var(--msg-mine); 
+            color: var(--text-orange); /* Texto naranja en tus mensajes */
+            border-top-right-radius: 2px; 
+        }
+        .bubble-theirs { 
+            align-self: flex-start; 
+            background-color: var(--msg-theirs); 
+            color: white; 
+            border-top-left-radius: 2px; 
+        }
+
+        .msg-info { 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-end; 
+            gap: 4px; 
+            font-size: 11px; 
+            margin-top: 4px; 
+            opacity: 0.8;
+            color: white;
+        }
+
+        /* BARRA DE ENTRADA GRIS */
+        .input-area { 
+            background-color: #111b21; 
+            padding: 8px 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .input-card { 
+            background: #2a3942; 
+            border-radius: 25px; 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 15px; 
+            height: 48px; 
+        }
+        .input-card input { 
+            background: transparent; 
+            border: none; 
+            outline: none; 
+            flex: 1; 
+            color: white; 
+            font-size: 16px; 
+        }
+        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; }
+        .send-btn { 
+            background: #00a884; 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            border: none; 
+        }
     </style>
 </head>
 <body>
 
-    <div id="menu-dots">
-        <div class="menu-item" onclick="window.location.href='perfil_contacto.html'">Info. del contacto</div>
-        <div class="menu-item" onclick="vaciarChat()">Vaciar chat</div>
-        <div class="menu-item" onclick="location.reload()">Actualizar</div>
-    </div>
-
-    <div id="call-screen">
-        <div class="text-center">
-            <div class="text-sm opacity-80 mb-2 uppercase tracking-widest">Llamada de DNPlus</div>
-            <img id="call-photo" src="" class="w-32 h-32 rounded-full border-4 border-white/20 mb-4 mx-auto object-cover">
-            <div id="call-name" class="text-2xl font-bold">Cargando...</div>
-            <div id="call-status" class="text-lg opacity-90 mt-2">Llamando...</div>
-        </div>
-        <div class="flex gap-12">
-            <div class="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl cursor-pointer" onclick="endCall()"><i class="fas fa-phone-slash"></i></div>
-            <div class="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl cursor-pointer"><i class="fas fa-volume-up"></i></div>
-        </div>
-    </div>
-
     <header>
-        <div class="header-left">
+        <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
-            <div class="header-info">
-                <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
-                <div>
-                    <div id="header-name" class="font-bold text-[16px]">Cargando...</div>
-                    <div id="status-text" class="text-[12px] opacity-70">en línea</div>
-                </div>
+            <img id="header-photo" src="" class="avatar">
+            <div class="ml-1">
+                <div id="header-name" class="font-medium text-[17px]">Cargando...</div>
+                <div class="text-[12px] opacity-70">en línea</div>
             </div>
         </div>
-        <div class="flex items-center gap-6 pr-2">
-            <i class="fas fa-phone text-lg opacity-90 cursor-pointer" onclick="startCall()"></i>
-            <i class="fas fa-ellipsis-v text-lg opacity-90 cursor-pointer p-1" onclick="toggleMenu()"></i>
+        <div class="flex items-center gap-6 pr-2 text-[#8696a0]">
+            <i class="fas fa-video"></i>
+            <i class="fas fa-phone"></i>
+            <i class="fas fa-ellipsis-v"></i>
         </div>
     </header>
 
     <main id="chat-container"></main>
 
-    <div id="emoji-panel"></div>
-
     <div class="input-area">
-        <div id="rec-overlay">
-            <i class="fas fa-microphone text-red-500 animate-pulse mr-3 text-lg"></i>
-            <span id="rec-timer" class="text-white font-medium flex-1">0:00</span>
-        </div>
         <div class="input-card">
-            <i class="far fa-smile emoji-btn" id="emoji-toggle"></i>
+            <i class="far fa-smile icon-btn mr-3"></i>
             <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
-            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl rotate-[-45deg] cursor-pointer mx-2"></i></label>
-            <input type="file" id="file-input" accept="image/*,video/*" hidden onchange="handleFileUpload(this)">
+            <i class="fas fa-paperclip icon-btn -rotate-45 ml-2"></i>
         </div>
-        <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
+        <button id="main-btn" class="send-btn" onclick="manejarEnvio()">
+            <i id="action-icon" class="fas fa-microphone"></i>
+        </button>
     </div>
 
     <script>
@@ -126,96 +163,66 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // VARIABLES DE SESIÓN REAL
-        const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
+        // Variables desde tu Firebase Console
+        const miId = localStorage.getItem("user_phone") || "595992536184";
         const idOtro = localStorage.getItem("chat_destinatario_id");
         const salaId = localStorage.getItem("chat_sala_id");
 
         const input = document.getElementById('chat-input');
         const container = document.getElementById('chat-container');
-        const actionBtn = document.getElementById('action-btn');
         const actionIcon = document.getElementById('action-icon');
 
         window.onload = () => {
-            if(!miId || !idOtro || !salaId) { window.location.href="lista_chats.html"; return; }
+            if(!idOtro || !salaId) return;
 
-            // 1. CARGAR DATOS REALES DEL CONTACTO
-            db.ref("usuarios_registrados/" + idOtro).on("value", (snapshot) => {
-                const data = snapshot.val();
-                if(data) {
-                    const nombre = data.nombre || "Usuario DNPlus";
-                    const foto = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                    document.getElementById('header-name').innerText = nombre;
-                    document.getElementById('header-photo').src = foto;
-                    document.getElementById('call-name').innerText = nombre;
-                    document.getElementById('call-photo').src = foto;
+            // Cargar datos del contacto desde usuarios_registrados
+            db.ref("usuarios_registrados/" + idOtro).on("value", (snap) => {
+                const user = snap.val();
+                if(user) {
+                    document.getElementById('header-name').innerText = user.nombre || "Usuario";
+                    document.getElementById('header-photo').src = user.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 }
             });
 
-            // 2. ESCUCHAR MENSAJES REALES
+            // Escuchar mensajes de chats_privados
             db.ref("chats_privados/" + salaId).on("child_added", (snap) => {
                 const data = snap.val();
-                dibujarBurbuja(data);
+                const esMio = data.emisor === miId;
+                
+                const b = document.createElement('div');
+                b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
+                b.innerHTML = `
+                    <div>${data.mensaje}</div>
+                    <div class="msg-info">
+                        <span>${data.hora}</span>
+                        ${esMio ? '<i class="fas fa-check-double text-[#34B7F1]"></i>' : ''}
+                    </div>
+                `;
+                container.appendChild(b);
+                container.scrollTop = container.scrollHeight;
             });
         };
 
-        function dibujarBurbuja(data) {
-            const esMio = data.emisor === miId;
-            const b = document.createElement('div');
-            b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
-            const textoClase = esMio ? 'msg-text-mine' : '';
+        function manejarEnvio() {
+            const texto = input.value.trim();
+            if(!texto) return;
+
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
-            if(data.tipo === 'audio') {
-                let bars = Array(26).fill(0).map(() => `<div class="v-bar" style="height:${Math.random()*10+4}px"></div>`).join('');
-                b.innerHTML = `<div class="audio-wrapper">
-                    <img src="${document.getElementById('header-photo').src}" class="audio-avatar">
-                    <i class="fas fa-play text-white/90 text-lg"></i>
-                    <div class="visualizer">${bars}</div>
-                    <span class="text-[10px] opacity-80 pr-1">${data.duracion}</span>
-                </div>`;
-            } else if(data.tipo === 'imagen' || data.tipo === 'video') {
-                b.innerHTML = `<div class="media-container"><img src="${data.url}" class="media-content"></div>`;
-            } else {
-                b.innerHTML = `<div class="${textoClase}">${data.mensaje}</div>`;
-            }
-
-            b.innerHTML += `<div class="msg-info"><span>${data.hora}</span><i class="fas fa-check-double ${esMio ? 'text-sky-400' : 'hidden'}"></i></div>`;
-            container.appendChild(b);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function enviarData(payload) {
             db.ref("chats_privados/" + salaId).push({
-                ...payload, emisor: miId,
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                mensaje: texto,
+                emisor: miId,
+                hora: hora,
                 fecha: Date.now()
             });
+
+            input.value = "";
+            actionIcon.className = "fas fa-microphone";
         }
 
-        actionBtn.onclick = () => {
-            const texto = input.value.trim();
-            if(texto) {
-                enviarData({ tipo: 'texto', mensaje: texto });
-                input.value = "";
-                actionIcon.className = "fas fa-microphone";
-            }
+        input.oninput = () => {
+            actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
         };
-
-        input.oninput = () => actionIcon.className = input.value.trim() ? "fas fa-paper-plane ml-1" : "fas fa-microphone";
-
-        // EMOJIS, MENÚ Y LLAMADAS (Tus funciones existentes)
-        const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕","😈","👿","👹","👺","💀","☠️","👻","👽","👾","🤖","💩","😺","😸","😻","😼","😽","🙀","😿","😾","🙈","🙉","🙊","💋","💌","💘","💝","💖","💗","💓","💞","💕","💟","❣️","💔","❤️","🧡","💛","💚","💙","💜","🖤","👋","🤚","🖐️","✋","🖖","👌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","👐","🤲","🤝","🙏","✍️","💅","🤳","💪","🦾","🦵","🦿","🦶","👂","🦻","👃","🧠","🦷","🦴","👀","👁️","👅","👄"];
-        const ep = document.getElementById('emoji-panel');
-        emojis.forEach(e => {
-            const s = document.createElement('span'); s.className='emoji-item'; s.innerText=e;
-            s.onclick=()=>{input.value+=e; input.dispatchEvent(new Event('input'));};
-            ep.appendChild(s);
-        });
-        document.getElementById('emoji-toggle').onclick = () => ep.style.display = ep.style.display === 'grid' ? 'none' : 'grid';
-        function toggleMenu() { document.getElementById('menu-dots').style.display = (document.getElementById('menu-dots').style.display === 'flex' ? 'none' : 'flex'); }
-        function vaciarChat() { if(confirm("¿Vaciar chat?")) db.ref("chats_privados/" + salaId).remove(); container.innerHTML=""; }
-        function startCall() { document.getElementById('call-screen').style.display = 'flex'; }
-        function endCall() { document.getElementById('call-screen').style.display = 'none'; }
     </script>
 </body>
 </html>
