@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
-        
         .chat-list-container { display: flex; flex-direction: column; padding-bottom: 80px; }
         
-        /* DISEÑO DE FILA DE CHAT */
         .chat-row { 
             display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
             cursor: pointer; border-bottom: 1px solid rgba(134, 150, 160, 0.08); 
@@ -17,7 +15,6 @@
         .chat-row:active { background-color: #202c33; }
         
         .profile-img { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; object-fit: cover; }
-        
         .chat-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .chat-header { display: flex; justify-content: space-between; align-items: center; }
         .name { font-size: 16px; font-weight: 500; color: #e9edef; }
@@ -26,10 +23,9 @@
         .last-msg-container { display: flex; justify-content: space-between; align-items: center; margin-top: 3px; }
         .message { font-size: 14px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
         
-        /* BOTÓN FLOTANTE INTERNO */
         .fab-chats {
             position: fixed; bottom: 25px; right: 25px;
-            background-color: #00a884; width: 56px; height: 56px;
+            background-color: #176f47; width: 56px; height: 56px;
             border-radius: 50%; display: flex; align-items: center;
             justify-content: center; font-size: 24px; color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 99; cursor: pointer;
@@ -39,7 +35,7 @@
 <body>
 
     <div class="chat-list-container" id="contenedor-chats-real">
-        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando tus chats...</p>
+        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando tus conversaciones...</p>
     </div>
 
     <div class="fab-chats" onclick="window.top.location.href='lista_contactos.html'">💬</div>
@@ -54,42 +50,59 @@
         };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
-        const miId = localStorage.getItem("user_temp_id");
+
+        // IMPORTANTE: Asegúrate de que este ID sea el mismo que guardaste al registrarte
+        const miId = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
 
         function cargarChats() {
+            if (!miId) {
+                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Error: No se encontró tu ID de usuario.</p>";
+                return;
+            }
+
             db.ref("chats_privados").on("value", (snapshot) => {
                 const container = document.getElementById("contenedor-chats-real");
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats aún. Toca el botón para empezar uno.</p>";
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats aún.</p>";
                     return;
                 }
 
                 snapshot.forEach((child) => {
                     const salaId = child.key;
+                    
+                    // Si la sala contiene mi ID, es un chat mío
                     if (salaId.includes(miId)) {
                         const idOtro = salaId.replace(miId, "").replace("_", "");
                         
-                        db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
+                        // Buscamos en la ruta 'usuarios/' que es la que usamos en el paso anterior
+                        db.ref("usuarios/" + idOtro).once("value", (uSnap) => {
                             const user = uSnap.val() || {};
                             const msgs = Object.values(child.val());
                             const ultimo = msgs[msgs.length - 1];
-                            const hora = ultimo.fecha ? new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+                            
+                            // Formatear hora
+                            let hora = "";
+                            if (ultimo.fecha) {
+                                hora = new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            }
 
-                            container.innerHTML += `
-                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre}', '${user.foto}')">
+                            const chatHtml = `
+                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre || 'Usuario'}', '${user.foto || ''}')">
                                     <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
                                     <div class="chat-details">
                                         <div class="chat-header">
-                                            <span class="name">${user.nombre || 'Usuario'}</span>
+                                            <span class="name">${user.nombre || 'Usuario DNPlus'}</span>
                                             <span class="time">${hora}</span>
                                         </div>
                                         <div class="last-msg-container">
-                                            <span class="message">${ultimo.contenido || 'Archivo'}</span>
+                                            <span class="message">${ultimo.mensaje || ultimo.contenido || 'Archivo'}</span>
                                         </div>
                                     </div>
                                 </div>`;
+                            
+                            container.innerHTML += chatHtml;
                         });
                     }
                 });
@@ -101,8 +114,6 @@
             localStorage.setItem("chat_destinatario_id", id);
             localStorage.setItem("chat_destinatario_nombre", nom);
             localStorage.setItem("chat_destinatario_foto", foto);
-            
-            // USAMOS window.top para salir del iframe y abrir el chat en toda la pantalla
             window.top.location.href = "mensajes.html";
         }
 
