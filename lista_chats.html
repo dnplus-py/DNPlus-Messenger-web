@@ -14,7 +14,7 @@
         }
         .chat-row:active { background-color: #202c33; }
         
-        .profile-img { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; object-fit: cover; }
+        .profile-img { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; object-fit: cover; border: 1px solid #176f47; }
         .chat-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .chat-header { display: flex; justify-content: space-between; align-items: center; }
         .name { font-size: 16px; font-weight: 500; color: #e9edef; }
@@ -35,7 +35,7 @@
 <body>
 
     <div class="chat-list-container" id="contenedor-chats-real">
-        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando tus conversaciones...</p>
+        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando tus mensajes...</p>
     </div>
 
     <div class="fab-chats" onclick="window.top.location.href='lista_contactos.html'">💬</div>
@@ -51,34 +51,32 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // Buscamos tu ID en las dos posibles llaves que usamos
+        // ID del usuario actual
         const miId = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
 
         function cargarChats() {
             if (!miId) {
-                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Inicia sesión para ver tus chats.</p>";
+                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Error: No se encontró tu sesión.</p>";
                 return;
             }
 
-            // Referencia a los chats
+            // Escuchamos solo la carpeta de chats
             db.ref("chats_privados").on("value", (snapshot) => {
                 const container = document.getElementById("contenedor-chats-real");
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes conversaciones activas.</p>";
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No hay conversaciones aún.</p>";
                     return;
                 }
 
                 snapshot.forEach((child) => {
                     const salaId = child.key;
                     
-                    // Verificamos si yo participo en esta sala
                     if (salaId.includes(miId)) {
-                        // Extraemos el ID de la otra persona
                         const idOtro = salaId.replace(miId, "").replace("_", "");
                         
-                        // CORRECCIÓN: Buscamos en 'usuarios_registrados' que es tu ruta real ✅
+                        // ÚNICA CARPETA: usuarios_registrados ✅
                         db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
                             const user = uSnap.val() || {};
                             const msgs = Object.values(child.val());
@@ -86,11 +84,10 @@
                             
                             let hora = "";
                             if (ultimo && ultimo.fecha) {
-                                // Si la fecha es un timestamp largo, lo convierte a hora
                                 hora = new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                             }
 
-                            const chatHtml = `
+                            container.innerHTML += `
                                 <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre || 'Usuario DNPlus'}', '${user.foto || ''}')">
                                     <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
                                     <div class="chat-details">
@@ -99,17 +96,13 @@
                                             <span class="time">${hora}</span>
                                         </div>
                                         <div class="last-msg-container">
-                                            <span class="message">${ultimo.mensaje || ultimo.contenido || 'Archivo o Imagen'}</span>
+                                            <span class="message">${ultimo.mensaje || ultimo.contenido || 'Archivo'}</span>
                                         </div>
                                     </div>
                                 </div>`;
-                            
-                            container.innerHTML += chatHtml;
                         });
                     }
                 });
-            }, (error) => {
-                console.error("Error cargando chats: ", error);
             });
         }
 
