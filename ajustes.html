@@ -4,50 +4,164 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajustes - DNPlus</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
-        .header { background-color: #085f56; padding: 15px; display: flex; align-items: center; gap: 20px; }
-        .profile-card { display: flex; align-items: center; padding: 20px; gap: 15px; border-bottom: 1px solid #232d36; cursor: pointer; }
-        .avatar { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; }
-        .option { display: flex; align-items: center; padding: 20px; gap: 20px; cursor: pointer; }
-        .logout { color: #f15c5c; font-weight: bold; border-top: 1px solid #232d36; margin-top: 20px; }
+        :root {
+            --header-bg: #202c33;
+            --bg-dark: #0b141a;
+            --text-main: #e9edef;
+            --text-muted: #8696a0;
+            --danger: #f15c5c;
+            --accent: #00a884;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+        }
+
+        /* Cabecera estilo WhatsApp */
+        .header { 
+            background-color: var(--header-bg); 
+            padding: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn { cursor: pointer; font-size: 22px; color: var(--text-main); }
+
+        /* Tarjeta de Perfil */
+        .profile-card { 
+            display: flex; 
+            align-items: center; 
+            padding: 20px 16px; 
+            gap: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .profile-card:active { background-color: #202c33; }
+
+        .avatar { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            background-color: #2a3942;
+        }
+
+        .user-info { flex: 1; }
+        .user-name { font-size: 18px; font-weight: 500; margin-bottom: 2px; }
+        .user-status { color: var(--text-muted); font-size: 14px; }
+
+        /* Opciones */
+        .option { 
+            display: flex; 
+            align-items: center; 
+            padding: 18px 16px; 
+            gap: 20px; 
+            cursor: pointer; 
+        }
+        .option:active { background-color: #202c33; }
+        
+        .option-icon { font-size: 20px; color: var(--text-muted); width: 24px; text-align: center; }
+        .option-title { font-size: 16px; }
+        .option-desc { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+        .logout-text { color: var(--danger); font-weight: 600; }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span onclick="location.href='home.html'" style="cursor:pointer; font-size:24px;">←</span>
-        <h2 style="margin:0; font-size:19px;">Ajustes</h2>
+        <span class="back-btn" onclick="window.history.back()">←</span>
+        <h2 style="margin:0; font-size:19px; font-weight: 500;">Ajustes</h2>
     </div>
 
     <div class="profile-card" onclick="location.href='editar_mi_perfil.html'">
-        <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar" id="myAvatar">
-        <div>
-            <div id="myName" style="font-size:18px; font-weight:bold;">Usuario</div>
-            <div style="color:#8696a0; font-size:14px;">Toca para editar perfil</div>
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar" id="myAvatar">
+        <div class="user-info">
+            <div id="myName" class="user-name">Cargando...</div>
+            <div id="myBio" class="user-status">Toca para editar tu perfil</div>
+        </div>
+        <span style="color: var(--accent); font-size: 20px;">QR</span>
+    </div>
+
+    <div class="option">
+        <span class="option-icon">🔑</span>
+        <div class="user-info">
+            <div class="option-title">Cuenta</div>
+            <div class="option-desc">Privacidad, seguridad, cambiar número</div>
+        </div>
+    </div>
+
+    <div class="option">
+        <span class="option-icon">💬</span>
+        <div class="user-info">
+            <div class="option-title">Chats</div>
+            <div class="option-desc">Tema, fondos de pantalla, historial</div>
         </div>
     </div>
 
     <div class="option" onclick="cerrarSesion()">
-        <span style="font-size:20px;">🚪</span>
-        <div>
-            <div style="color:#f15c5c; font-weight:bold;">Cerrar sesión</div>
-            <div style="color:#8696a0; font-size:12px;">Salir de la aplicación</div>
+        <span class="option-icon">🚪</span>
+        <div class="user-info">
+            <div class="option-title logout-text">Cerrar sesión</div>
+            <div class="option-desc">Salir de tu cuenta en este dispositivo</div>
         </div>
     </div>
 
+    <div class="footer">
+        de <br> <b style="color: var(--text-main)">DNPlus Messenger</b>
+    </div>
+
     <script>
+        // Configuración de Firebase David Oviedo
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Obtenemos el teléfono del usuario (ID)
+        const userPhone = localStorage.getItem("user_phone") || "595992536184";
+
         window.onload = function() {
-            const nombre = localStorage.getItem("user_name");
-            const foto = localStorage.getItem("user_photo");
-            if(nombre) document.getElementById('myName').innerText = nombre;
-            if(foto) document.getElementById('myAvatar').src = foto;
+            // Escuchar cambios en tiempo real desde Firebase
+            db.ref("usuarios_registrados/" + userPhone).on("value", (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('myName').innerText = data.nombre || "Usuario";
+                    document.getElementById('myBio').innerText = data.bio || "Disponible";
+                    if (data.foto) {
+                        document.getElementById('myAvatar').src = data.foto;
+                    }
+                }
+            });
         }
 
         function cerrarSesion() {
-            if(confirm("¿Quieres cerrar sesión?")) {
+            if(confirm("¿David, estás seguro de que quieres cerrar sesión?")) {
                 localStorage.clear();
-                window.location.href = 'index.html';
+                window.parent.location.href = 'index.html'; // Usamos parent por si estás en un iframe
             }
         }
     </script>
