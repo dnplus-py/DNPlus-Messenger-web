@@ -9,14 +9,14 @@
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0b141a; color: #e9edef; }
         
-        /* Contenedor bacio por defecto */
+        /* Pantalla vacía si no hay llamadas */
         .call-list-container { min-height: 100vh; }
 
         /* BOTÓN FLOTANTE (FAB) */
         .fab-calls {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            right: 25px;
             background-color: #00a884;
             width: 56px;
             height: 56px;
@@ -24,19 +24,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             cursor: pointer;
-            z-index: 999;
+            z-index: 9999; /* Asegura que esté por encima */
             color: white;
             font-size: 22px;
+            transition: transform 0.1s;
         }
+        .fab-calls:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
 
     <div class="call-list-container" id="contenedor-llamadas"></div>
 
-    <div class="fab-calls" onclick="abrirCrearContacto()">
+    <div class="fab-calls" onclick="irACrearContacto()">
         <i class="fas fa-user-plus"></i>
     </div>
 
@@ -44,6 +46,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // Configuración Firebase David Oviedo
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -52,10 +55,11 @@
         const db = firebase.database();
         const miId = localStorage.getItem("user_phone") || "595992536184";
 
-        // Función para abrir la página fuera del ViewPager
-        function abrirCrearContacto() {
-            // Usamos window.top para asegurarnos de que cargue sobre toda la aplicación
-            window.top.location.href = 'crear_new_contacto.html';
+        // ESTA FUNCIÓN ES LA CLAVE:
+        function irACrearContacto() {
+            // 'window.parent' hace que la URL cambie en la ventana principal, 
+            // no solo dentro de la pestaña de llamadas.
+            window.parent.location.href = 'crear_new_contacto.html';
         }
 
         function cargarHistorial() {
@@ -63,22 +67,24 @@
                 const container = document.getElementById("contenedor-llamadas");
                 container.innerHTML = ""; 
                 
-                if (!snapshot.exists()) return; // Se queda bacia si no hay datos
+                if (!snapshot.exists()) return; // Pantalla vacía si no hay datos
 
                 snapshot.forEach(child => {
                     const call = child.val();
                     const fecha = new Date(call.fecha).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
 
                     container.innerHTML += `
-                        <div class="flex items-center p-4 gap-4 border-b border-white/5">
-                            <img src="${call.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-12 h-12 rounded-full">
+                        <div class="flex items-center p-4 gap-4 border-b border-white/5 animate-fade-in">
+                            <img src="${call.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-12 h-12 rounded-full object-cover">
                             <div class="flex-1">
-                                <div class="font-medium">${call.nombre}</div>
+                                <div class="font-medium text-[16px]">${call.nombre}</div>
                                 <div class="text-sm text-[#8696a0] flex items-center gap-1">
-                                    <i class="fas fa-arrow-up-right text-[#00a884]"></i> ${fecha}
+                                    <i class="fas fa-arrow-up-right text-[#00a884] text-[10px]"></i> ${fecha}
                                 </div>
                             </div>
-                            <i class="fas fa-phone-alt text-[#00a884] p-2"></i>
+                            <div class="text-[#00a884] p-2 text-xl">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
                         </div>`;
                 });
             });
