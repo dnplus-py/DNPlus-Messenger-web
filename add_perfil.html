@@ -58,7 +58,7 @@
             const tid = localStorage.getItem("user_temp_id");
 
             if(!nom) return alert("Pon tu nombre, bro");
-            if(!tid) return window.location.href="registro.html";
+            if(!tid) return window.location.href="home.html";
 
             db.ref("usuarios_registrados/" + tid).update({
                 nombre: nom,
