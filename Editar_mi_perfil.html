@@ -3,122 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Perfil - DNPlus</title>
+    <title>Editar Perfil - DNPlus Dark</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; }
-        .header-edit { background-color: #085f56; color: white; padding: 15px; display: flex; align-items: center; gap: 20px; }
-        .profile-section { display: flex; flex-direction: column; align-items: center; padding: 30px 0; }
-        .avatar-container { position: relative; width: 160px; height: 160px; }
-        .avatar-big { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background-color: #232d36; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-change-photo { position: absolute; bottom: 5px; right: 5px; background-color: #085f56; color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #0b141a; font-size: 20px; cursor: pointer; }
-        .info-item { display: flex; align-items: center; padding: 15px 20px; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .info-icon { color: #8696a0; font-size: 20px; width: 30px; text-align: center; }
-        .info-label { font-size: 13px; color: #8696a0; margin-bottom: 2px; }
-        .info-value { font-size: 16px; color: #e9edef; border: none; outline: none; width: 100%; background: transparent; }
-        .btn-save-profile { position: fixed; bottom: 25px; right: 25px; background-color: #00a884; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: none; font-size: 24px; cursor: pointer; }
-        #fileInput { display: none; }
+        :root {
+            --primary-header: #085f56;
+            --button-color: #176f47;
+            --bg-dark: #0b141a;
+            --bg-secondary: #111b21;
+            --text-custom: #F08927;
+            --text-main: #e9edef;
+            --text-muted: #8696a0;
+            --input-underline: #2a3942;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background-color: var(--primary-header);
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px;
+            flex-grow: 1;
+        }
+
+        .profile-pic-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--bg-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            background-color: var(--bg-secondary);
+        }
+
+        .camera-icon {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: var(--button-color);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--bg-dark);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .input-group {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid var(--input-underline);
+            background: transparent;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .custom-input:focus {
+            border-bottom-color: var(--button-color);
+        }
+
+        .update-button {
+            width: 230px;
+            height: 50px;
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .update-button:disabled {
+            opacity: 0.6;
+        }
+
+        .field-container {
+            display: flex;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .icon-color {
+            color: var(--text-muted);
+            margin-right: 15px;
+            min-width: 24px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-edit">
-        <span onclick="location.href='ajustes.html'" style="font-size: 24px; cursor: pointer;">←</span>
-        <span style="font-size: 18px; font-weight: bold;">Perfil</span>
-    </div>
-
-    <div class="profile-section">
-        <div class="avatar-container">
-            <img src="https://www.w3schools.com/howto/img_avatar.png" class="avatar-big" id="currentPhoto">
-            <div class="btn-change-photo" onclick="document.getElementById('fileInput').click()">📷</div>
+    <div class="header">
+        <div onclick="window.history.back()" style="cursor:pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </div>
+        <h1 class="text-xl font-semibold">Perfil</h1>
     </div>
 
-    <input type="file" id="fileInput" accept="image/*" onchange="actualizarFoto(event)">
-
-    <div class="info-item">
-        <div class="info-icon">👤</div>
-        <div style="flex: 1;">
-            <div class="info-label">Nombre</div>
-            <input type="text" class="info-value" id="editName" placeholder="David Oviedo">
+    <div class="profile-container">
+        
+        <div class="profile-pic-wrapper">
+            <img src="https://ui-avatars.com/api/?name=David+Oviedo&background=111b21&color=e9edef&size=200" id="profileImage" class="profile-pic">
+            <label for="fileInput" class="camera-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </label>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
         </div>
-    </div>
 
-    <div class="info-item">
-        <div class="info-icon">ℹ️</div>
-        <div style="flex: 1;">
-            <div class="info-label">Info.</div>
-            <input type="text" class="info-value" id="editStatus" placeholder="Hola, estoy usando DNPlus">
+        <div class="input-group">
+            <div class="field-container">
+                <div class="icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="flex-grow">
+                    <label class="input-label">Nombre</label>
+                    <input type="text" id="inputNombre" class="custom-input" placeholder="Tu nombre">
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="info-item">
-        <div class="info-icon">📞</div>
-        <div style="flex: 1;">
-            <div class="info-label">Teléfono</div>
-            <input type="text" class="info-value" id="editPhone" placeholder="Tu número">
+        <div class="input-group">
+            <div class="field-container">
+                <div class="icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <div class="flex-grow">
+                    <label class="input-label">Información</label>
+                    <input type="text" id="inputBio" class="custom-input" placeholder="Estado">
+                </div>
+            </div>
         </div>
+
+        <div class="input-group">
+            <div class="field-container">
+                <div class="icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div class="flex-grow">
+                    <label class="input-label">Teléfono</label>
+                    <input type="tel" id="inputTel" class="custom-input" readonly style="opacity: 0.7;">
+                </div>
+            </div>
+        </div>
+
+        <button class="update-button" id="btnUpdate">Actualizar</button>
+        <p id="statusMsg" style="display: none; color: #F08927; margin-top: 15px; font-style: italic;">✓ Perfil actualizado</p>
+
     </div>
-
-    <button class="btn-save-profile" onclick="guardarTodo()">✓</button>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // Configuración de tu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
         };
-        firebase.initializeApp(firebaseConfig);
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const DEFAULT_IMG = "https://www.w3schools.com/howto/img_avatar.png";
+        // El ID de usuario (tu número por defecto)
+        const userPhone = localStorage.getItem("user_phone") || "595992536184";
+        let base64Image = "";
 
-        window.onload = function() {
-            // Intentar cargar desde LocalStorage primero para velocidad
-            document.getElementById('editName').value = localStorage.getItem("user_name") || "David Oviedo";
-            document.getElementById('currentPhoto').src = localStorage.getItem("user_photo") || DEFAULT_IMG;
-            
-            // Luego sincronizar con Firebase
-            db.ref("usuarios/mi_perfil").once("value", (snapshot) => {
-                const data = snapshot.val();
-                if(data) {
-                    if(data.nombre) document.getElementById('editName').value = data.nombre;
-                    if(data.foto) document.getElementById('currentPhoto').src = data.foto;
-                    if(data.estado) document.getElementById('editStatus').value = data.estado;
-                    if(data.telefono) document.getElementById('editPhone').value = data.telefono;
+        // 1. CARGAR DATOS REALES
+        function loadProfile() {
+            db.ref("usuarios_registrados/" + userPhone).once("value", (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('inputNombre').value = data.nombre || "";
+                    document.getElementById('inputBio').value = data.bio || "";
+                    document.getElementById('inputTel').value = "+" + userPhone;
+                    if (data.foto) {
+                        document.getElementById('profileImage').src = data.foto;
+                        base64Image = data.foto;
+                    }
                 }
             });
         }
 
-        function actualizarFoto(event) {
-            const reader = new FileReader();
-            reader.onload = () => document.getElementById('currentPhoto').src = reader.result;
-            reader.readAsDataURL(event.target.files[0]);
-        }
+        // 2. CAMBIAR FOTO (Vista previa y conversión)
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    base64Image = event.target.result;
+                    document.getElementById('profileImage').src = base64Image;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-        function guardarTodo() {
-            const n = document.getElementById('editName').value;
-            const f = document.getElementById('currentPhoto').src;
-            const s = document.getElementById('editStatus').value || "Hola, estoy usando DNPlus";
-            const t = document.getElementById('editPhone').value;
+        // 3. GUARDAR CAMBIOS
+        document.getElementById('btnUpdate').addEventListener('click', function() {
+            const btn = this;
+            const nombre = document.getElementById('inputNombre').value;
+            const bio = document.getElementById('inputBio').value;
 
-            db.ref("usuarios/mi_perfil").update({
-                nombre: n,
-                foto: f,
-                estado: s,
-                telefono: t
-            }).then(() => {
-                localStorage.setItem("user_name", n);
-                localStorage.setItem("user_photo", f);
-                window.location.href = 'ajustes.html';
+            btn.innerText = 'Guardando...';
+            btn.disabled = true;
+
+            db.ref("usuarios_registrados/" + userPhone).update({
+                nombre: nombre,
+                bio: bio,
+                foto: base64Image
+            }, (error) => {
+                btn.innerText = 'Actualizar';
+                btn.disabled = false;
+                if (!error) {
+                    const msg = document.getElementById('statusMsg');
+                    msg.style.display = 'block';
+                    setTimeout(() => msg.style.display = 'none', 3000);
+                }
             });
-        }
+        });
+
+        loadProfile();
     </script>
 </body>
 </html>
