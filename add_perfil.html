@@ -6,13 +6,13 @@
     <title>Perfil DNPlus</title>
     <style>
         body { background-color: #0b141a; color: white; text-align: center; font-family: sans-serif; padding: 20px; }
-        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: #232d36; margin: 30px auto; display: block; }
-        .input-name { background: transparent; border: none; border-bottom: 2px solid #00a884; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; }
-        .btn-ready { background: #00a884; color: white; padding: 12px 40px; border-radius: 30px; border: none; margin-top: 40px; font-weight: bold; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: #232d36; margin: 30px auto; display: block; border: 3px solid #176f47; }
+        .input-name { background: transparent; border: none; border-bottom: 2px solid #176f47; color: white; width: 80%; padding: 10px; font-size: 18px; outline: none; }
+        .btn-ready { background: #176f47; color: white; padding: 12px 40px; border-radius: 30px; border: none; margin-top: 40px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h2 style="color:#00a884">Info. de perfil</h2>
+    <h2 style="color:#176f47">Info. de perfil</h2>
     <p style="color:#8696a0">Ingresa tu nombre y elige una foto.</p>
 
     <div onclick="document.getElementById('imgInp').click()">
@@ -30,12 +30,7 @@
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            authDomain: "dnplus-messenger-pro.firebaseapp.com",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-            storageBucket: "dnplus-messenger-pro.firebasestorage.app",
-            messagingSenderId: "625573378436",
-            appId: "1:625573378436:android:58945eb1e22ec4a2ba85d1"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -55,19 +50,27 @@
 
         function saveProfile() {
             const nom = document.getElementById('nameInp').value;
-            const tid = localStorage.getItem("user_temp_id");
+            
+            // Usamos el ID que generamos en el paso anterior (OTP)
+            const tid = localStorage.getItem("chat_destId");
 
             if(!nom) return alert("Pon tu nombre, bro");
-            if(!tid) return window.location.href="home.html";
+            
+            // Si por alguna razón no hay ID, mandamos a home para no trabar la app
+            if(!tid) {
+                window.location.href="home.html";
+                return;
+            }
 
-            db.ref("usuarios_registrados/" + tid).update({
+            // ACTUALIZAMOS en la ruta 'usuarios/' (donde está el correo)
+            db.ref("usuarios/" + tid).update({
                 nombre: nom,
                 foto: base64 || "https://cdn-icons-png.flaticon.com/512/149/149071.png"
             }).then(() => {
                 localStorage.setItem("user_name", nom);
                 localStorage.setItem("user_photo", base64);
                 window.location.href = "home.html";
-            });
+            }).catch(e => alert("Error: " + e.message));
         }
     </script>
 </body>
