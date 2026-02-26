@@ -35,7 +35,7 @@
 <body>
 
     <div class="chat-list-container" id="contenedor-chats-real">
-        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando tus mensajes...</p>
+        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando mensajes de DNPlus...</p>
     </div>
 
     <div class="fab-chats" onclick="window.top.location.href='lista_contactos.html'">💬</div>
@@ -51,22 +51,22 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // ID del usuario actual
+        // El ID que usamos en el registro
         const miId = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
 
         function cargarChats() {
             if (!miId) {
-                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Error: No se encontró tu sesión.</p>";
+                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Sesión no encontrada.</p>";
                 return;
             }
 
-            // Escuchamos solo la carpeta de chats
+            // 1. Buscamos en 'chats_privados' como dice tu consola de Firebase
             db.ref("chats_privados").on("value", (snapshot) => {
                 const container = document.getElementById("contenedor-chats-real");
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No hay conversaciones aún.</p>";
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats todavía.</p>";
                     return;
                 }
 
@@ -76,15 +76,20 @@
                     if (salaId.includes(miId)) {
                         const idOtro = salaId.replace(miId, "").replace("_", "");
                         
-                        // ÚNICA CARPETA: usuarios_registrados ✅
+                        // 2. Buscamos el nombre y foto en 'usuarios_registrados'
                         db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
                             const user = uSnap.val() || {};
-                            const msgs = Object.values(child.val());
-                            const ultimo = msgs[msgs.length - 1];
                             
+                            // Obtenemos el último mensaje de la sala
+                            const mensajesSala = child.val();
+                            const llaves = Object.keys(mensajesSala);
+                            const ultimoMensajeObj = mensajesSala[llaves[llaves.length - 1]];
+                            
+                            let textoUltimo = ultimoMensajeObj.mensaje || ultimoMensajeObj.contenido || "Archivo";
                             let hora = "";
-                            if (ultimo && ultimo.fecha) {
-                                hora = new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            
+                            if (ultimoMensajeObj.fecha) {
+                                hora = new Date(ultimoMensajeObj.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                             }
 
                             container.innerHTML += `
@@ -96,7 +101,7 @@
                                             <span class="time">${hora}</span>
                                         </div>
                                         <div class="last-msg-container">
-                                            <span class="message">${ultimo.mensaje || ultimo.contenido || 'Archivo'}</span>
+                                            <span class="message">${textoUltimo}</span>
                                         </div>
                                     </div>
                                 </div>`;
