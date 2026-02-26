@@ -7,28 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0b141a; color: #e9edef; }
         
-        /* Contenedor principal sin bordes ni elementos sobrantes */
-        .call-list-container { min-height: 100vh; padding-bottom: 100px; }
-        
-        .call-item { 
-            display: flex; align-items: center; padding: 14px 16px; gap: 15px; 
-            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); 
-        }
-        .call-item:active { background-color: #202c33; }
-        
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #232d36; }
-        .info { flex: 1; }
-        .name { font-weight: 500; font-size: 16px; }
-        .details { color: #8696a0; font-size: 14px; display: flex; align-items: center; gap: 6px; }
-        
-        .icon-call { color: #00a884; font-size: 20px; padding: 10px; }
+        /* Contenedor bacio por defecto */
+        .call-list-container { min-height: 100vh; }
 
-        /* BOTÓN FLOTANTE (FAB) - Fuera de cualquier contenedor relativo */
+        /* BOTÓN FLOTANTE (FAB) */
         .fab-calls {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             right: 20px;
             background-color: #00a884;
             width: 56px;
@@ -39,20 +26,18 @@
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             cursor: pointer;
-            z-index: 9999; /* Máxima prioridad para que flote sobre todo */
+            z-index: 999;
             color: white;
-            transition: transform 0.2s;
+            font-size: 22px;
         }
-        .fab-calls:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
 
     <div class="call-list-container" id="contenedor-llamadas"></div>
 
-    <div class="fab-calls" onclick="window.open('crear_new_contacto.html', '_self')">
-        <i class="fas fa-phone-plus"></i>
-        <span class="absolute top-3 right-3 text-[10px]"><i class="fas fa-plus"></i></span>
+    <div class="fab-calls" onclick="abrirCrearContacto()">
+        <i class="fas fa-user-plus"></i>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -67,29 +52,33 @@
         const db = firebase.database();
         const miId = localStorage.getItem("user_phone") || "595992536184";
 
+        // Función para abrir la página fuera del ViewPager
+        function abrirCrearContacto() {
+            // Usamos window.top para asegurarnos de que cargue sobre toda la aplicación
+            window.top.location.href = 'crear_new_contacto.html';
+        }
+
         function cargarHistorial() {
             db.ref("historial_llamadas/" + miId).on("value", snapshot => {
                 const container = document.getElementById("contenedor-llamadas");
-                container.innerHTML = ""; // Se mantiene vacío si no hay datos
+                container.innerHTML = ""; 
                 
-                if (!snapshot.exists()) return;
+                if (!snapshot.exists()) return; // Se queda bacia si no hay datos
 
                 snapshot.forEach(child => {
                     const call = child.val();
-                    const esPerdida = call.tipo === "perdida";
                     const fecha = new Date(call.fecha).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
 
                     container.innerHTML += `
-                        <div class="call-item">
-                            <img src="${call.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
-                            <div class="info">
-                                <div class="name">${call.nombre}</div>
-                                <div class="details">
-                                    <i class="fas ${esPerdida ? 'fa-arrow-down-left text-red-500' : 'fa-arrow-up-right text-[#00a884]'}"></i>
-                                    <span>${fecha}</span>
+                        <div class="flex items-center p-4 gap-4 border-b border-white/5">
+                            <img src="${call.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-12 h-12 rounded-full">
+                            <div class="flex-1">
+                                <div class="font-medium">${call.nombre}</div>
+                                <div class="text-sm text-[#8696a0] flex items-center gap-1">
+                                    <i class="fas fa-arrow-up-right text-[#00a884]"></i> ${fecha}
                                 </div>
                             </div>
-                            <div class="icon-call"><i class="fas fa-phone-alt"></i></div>
+                            <i class="fas fa-phone-alt text-[#00a884] p-2"></i>
                         </div>`;
                 });
             });
