@@ -22,7 +22,7 @@
             margin-bottom: 20px;
         }
         .icon-container img {
-            width: 80px; /* Tamaño del icono del sobre */
+            width: 80px;
         }
         h2 {
             font-size: 24px;
@@ -56,7 +56,7 @@
         .btn-enviar {
             width: 90%;
             max-width: 320px;
-            background-color: #176f47; /* Tu verde favorito para el botón */
+            background-color: #176f47; /* Tu verde favorito */
             color: white;
             border: none;
             border-radius: 25px;
@@ -106,10 +106,10 @@
             textoBoton.innerText = "ENVIANDO...";
             boton.disabled = true;
 
+            // GENERACIÓN DE 6 DÍGITOS REAL ✅
             const codigoOTP = Math.floor(100000 + Math.random() * 900000);
             localStorage.setItem("codigo_verificacion", codigoOTP);
 
-            // TUS IDs QUE DIERON 200 OK ✅
             const serviceID = 'service_eakuydh'; 
             const templateID = 'template_7nnvz18'; 
 
@@ -125,7 +125,7 @@
                 }, (err) => {
                     textoBoton.innerText = "REINTENTAR";
                     boton.disabled = false;
-                    alert("Error: Template incorrecto o problema de conexión.");
+                    alert("Error: Revisa tu conexión o IDs de EmailJS.");
                 });
         }
     </script>
