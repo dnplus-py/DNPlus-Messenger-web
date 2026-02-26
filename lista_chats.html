@@ -51,45 +51,47 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // IMPORTANTE: Asegúrate de que este ID sea el mismo que guardaste al registrarte
+        // Buscamos tu ID en las dos posibles llaves que usamos
         const miId = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
 
         function cargarChats() {
             if (!miId) {
-                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Error: No se encontró tu ID de usuario.</p>";
+                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Inicia sesión para ver tus chats.</p>";
                 return;
             }
 
+            // Referencia a los chats
             db.ref("chats_privados").on("value", (snapshot) => {
                 const container = document.getElementById("contenedor-chats-real");
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats aún.</p>";
+                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes conversaciones activas.</p>";
                     return;
                 }
 
                 snapshot.forEach((child) => {
                     const salaId = child.key;
                     
-                    // Si la sala contiene mi ID, es un chat mío
+                    // Verificamos si yo participo en esta sala
                     if (salaId.includes(miId)) {
+                        // Extraemos el ID de la otra persona
                         const idOtro = salaId.replace(miId, "").replace("_", "");
                         
-                        // Buscamos en la ruta 'usuarios/' que es la que usamos en el paso anterior
-                        db.ref("usuarios/" + idOtro).once("value", (uSnap) => {
+                        // CORRECCIÓN: Buscamos en 'usuarios_registrados' que es tu ruta real ✅
+                        db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
                             const user = uSnap.val() || {};
                             const msgs = Object.values(child.val());
                             const ultimo = msgs[msgs.length - 1];
                             
-                            // Formatear hora
                             let hora = "";
-                            if (ultimo.fecha) {
+                            if (ultimo && ultimo.fecha) {
+                                // Si la fecha es un timestamp largo, lo convierte a hora
                                 hora = new Date(ultimo.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                             }
 
                             const chatHtml = `
-                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre || 'Usuario'}', '${user.foto || ''}')">
+                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre || 'Usuario DNPlus'}', '${user.foto || ''}')">
                                     <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
                                     <div class="chat-details">
                                         <div class="chat-header">
@@ -97,7 +99,7 @@
                                             <span class="time">${hora}</span>
                                         </div>
                                         <div class="last-msg-container">
-                                            <span class="message">${ultimo.mensaje || ultimo.contenido || 'Archivo'}</span>
+                                            <span class="message">${ultimo.mensaje || ultimo.contenido || 'Archivo o Imagen'}</span>
                                         </div>
                                     </div>
                                 </div>`;
@@ -106,6 +108,8 @@
                         });
                     }
                 });
+            }, (error) => {
+                console.error("Error cargando chats: ", error);
             });
         }
 
