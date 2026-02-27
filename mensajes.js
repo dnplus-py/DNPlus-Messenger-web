@@ -1,3 +1,17 @@
+<script>
+// mensajes.js - Versión Centralizada
+console.log("✅ DNPlus Messenger: Librería cargada correctamente");
+
+function enviarPorPartes(tipo, contenido) {
+    console.log("Extrayendo URL del tipo: " + tipo);
+    // Aquí irá la lógica de Firebase que ya tenemos
+}
+
+// Esto avisará en la consola del navegador si funcionó
+document.addEventListener("DOMContentLoaded", () => {
+    alert("¡Conectado a la librería central de DNPlus!");
+});
+
 // Configuración de Firebase (Asegúrate de que coincida con tu proyecto)
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
@@ -169,7 +183,7 @@ function showMsgMenu(e, key) {
     menu.style.top = e.pageY + 'px';
     menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + 'px';
 }
-
+        
 function accionMsg(tipo) {
     if(tipo === 'eliminar') {
         if(confirm("¿Eliminar este mensaje?")) {
@@ -188,4 +202,4 @@ document.addEventListener('click', (e) => {
         document.getElementById('emoji-panel').style.display = 'none';
     }
 });
-    
+</script>
