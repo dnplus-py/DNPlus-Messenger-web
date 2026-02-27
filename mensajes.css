@@ -1,11 +1,11 @@
-/* DNPLUS - ESTILO DEFINITIVO */
+/* DNPLUS MOBILE OPTIMIZED */
 :root {
     --bg-chat: #0b141a;
     --mio: #176f47;
     --header: #085f56;
 }
 
-/* 1. CABECERA E ICONOS */
+/* CABECERA: Iconos a la derecha y nombre a la izquierda */
 header {
     height: 62px !important;
     background-color: var(--header) !important;
@@ -13,31 +13,28 @@ header {
     justify-content: space-between !important;
     align-items: center !important;
     padding: 0 15px !important;
-    color: white !important;
 }
+header i { color: white !important; font-size: 20px !important; }
 
-header i { color: white !important; font-size: 20px; }
-
-/* 2. AUDIO FINO */
+/* AUDIOS: Estilo fino 38px */
 .audio-wrapper {
     height: 38px !important;
-    width: 230px !important;
+    width: 220px !important;
     display: flex !important;
-    align-items: center;
+    align-items: center !important;
 }
 
-/* 3. EMOJIS (8 COLUMNAS FORZADAS) */
+/* EMOJIS: 8 columnas fijas sin errores */
 #emoji-panel {
     display: grid !important;
     grid-template-columns: repeat(8, 1fr) !important;
     background: #232d36 !important;
     height: 250px !important;
     overflow-y: auto !important;
-    gap: 8px !important;
+    gap: 5px !important;
     padding: 10px !important;
-    border-top: 1px solid #374045;
+    border-top: 1px solid #374045 !important;
 }
-
 .emoji-item, #emoji-panel span {
     font-size: 26px !important;
     display: flex !important;
@@ -46,7 +43,7 @@ header i { color: white !important; font-size: 20px; }
     height: 45px !important;
 }
 
-/* 4. VISOR (PARA QUE NO MOLESTE ABAJO) */
+/* VISOR: Fixed para que no aparezca abajo de los emojis */
 #image-viewer {
     display: none !important;
     position: fixed !important;
@@ -56,5 +53,9 @@ header i { color: white !important; font-size: 20px; }
     z-index: 9999;
 }
 
-/* OCULTAR CUALQUER PREVIEW QUE SOBRE */
-[id*="preview"] { display: none !important; height: 0 !important; }
+/* ELIMINAR ESPACIOS MUERTOS ABAJO */
+[id*="preview"], .preview-container { 
+    display: none !important; 
+    height: 0 !important; 
+    margin: 0 !important;
+}
