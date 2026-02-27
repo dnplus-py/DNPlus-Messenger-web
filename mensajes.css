@@ -6,8 +6,8 @@
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
-    --header-color: #085f56;    /* Verde oscuro profesional */
-    --accent-color: #ffffff;    /* Tu naranja DNPlus */
+    --header-color: #085f56;
+    --accent-color: #ffffff;
 }
 
 body {
@@ -29,7 +29,8 @@ header {
     padding: 0 15px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important; /* EMPUJA ICONOS A LA DERECHA */
+    justify-content: space-between !important;
+    position: relative !important; /* Base para el menú flotante */
     z-index: 1000;
 }
 
@@ -38,9 +39,9 @@ header .flex.items-center.gap-4,
 header .flex.gap-3,
 #header-icons {
     display: flex !important;
-    gap: 18px !important; /* Espacio elegante entre iconos */
+    gap: 18px !important;
     align-items: center !important;
-    margin-left: auto; /* Refuerza la posición a la derecha */
+    margin-left: auto;
 }
 
 header i { 
@@ -49,26 +50,33 @@ header i {
     cursor: pointer; 
 }
 
-/* Barra de acciones (cuando seleccionas mensajes para borrar) */
-#action-header-menu {
+/* --- MENÚ 3 PUNTOS (FLOTANTE DEFINITIVO) --- */
+.options-menu, .dropdown-menu, #main-menu {
+    position: absolute !important;
+    top: 55px !important;   /* Lo baja un poco para que no tape el header */
+    right: 10px !important; 
+    background-color: #232d36 !important;
+    min-width: 180px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5) !important;
+    z-index: 9999 !important;
     display: none; 
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 62px;
-    background-color: var(--header-color) !important;
-    justify-content: flex-end;
-    align-items: center;
-    padding-right: 20px;
-    gap: 25px;
-    z-index: 6000;
+    padding: 8px 0 !important;
+    border: 1px solid #374045 !important;
 }
 
-#action-header-menu i { 
-    color: white !important; /* Cambiado a blanco para que combine con el resto */
-    font-size: 18px; 
+.menu-item, .dropdown-item {
+    padding: 12px 20px !important;
+    color: #e9edef !important;
+    font-size: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    cursor: pointer !important;
 }
 
+.menu-item:hover { background-color: #182229 !important; }
+.menu-item i { color: var(--accent-color) !important; font-size: 18px !important; width: 20px; text-align: center; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
@@ -93,11 +101,10 @@ header i {
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     word-wrap: break-word;
 }
-
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
+/* --- DISEÑO DE AUDIO --- */
 .audio-wrapper {
     width: 250px !important;
     height: 54px !important;
@@ -105,36 +112,11 @@ header i {
     align-items: center !important;
     gap: 12px !important;
 }
+.audio-wrapper img { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover; }
 
-.audio-wrapper img {
-    width: 45px !important;
-    height: 45px !important;
-    border-radius: 50% !important;
-    object-fit: cover;
-}
-
-/* --- MULTIMEDIA (FOTOS) --- */
-.img-frame {
-    width: 250px !important;   
-    height: 300px !important;  
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 4px;
-}
-
-.img-frame img { width: 100%; height: 100%; object-fit: cover; }
-
-.msg-time {
-    font-size: 10px;
-    opacity: 0.7;
-    text-align: right;
-    margin-top: 4px;
-    display: block;
-}
-
-/* --- PANEL DE EMOJIS (CUADRÍCULA 8 COLUMNAS) --- */
+/* --- PANEL DE EMOJIS (8 COLUMNAS) --- */
 #emoji-panel {
-    display: none; /* Se activa con JS */
+    display: none;
     background: #232d36 !important;
     width: 100% !important;
     height: 250px !important;
@@ -145,106 +127,12 @@ header i {
     gap: 10px !important;
     border-top: 1px solid #374045;
 }
-
-.emoji-item {
-    font-size: 26px !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    height: 45px !important;
-    cursor: pointer;
-}
+.emoji-item { font-size: 26px !important; display: flex !important; justify-content: center !important; align-items: center !important; height: 45px !important; cursor: pointer; }
 
 /* --- ENTRADA DE TEXTO --- */
-.input-area {
-    background-color: #111b21;
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+.input-area { background-color: #111b21; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+.input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
+#chat-input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; }
+.action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; }
 
-.input-card {
-    background: #2a3942;
-    border-radius: 25px;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    height: 48px;
-}
-
-#chat-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    flex: 1;
-    color: white;
-    font-size: 16px;
-}
-
-.action-btn {
-    background: var(--msg-mine);
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    border: none;
-}
-
-/* Visor de imágenes fijo para que no moleste abajo */
-#image-viewer {
-    display: none !important;
-    position: fixed !important;
-    z-index: 9999;
-}
-
-
-/* --- CORRECCIÓN MENÚ 3 PUNTOS (FLOTANTE) --- */
-.options-menu, .dropdown-menu, #main-menu {
-    position: absolute !important;
-    top: 55px !important;    /* Aparece justo debajo del icono */
-    right: 15px !important;   /* Alineado a la derecha */
-    background-color: #232d36 !important; /* Fondo oscuro tipo WhatsApp */
-    min-width: 170px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
-    z-index: 9999 !important; /* Por encima de todo */
-    display: none; /* Se activa al pulsar */
-    padding: 8px 0 !important;
-    border: 1px solid #374045 !important;
-}
-
-/* Estilo de las letras y botones del menú */
-.menu-item, .dropdown-item {
-    padding: 12px 20px !important;
-    color: #e9edef !important;
-    font-size: 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 15px !important;
-    cursor: pointer !important;
-}
-
-.menu-item:hover {
-    background-color: #182229 !important;
-}
-
-/* Los iconos dentro del menú (Fondo, Vaciar, etc.) */
-.menu-item i {
-    color: var(--accent-color) !important; /* Tu naranja #F08927 */
-    font-size: 18px !important;
-    width: 20px;
-    text-align: center;
-}
-
-/* ASEGURAR QUE LA CABECERA NO SE MUEVA */
-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    position: relative !important; /* Importante para el menú absolute */
-}
+#image-viewer { display: none !important; position: fixed !important; z-index: 9999; }
