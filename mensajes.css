@@ -1,11 +1,11 @@
-/* DNPlus Messenger - Estilo Maestro Unificado */
+/* DNPlus Messenger - Estilo Maestro Final Corregido */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
-    --header-color: #202c33;
-    --accent-color: #F08927; /* Tu naranja favorito */
+    --header-color: #085f56;    /* Verde oscuro profesional */
+    --accent-color: #F08927;    /* Tu naranja DNPlus */
 }
 
 body {
@@ -19,39 +19,28 @@ body {
     position: relative;
 }
 
-/* --- BARRA DE ACCIONES (Borrar/Responder) --- */
-#action-header-menu {
-    display: none; 
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 62px;
-    background: #202c33;
-    z-index: 6000;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 20px;
-    gap: 25px;
-}
-
-#action-header-menu i {
-    color: var(--accent-color) !important;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-/* --- HEADER --- */
-header {
+/* --- CABECERAS --- */
+header, #action-header-menu {
     height: 62px;
     background-color: var(--header-color) !important;
     color: white !important;
     padding: 0 10px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     z-index: 1000;
 }
 
-#header-name { color: white !important; font-weight: bold; }
+#action-header-menu {
+    display: none; 
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 25px;
+    z-index: 6000;
+}
+
+#action-header-menu i { color: var(--accent-color) !important; font-size: 20px; cursor: pointer; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
@@ -60,13 +49,13 @@ header {
     padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     background-blend-mode: overlay;
     background-color: #0b141a;
 }
 
-/* --- BURBUJAS --- */
+/* --- BURBUJAS DE MENSAJE --- */
 .bubble {
     max-width: 85%;
     padding: 8px 12px;
@@ -74,52 +63,75 @@ header {
     position: relative;
     font-size: 0.95rem;
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    word-wrap: break-word;
 }
 
-.bubble-mine {
-    align-self: flex-end;
-    background-color: var(--msg-mine);
-    color: var(--text-color-mine) !important;
-    border-top-right-radius: 2px;
-}
+.bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
+.bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-.bubble-theirs {
-    align-self: flex-start;
-    background-color: var(--msg-theirs);
-    color: white;
-    border-top-left-radius: 2px;
-}
-
-/* --- MULTIMEDIA (FOTOS Y AUDIO) --- */
-.img-frame {
-    width: 250px !important;   
-    height: 300px !important;  
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    margin-bottom: 4px;
-    background: #111b21;
-}
-
-.img-frame img { width: 100%; height: 100%; object-fit: cover; }
-
+/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
 .audio-wrapper {
-    width: 210px !important; 
+    width: 250px !important;
     height: 60px;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
+.audio-wrapper img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%; /* Foto redonda */
+    object-fit: cover;
+}
+
+.audio-controls {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- MULTIMEDIA (FOTOS) --- */
+.img-frame {
+    width: 250px !important;   
+    height: 300px !important;  
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.img-frame img { width: 100%; height: 100%; object-fit: cover; }
+
 .msg-time {
     font-size: 10px;
     opacity: 0.7;
     text-align: right;
+    margin-top: 4px;
     display: block;
-    color: white;
 }
 
-/* --- MENÚS (3 Puntos y Contextual) --- */
+/* --- PANEL DE EMOJIS (CORREGIDO) --- */
+#emoji-panel {
+    display: none;
+    background: #232d36;
+    width: 100%;
+    height: 250px;
+    padding: 10px;
+    overflow-y: auto;
+    display: grid; /* ESTO FALTABA */
+    grid-template-columns: repeat(8, 1fr); 
+    gap: 10px;
+    border-top: 1px solid #374045;
+}
+
+.emoji-item {
+    font-size: 24px;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* --- MENÚS --- */
 .msg-menu {
     position: absolute;
     background: #232d36;
@@ -142,36 +154,9 @@ header {
     gap: 10px;
 }
 
-.menu-item i {
-    color: var(--accent-color) !important; /* Iconos naranja */
-    width: 20px;
-    text-align: center;
-}
+.menu-item i { color: var(--accent-color) !important; width: 20px; text-align: center; }
 
-.menu-item:hover { background: #374045; }
-
-/* --- VISOR DE IMAGEN --- */
-#image-viewer {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-#image-viewer i { color: var(--accent-color) !important; }
-
-#full-image {
-    max-width: 95%;
-    max-height: 80%;
-    transition: transform 0.3s ease;
-}
-
-/* --- ENTRADA DE MENSAJES --- */
+/* --- ENTRADA DE TEXTO --- */
 .input-area {
     background-color: #111b21;
     padding: 8px;
@@ -186,7 +171,7 @@ header {
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 0 15px !important;
+    padding: 0 15px;
     height: 48px;
 }
 
@@ -197,17 +182,7 @@ header {
     flex: 1;
     color: white;
     font-size: 16px;
-    margin-left: 10px !important; 
-}
-
-#emoji-panel {
-    display: none;
-    background: #232d36;
-    width: 100%;
-    height: 250px !important;
-    grid-template-columns: repeat(7, 1fr) !important;
-    padding: 10px;
-    overflow-y: auto;
+    margin-left: 10px;
 }
 
 .action-btn {
