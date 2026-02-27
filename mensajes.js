@@ -140,31 +140,42 @@ function manejarAdjunto(inputElement) {
 }
 
 // 7. GRABACIÓN DE AUDIO
-let mediaRecorder, audioChunks = [], isRecording = false;
 
-async function startRec() {
-    try {
-        // Pedimos el stream de audio
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        // Si llegamos aquí, el permiso está OK
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        isRecording = true;
-        
-        // Mostrar visualmente que está grabando
-        document.getElementById('rec-overlay').style.display = 'flex';
-        
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.start();
-        
-        console.log("🎤 Grabación iniciada con éxito");
-    } catch(e) { 
-        console.error("Error de micro:", e);
-        // Solo avisar si realmente hay un problema grave
-        if(e.name === 'NotAllowedError') {
-            alert("Por favor, acepta el permiso de micrófono en el navegador.");
-        }
+let audioActual = null;
+let iconoActual = null;
+
+function reproducirAudio(url, icono) {
+    if (audioActual && !audioActual.paused) {
+        audioActual.pause();
+        iconoActual.className = "fas fa-play text-2xl cursor-pointer";
+        if (audioActual.src === url) return; // Si es el mismo, solo pausa
+    }
+
+    audioActual = new Audio(url);
+    iconoActual = icono;
+    icono.className = "fas fa-pause text-2xl cursor-pointer";
+    
+    audioActual.play();
+    audioActual.onended = () => {
+        icono.className = "fas fa-play text-2xl cursor-pointer";
+    };
+}
+
+// Menú para Borrar / Reenviar / Responder
+function showMsgMenu(e, key) {
+    e.preventDefault();
+    msgSeleccionado = key;
+    const menu = document.getElementById('context-menu');
+    menu.style.display = 'flex';
+    menu.style.top = e.pageY + 'px';
+    menu.style.left = e.pageX + 'px';
+}
+
+function borrarMensaje() {
+    if(msgSeleccionado) {
+        db.ref("chats_privados/" + salaId + "/" + msgSeleccionado).remove();
+        document.getElementById('context-menu').style.display = 'none';
+        location.reload(); // Recargar para limpiar la vista
     }
 }
 
