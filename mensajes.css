@@ -1,55 +1,32 @@
-/* ============================================================
-   DNPLUS - CÓDIGO DE REPARACIÓN TOTAL
-   ============================================================ */
+/* DNPLUS - REPARACIÓN TOTAL MÓVIL */
 :root {
-    --whatsapp-bg: #0b141a;
-    --msg-mine: #176f47;
-    --msg-theirs: #202c33;
-    --header-color: #085f56;
-    --accent: #ffffff;
+    --bg-chat: #0b141a;
+    --mio: #176f47;
+    --theirs: #202c33;
+    --header: #085f56;
 }
 
-/* 1. ESTRUCTURA Y CUERPO */
-body {
-    background-color: var(--whatsapp-bg);
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* 2. CABECERA CON ICONOS (TELÉFONO Y TRES PUNTOS) */
+/* 1. CABECERA (Corrige iconos y nombre) */
 header {
     height: 62px !important;
-    background-color: var(--header-color) !important;
+    background-color: var(--header) !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     padding: 0 15px !important;
     color: white !important;
-    z-index: 1000;
 }
+header i { color: white !important; font-size: 20px !important; }
 
-header .flex.gap-3, header #header-icons {
-    display: flex !important;
-    gap: 20px !important;
-    align-items: center !important;
-}
-
-header i { color: white !important; font-size: 20px !important; cursor: pointer; }
-
-/* 3. BURBUJAS DE AUDIO (FINAS 38PX) */
+/* 2. AUDIOS (Estilo fino de 38px) */
 .audio-wrapper {
     height: 38px !important;
     width: 220px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 8px;
 }
 
-/* 4. PANEL DE EMOJIS (8 COLUMNAS) */
+/* 3. EMOJIS (Forzar 8 columnas en el móvil) */
 #emoji-panel {
     display: grid !important;
     grid-template-columns: repeat(8, 1fr) !important;
@@ -61,15 +38,17 @@ header i { color: white !important; font-size: 20px !important; cursor: pointer;
     border-top: 1px solid #374045 !important;
 }
 
-.emoji-item, #emoji-panel span {
-    font-size: 26px !important;
+/* Asegura que cada emoji sea un cuadradito */
+#emoji-panel span, .emoji-item {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
+    font-size: 26px !important;
     height: 45px !important;
+    width: 100% !important;
 }
 
-/* 5. VISOR DE IMÁGENES (FIXED PARA QUE NO MOLESTE) */
+/* 4. VISOR DE IMAGEN (Para que no estorbe abajo) */
 #image-viewer {
     display: none !important;
     position: fixed !important;
@@ -79,7 +58,7 @@ header i { color: white !important; font-size: 20px !important; cursor: pointer;
     z-index: 9999;
 }
 
-/* OCULTAR CUALQUIER BARRA DE PREVIEW ABAJO */
+/* Ocultar cualquier rastro del visor abajo de los emojis */
 [id*="preview"], .preview-container {
     display: none !important;
     height: 0 !important;
