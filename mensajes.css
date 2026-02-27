@@ -104,7 +104,7 @@ header i {
 pointer; }
 
 /* ============================================================
-   PARTE 4: VISOR DE IMÁGENES (FIXED - NO SALE ABAJO)
+   PARTE 3: VISOR DE IMÁGENES (FIXED - NO SALE ABAJO)
    ============================================================ */
 #image-viewer {
     display: none;
@@ -118,45 +118,45 @@ pointer; }
     align-items: center;
 }
 
-
 /* ============================================================
-   PARTE 3: PANEL DE EMOJIS (CUADRÍCULA FORZADA)
+   PARTE 4: VISOR DE IMÁGENES (CORRECCIÓN DE APERTURA)
    ============================================================ */
-#emoji-panel {
-    display: none; 
-    background-color: #232d36 !important;
-    width: 100% !important;
-    height: 250px !important;
-    overflow-y: auto !important;
-    padding: 10px !important;
-    border-top: 1px solid #374045 !important;
-    /* ESTO FUERZA LA CUADRÍCULA SI O SÍ */
-    display: grid !important; 
-    grid-template-columns: repeat(8, 1fr) !important; 
-    gap: 10px !important;
-    align-content: start;
+#image-viewer {
+    display: none !important; /* FUERZA EL CIERRE POR DEFECTO */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Para que los títulos ocupen toda la fila y no se metan en la rejilla */
-.emoji-section-title, .emoji-title, #emoji-panel b {
-    grid-column: span 8 !important;
-    color: #8696a0 !important;
-    font-size: 11px !important;
-    text-transform: uppercase;
-    padding: 10px 5px !important;
-    text-align: left;
-}
-
-.emoji-item, #emoji-panel span {
-    font-size: 28px !important;
-    text-align: center !important;
-    cursor: pointer !important;
+/* Solo se debe mostrar cuando el JavaScript le cambie el display a 'flex' */
+#image-viewer.active {
     display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 45px !important;
 }
 
+/* Ocultar la barra de vista previa que se ve abajo */
+.preview-container, #preview-img-container, [id*="preview"] {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden;
+}
+
+/* Las lupas solo se ven si el visor está abierto */
+.zoom-controls {
+    position: absolute;
+    bottom: 50px;
+    display: flex;
+    gap: 30px;
+    background: #232d36;
+    padding: 10px 25px;
+    border-radius: 30px;
+}
 
 /* ============================================================
    PARTE 5: ENTRADA DE TEXTO
