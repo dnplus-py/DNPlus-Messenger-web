@@ -171,3 +171,48 @@ pointer; }
     border-radius: 50%;
     border: none; color: white;
 }
+
+/* ============================================================
+   PARTE 3: PANEL DE EMOJIS (REJILLA ANTI-ERRORES)
+   ============================================================ */
+#emoji-panel {
+    display: grid !important; /* Forzamos rejilla */
+    grid-template-columns: repeat(8, 1fr) !important; /* 8 columnas fijas */
+    background-color: #232d36 !important;
+    width: 100% !important;
+    height: 250px !important;
+    overflow-y: auto !important;
+    padding: 10px !important;
+    border-top: 1px solid #374045 !important;
+    gap: 5px !important;
+    align-content: start !important;
+}
+
+/* Forzamos que los emojis (span o div) se porten bien */
+#emoji-panel span, 
+#emoji-panel div:not(.emoji-section-title), 
+.emoji-item {
+    font-size: 26px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 45px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+}
+
+/* Para que los títulos de sección NO se metan en las columnas */
+.emoji-section-title, 
+#emoji-panel b, 
+#emoji-panel strong {
+    grid-column: span 8 !important; /* Ocupa toda la fila */
+    color: #8696a0 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    padding: 10px 0 5px 5px !important;
+    text-align: left !important;
+}
+
+/* Scroll fino para que no estorbe */
+#emoji-panel::-webkit-scrollbar { width: 4px; }
+#emoji-panel::-webkit-scrollbar-thumb { background: #374045; border-radius: 10px; }
