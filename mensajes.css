@@ -7,7 +7,7 @@
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
     --header-color: #085f56;    /* Verde oscuro profesional */
-    --accent-color: #F08927;    /* Tu naranja DNPlus */
+    --accent-color: #ffffff;    /* Tu naranja DNPlus */
 }
 
 body {
@@ -200,4 +200,51 @@ header i {
     display: none !important;
     position: fixed !important;
     z-index: 9999;
+}
+
+
+/* --- CORRECCIÓN MENÚ 3 PUNTOS (FLOTANTE) --- */
+.options-menu, .dropdown-menu, #main-menu {
+    position: absolute !important;
+    top: 55px !important;    /* Aparece justo debajo del icono */
+    right: 15px !important;   /* Alineado a la derecha */
+    background-color: #232d36 !important; /* Fondo oscuro tipo WhatsApp */
+    min-width: 170px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+    z-index: 9999 !important; /* Por encima de todo */
+    display: none; /* Se activa al pulsar */
+    padding: 8px 0 !important;
+    border: 1px solid #374045 !important;
+}
+
+/* Estilo de las letras y botones del menú */
+.menu-item, .dropdown-item {
+    padding: 12px 20px !important;
+    color: #e9edef !important;
+    font-size: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    cursor: pointer !important;
+}
+
+.menu-item:hover {
+    background-color: #182229 !important;
+}
+
+/* Los iconos dentro del menú (Fondo, Vaciar, etc.) */
+.menu-item i {
+    color: var(--accent-color) !important; /* Tu naranja #F08927 */
+    font-size: 18px !important;
+    width: 20px;
+    text-align: center;
+}
+
+/* ASEGURAR QUE LA CABECERA NO SE MUEVA */
+header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative !important; /* Importante para el menú absolute */
 }
