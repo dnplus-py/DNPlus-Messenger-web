@@ -116,15 +116,30 @@ let mediaRecorder, audioChunks = [], isRecording = false;
 
 async function startRec() {
     try {
+        // Pedimos el stream de audio
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // Si llegamos aquí, el permiso está OK
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         isRecording = true;
+        
+        // Mostrar visualmente que está grabando
         document.getElementById('rec-overlay').style.display = 'flex';
+        
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.start();
-    } catch(e) { alert("Acceso al micrófono denegado"); }
+        
+        console.log("🎤 Grabación iniciada con éxito");
+    } catch(e) { 
+        console.error("Error de micro:", e);
+        // Solo avisar si realmente hay un problema grave
+        if(e.name === 'NotAllowedError') {
+            alert("Por favor, acepta el permiso de micrófono en el navegador.");
+        }
+    }
 }
+
 
 function stopRec() {
     if (mediaRecorder && isRecording) {
