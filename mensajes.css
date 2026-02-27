@@ -36,7 +36,7 @@ header {
 /* Contenedor de iconos en la cabecera (Teléfono y Menú) */
 header .flex.gap-3, #header-icons {
     display: flex !important;
-    gap: 40px !important;
+    gap: 20px !important;
     align-items: center !important;
 }
 
@@ -56,7 +56,7 @@ header i { color: white !important; font-size: 20px; cursor: pointer; }
     z-index: 6000;
 }
 
-#action-header-menu i { color: var(--accent-color) !important; font-size: 20px; }
+#action-header-menu i { color: var(--accent-color) !important; font-size: 17px; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
