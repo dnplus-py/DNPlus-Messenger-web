@@ -21,7 +21,7 @@ body {
     position: relative;
 }
 
-/* --- CABECERAS --- */
+/* --- CABECERAS (HEADER) --- */
 header {
     height: 62px !important;
     background-color: var(--header-color) !important;
@@ -29,19 +29,27 @@ header {
     padding: 0 15px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important; /* Mantiene iconos a la derecha */
+    justify-content: space-between !important; /* EMPUJA ICONOS A LA DERECHA */
     z-index: 1000;
 }
 
-/* Contenedor de iconos en la cabecera (Teléfono y Menú) */
-header .flex.gap-3, #header-icons {
+/* Contenedor de iconos: Cámara, Teléfono, 3 puntos */
+header .flex.items-center.gap-4, 
+header .flex.gap-3,
+#header-icons {
     display: flex !important;
-    gap: 20px !important;
+    gap: 18px !important; /* Espacio elegante entre iconos */
     align-items: center !important;
+    margin-left: auto; /* Refuerza la posición a la derecha */
 }
 
-header i { color: white !important; font-size: 20px; cursor: pointer; }
+header i { 
+    color: white !important; 
+    font-size: 20px !important; 
+    cursor: pointer; 
+}
 
+/* Barra de acciones (cuando seleccionas mensajes para borrar) */
 #action-header-menu {
     display: none; 
     position: absolute;
@@ -56,7 +64,11 @@ header i { color: white !important; font-size: 20px; cursor: pointer; }
     z-index: 6000;
 }
 
-#action-header-menu i { color: var(--accent-color) !important; font-size: 17px; }
+#action-header-menu i { 
+    color: white !important; /* Cambiado a blanco para que combine con el resto */
+    font-size: 18px; 
+}
+
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
