@@ -1,4 +1,4 @@
-// mensajes.js - Versión Final Corregida para David Oviedo
+// mensajes.js - Versión Final DNPlus para David Oviedo
 console.log("✅ DNPlus Messenger: Sistema Activado");
 
 const firebaseConfig = {
@@ -14,8 +14,10 @@ const salaId = localStorage.getItem("chat_sala_id");
 const input = document.getElementById('chat-input');
 const actionIcon = document.getElementById('action-icon');
 const chatContainer = document.getElementById('chat-container');
+
 let msgSeleccionado = null;
 let mediaRecorder, audioChunks = [], isRecording = false;
+let currentZoom = 1;
 
 window.onload = () => {
     if(!idOtro || !salaId) return;
@@ -28,16 +30,21 @@ window.onload = () => {
         }
     });
 
-    // Escuchar mensajes nuevos
     db.ref("chats_privados/" + salaId).on("child_added", s => {
         dibujarBurbuja(s.val(), s.key);
     });
 
-    // Escuchar cuando se borra un mensaje para quitarlo de la pantalla sin recargar
     db.ref("chats_privados/" + salaId).on("child_removed", s => {
         const el = document.getElementById(s.key);
         if(el) el.remove();
     });
+
+    // Cargar fondo guardado
+    const bgSaved = localStorage.getItem("chat_bg_" + salaId);
+    if(bgSaved) {
+        chatContainer.style.backgroundImage = `url('${bgSaved}')`;
+        chatContainer.style.backgroundSize = "cover";
+    }
 
     cargarEmojis();
 };
@@ -45,10 +52,14 @@ window.onload = () => {
 function dibujarBurbuja(data, key) {
     const esMio = data.emisor === miId;
     const b = document.createElement('div');
-    b.id = key; // ID para poder borrarlo luego
+    b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
-    b.oncontextmenu = (e) => { e.preventDefault(); showMsgMenu(e, key); };
+    // Toque largo / Clic derecho para activar menú superior
+    b.oncontextmenu = (e) => { 
+        e.preventDefault(); 
+        showMsgMenu(key); 
+    };
 
     if (data.tipo === 'audio') {
         b.innerHTML = `
@@ -64,7 +75,7 @@ function dibujarBurbuja(data, key) {
     else if (data.tipo === 'imagen') {
         b.innerHTML = `
         <div class="img-frame" onclick="verImagen('${data.url}')">
-            <img src="${data.url}" style="width:100%; height:100%; object-fit:cover;">
+            <img src="${data.url}">
         </div>
         <span class="msg-time">${data.hora}</span>`;
     } 
@@ -76,7 +87,7 @@ function dibujarBurbuja(data, key) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// --- FUNCIONES DE AUDIO ---
+// --- AUDIO ---
 let audioActual = null, iconoActual = null;
 function reproducirAudio(url, icono) {
     if (audioActual && !audioActual.paused) {
@@ -118,28 +129,52 @@ function stopRec() {
     }
 }
 
-// --- VISOR DE IMAGEN ---
+// --- VISOR DE IMAGEN Y ZOOM ---
 function verImagen(url) {
     const v = document.getElementById('image-viewer');
-    document.getElementById('full-image').src = url;
+    const img = document.getElementById('full-image');
+    img.src = url;
+    currentZoom = 1;
+    img.style.transform = `scale(${currentZoom})`;
     v.style.display = 'flex';
 }
 
-// --- MENÚ Y BORRADO ---
-function showMsgMenu(e, key) {
-    e.preventDefault();
+function zoomImg(scale) {
+    currentZoom *= scale;
+    document.getElementById('full-image').style.transform = `scale(${currentZoom})`;
+}
+
+function cerrarVisor() {
+    document.getElementById('image-viewer').style.display = 'none';
+}
+
+// --- MENÚ DE ACCIONES (CABECERA) ---
+function showMsgMenu(key) {
     msgSeleccionado = key;
-    const menu = document.getElementById('context-menu');
-    menu.style.display = 'flex';
-    menu.style.top = e.pageY + 'px';
-    menu.style.left = e.pageX + 'px';
+    // Resaltar burbuja
+    document.querySelectorAll('.bubble').forEach(el => el.style.filter = "none");
+    document.getElementById(key).style.filter = "brightness(0.8)";
+    // Mostrar barra superior de iconos
+    document.getElementById('action-header-menu').style.display = 'flex';
+}
+
+function cerrarMenuAcciones() {
+    if(msgSeleccionado) document.getElementById(msgSeleccionado).style.filter = "none";
+    document.getElementById('action-header-menu').style.display = 'none';
+    msgSeleccionado = null;
 }
 
 function borrarMensaje() {
     if(msgSeleccionado) {
         db.ref("chats_privados/" + salaId + "/" + msgSeleccionado).remove();
-        document.getElementById('context-menu').style.display = 'none';
-        // Ya no hace falta reload, child_removed lo quita solo
+        cerrarMenuAcciones();
+    }
+}
+
+function vaciarChat() {
+    if(confirm("¿Vaciar todos los mensajes?")) {
+        db.ref("chats_privados/" + salaId).remove();
+        toggleHeaderMenu();
     }
 }
 
@@ -172,6 +207,28 @@ function cargarEmojis() {
     }
 }
 
+// --- OTROS ---
+function toggleHeaderMenu() {
+    const menu = document.getElementById('header-menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function cambiarFondo() { document.getElementById('bg-input').click(); }
+
+function aplicarNuevoFondo(el) {
+    const file = el.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            chatContainer.style.backgroundImage = `url('${e.target.result}')`;
+            chatContainer.style.backgroundSize = "cover";
+            localStorage.setItem("chat_bg_" + salaId, e.target.result);
+        };
+        reader.readAsDataURL(file);
+        toggleHeaderMenu();
+    }
+}
+
 function manejarAdjunto(el) {
     const file = el.files[0];
     if (!file) return;
@@ -195,63 +252,14 @@ btn.onclick = () => {
     }
 };
 
-// Eventos de grabación
 btn.onmousedown = btn.ontouchstart = (e) => { if(!input.value) startRec(); };
 btn.onmouseup = btn.ontouchend = () => { if(isRecording) stopRec(); };
 
 document.addEventListener('click', (e) => {
     if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) document.getElementById('emoji-panel').style.display = 'none';
-    if(!e.target.closest('.bubble')) document.getElementById('context-menu').style.display = 'none';
-});
-
-
-// Abrir/Cerrar menú de cabecera
-function toggleHeaderMenu() {
-    const menu = document.getElementById('header-menu');
-    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-}
-
-// Lógica para Vaciar Chat
-function vaciarChat() {
-    if(confirm("¿Estás seguro de que quieres vaciar todos los mensajes de este chat?")) {
-        db.ref("chats_privados/" + salaId).remove();
-        document.getElementById('header-menu').style.display = 'none';
-        chatContainer.innerHTML = ""; // Limpia la pantalla al instante
-    }
-}
-
-// Lógica para cambiar fondo de pantalla
-function cambiarFondo() {
-    document.getElementById('bg-input').click();
-}
-
-function aplicarNuevoFondo(inputEl) {
-    const file = inputEl.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            chatContainer.style.backgroundImage = `url('${e.target.result}')`;
-            chatContainer.style.backgroundSize = "cover";
-            // Guardar en localStorage para que no se pierda al recargar
-            localStorage.setItem("chat_bg_" + salaId, e.target.result);
-        };
-        reader.readAsDataURL(file);
-        document.getElementById('header-menu').style.display = 'none';
-    }
-}
-
-// Cargar fondo guardado al iniciar
-window.addEventListener('load', () => {
-    const bgSaved = localStorage.getItem("chat_bg_" + salaId);
-    if(bgSaved) {
-        chatContainer.style.backgroundImage = `url('${bgSaved}')`;
-        chatContainer.style.backgroundSize = "cover";
-    }
-});
-
-// Cerrar menú si se toca fuera
-document.addEventListener('click', (e) => {
+    if(!e.target.closest('.bubble') && !e.target.closest('#action-header-menu')) cerrarMenuAcciones();
     if(!e.target.closest('.relative')) {
-        document.getElementById('header-menu').style.display = 'none';
+        const hm = document.getElementById('header-menu');
+        if(hm) hm.style.display = 'none';
     }
 });
