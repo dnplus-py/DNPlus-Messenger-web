@@ -1,4 +1,3 @@
-<script>
 // mensajes.js - Versión Centralizada
 console.log("✅ DNPlus Messenger: Librería cargada correctamente");
 
@@ -202,4 +201,3 @@ document.addEventListener('click', (e) => {
         document.getElementById('emoji-panel').style.display = 'none';
     }
 });
-</script>
