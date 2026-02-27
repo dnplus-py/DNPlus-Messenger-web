@@ -149,27 +149,42 @@ function cerrarVisor() {
 }
 
 // --- MENÚ DE ACCIONES (CABECERA) ---
+
+// Esta función se activa al mantener presionado un mensaje
 function showMsgMenu(key) {
     msgSeleccionado = key;
-    // Resaltar burbuja
+    // Resaltar burbuja seleccionada para saber cuál vamos a borrar
     document.querySelectorAll('.bubble').forEach(el => el.style.filter = "none");
-    document.getElementById(key).style.filter = "brightness(0.8)";
-    // Mostrar barra superior de iconos
+    const el = document.getElementById(key);
+    if(el) el.style.filter = "brightness(0.8)";
+    
+    // Mostrar barra superior con los iconos de acciones
     document.getElementById('action-header-menu').style.display = 'flex';
 }
 
+// Función para cerrar la barra superior de acciones (El "Close")
 function cerrarMenuAcciones() {
-    if(msgSeleccionado) document.getElementById(msgSeleccionado).style.filter = "none";
+    if (msgSeleccionado) {
+        // Quitamos el resaltado del mensaje para que vuelva a su color normal
+        const el = document.getElementById(msgSeleccionado);
+        if (el) el.style.filter = "none";
+    }
+    // ESCONDEMOS la barra de la cabecera por completo
     document.getElementById('action-header-menu').style.display = 'none';
     msgSeleccionado = null;
 }
 
+// Función para borrar y que se limpie la interfaz al instante
 function borrarMensaje() {
-    if(msgSeleccionado) {
+    if (msgSeleccionado) {
+        // Borramos el dato real de la base de datos de Firebase
         db.ref("chats_privados/" + salaId + "/" + msgSeleccionado).remove();
+        
+        // Cerramos el menú para que la cabecera vuelva a la normalidad
         cerrarMenuAcciones();
     }
 }
+
 
 function vaciarChat() {
     if(confirm("¿Vaciar todos los mensajes?")) {
