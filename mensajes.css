@@ -6,7 +6,7 @@
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
     --header-color: #085f56;    /* Verde oscuro DNPlus */
-    --accent-color: #F08927;    /* Tu naranja favorito */
+    --accent-color: #ffffff;    /* Tu naranja favorito */
 }
 
 body {
@@ -65,7 +65,7 @@ header, #action-header-menu {
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
 .audio-wrapper {
-    width: 230px !important;
+    width: 270px !important;
     height: 38px !important; /* Altura delgada como pediste */
     display: flex;
     align-items: center;
