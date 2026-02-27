@@ -78,7 +78,7 @@ header i {
 
 .bubble {
     max-width: 85%;
-    padding: 6px 10px;
+    padding: 10px 10px;
     border-radius: 10px;
     font-size: 0.95rem;
     position: relative;
@@ -88,16 +88,16 @@ header i {
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
 .audio-wrapper {
-    width: 270px !important;
-    height: 38px !important; /* Altura delgada como pediste */
+    width: 280px !important;
+    height: 34px !important; /* Altura delgada como pediste */
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .audio-wrapper img {
-    width: 32px !important;
-    height: 32px !important;
+    width: 34px !important;
+    height: 34px !important;
     border-radius: 50%;
     object-fit: cover;
 }
