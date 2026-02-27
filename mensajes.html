@@ -31,9 +31,10 @@
 
     <main id="chat-container"></main>
 
-    <div id="emoji-panel"></div>
-
     <div class="input-area">
+        <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: 80%; height: 100%; align-items: center; padding-left: 20px;">
+            <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> Grabando...
+        </div>
         <div class="input-card">
             <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
             <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
@@ -42,6 +43,8 @@
         </div>
         <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
     </div>
+
+    <div id="emoji-panel"></div>
 
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
 
