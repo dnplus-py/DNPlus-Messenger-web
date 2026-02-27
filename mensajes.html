@@ -35,7 +35,7 @@
         .menu-item { padding: 12px 16px; border-bottom: 1px solid #374045; cursor: pointer; }
         #emoji-panel { bottom: 65px; left: 10px; width: 90%; grid-template-columns: repeat(8, 1fr); padding: 10px; border-radius: 15px; height: 150px; overflow-y: auto; }
         
-        .action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        .action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border:none; cursor:pointer; }
         #rec-overlay { position: absolute; left: 0; right: 65px; height: 100%; background: #111b21; display: none; align-items: center; padding: 0 20px; z-index: 101; border-radius: 25px; }
     </style>
 </head>
@@ -53,7 +53,7 @@
             <img id="header-photo" src="" class="w-10 h-10 rounded-full">
             <div>
                 <div id="header-name" class="font-bold text-sm">Cargando...</div>
-                <div class="text-[10px] text-green-400">en línea</div>
+                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
         <div class="flex gap-3">
@@ -75,13 +75,12 @@
             <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
             <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
             <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
-            <input type="file" id="file-input" hidden onchange="alert('Adjuntar archivo...')">
+            <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
         </div>
         <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
     </div>
 
-    
-    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>.
+    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
 
 </body>
 </html>
