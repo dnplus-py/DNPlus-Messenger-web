@@ -1,11 +1,11 @@
-/* DNPlus Messenger - Estilo Maestro Final Corregido */
+/* DNPlus Messenger - Estilo Maestro Final CORREGIDO */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
-    --header-color: #085f56;    /* Verde oscuro profesional */
-    --accent-color: #F08927;    /* Tu naranja DNPlus */
+    --header-color: #085f56;    
+    --accent-color: #F08927;    
 }
 
 body {
@@ -55,7 +55,7 @@ header, #action-header-menu {
     background-color: #0b141a;
 }
 
-/* --- BURBUJAS DE MENSAJE --- */
+/* --- BURBUJAS --- */
 .bubble {
     max-width: 85%;
     padding: 8px 12px;
@@ -69,19 +69,19 @@ header, #action-header-menu {
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
+/* --- DISEÑO DE AUDIO (RETOQUE DE CRONÓMETRO) --- */
 .audio-wrapper {
-    width: 250px !important;
-    height: 60px;
+    width: 280px !important; /* Ancho fijo para que no se agrande */
+    height: 55px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .audio-wrapper img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%; /* Foto redonda */
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
     object-fit: cover;
 }
 
@@ -89,7 +89,23 @@ header, #action-header-menu {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
+    overflow: hidden; /* Evita que los controles estiren el div */
+}
+
+/* Estilo para el tiempo/cronómetro del audio */
+.audio-time {
+    font-size: 12px;
+    min-width: 35px; /* Evita que el texto baile al cambiar los segundos */
+    color: #8696a0;
+}
+
+/* Barra de progreso del audio */
+.audio-progress {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
 }
 
 /* --- MULTIMEDIA (FOTOS) --- */
@@ -111,7 +127,7 @@ header, #action-header-menu {
     display: block;
 }
 
-/* --- PANEL DE EMOJIS (CORREGIDO) --- */
+/* --- PANEL DE EMOJIS --- */
 #emoji-panel {
     display: none;
     background: #232d36;
@@ -119,42 +135,10 @@ header, #action-header-menu {
     height: 250px;
     padding: 10px;
     overflow-y: auto;
-    display: grid; /* ESTO FALTABA */
+    display: grid;
     grid-template-columns: repeat(8, 1fr); 
     gap: 10px;
-    border-top: 1px solid #374045;
 }
-
-.emoji-item {
-    font-size: 24px;
-    text-align: center;
-    cursor: pointer;
-}
-
-/* --- MENÚS --- */
-.msg-menu {
-    position: absolute;
-    background: #232d36;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    z-index: 5000;
-    display: none;
-    flex-direction: column;
-    padding: 5px 0;
-    border: 1px solid #374045;
-}
-
-.menu-item {
-    padding: 12px 20px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.menu-item i { color: var(--accent-color) !important; width: 20px; text-align: center; }
 
 /* --- ENTRADA DE TEXTO --- */
 .input-area {
