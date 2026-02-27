@@ -44,6 +44,13 @@
         <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
     </div>
 
+    <div id="context-menu" class="msg-menu">
+    <div class="menu-item" onclick="borrarMensaje()"><i class="fas fa-trash mr-2"></i> Borrar</div>
+    <div class="menu-item" onclick="alert('Función Reenviar')"><i class="fas fa-share mr-2"></i> Reenviar</div>
+    <div class="menu-item" onclick="alert('Función Responder')"><i class="fas fa-reply mr-2"></i> Responder</div>
+</div>
+
+
     <div id="emoji-panel"></div>
 
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
