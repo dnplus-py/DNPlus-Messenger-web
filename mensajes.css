@@ -1,9 +1,8 @@
-/* DNPlus Messenger - Estilo Maestro Final Corregido */
+/* DNPlus Messenger - Estilo Maestro Final */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --text-color-mine: #ffffff; 
     --header-color: #085f56;    
     --accent-color: #F08927;    
 }
@@ -18,7 +17,6 @@ body {
     overflow: hidden;
 }
 
-/* --- CABECERAS --- */
 header, #action-header-menu {
     height: 62px;
     background-color: var(--header-color) !important;
@@ -39,7 +37,8 @@ header, #action-header-menu {
     z-index: 6000;
 }
 
-/* --- CHAT --- */
+
+
 #chat-container {
     flex: 1;
     overflow-y: auto;
@@ -51,45 +50,37 @@ header, #action-header-menu {
     background-blend-mode: overlay;
 }
 
-/* --- BURBUJAS --- */
 .bubble {
     max-width: 85%;
     padding: 6px 10px;
     border-radius: 10px;
     font-size: 0.95rem;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    position: relative;
 }
 
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- AUDIO (AHORA MÁS FINO Y ESTILIZADO) --- */
+/* AUDIO FINO Y ELEGANTE */
 .audio-wrapper {
-    width: 240px !important;
-    height: 40px !important; /* Reducido de 60px a 40px para que no sea grueso */
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 2px 0;
-}
-
-.audio-wrapper img {
-    width: 35px !important; /* Foto más pequeña para que quepa en el audio fino */
-    height: 35px !important;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.audio-controls {
-    flex: 1;
+    width: 230px !important;
+    height: 38px !important; 
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* --- EMOJIS (CUADRÍCULA COMPLETA) --- */
+.audio-wrapper img {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+
 #emoji-panel {
-    display: none; /* Se activa por JS */
+    display: none;
     background: #232d36;
     width: 100%;
     height: 250px;
@@ -98,53 +89,36 @@ header, #action-header-menu {
     border-top: 1px solid #374045;
 }
 
-/* Clase para las secciones de emojis (Caritas, Corazones) */
-.emoji-section {
+.emoji-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr); 
-    gap: 10px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
 }
 
 .emoji-title {
     color: #8696a0;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: bold;
     text-transform: uppercase;
-    padding: 5px 0;
-    grid-column: span 8;
+    padding: 10px 0;
+    width: 100%;
 }
 
-.emoji-item {
-    font-size: 24px;
-    text-align: center;
-    cursor: pointer;
-}
-
-/* --- VISOR DE IMAGEN (ARREGLO POSICIÓN ABAJO) --- */
+/* VISOR PANTALLA COMPLETA - ESTO QUITA LO DE ABAJO */
 #image-viewer {
     display: none;
-    position: fixed;
+    position: fixed; 
     top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.95);
     z-index: 9999;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-/* La barra de zoom que salía abajo */
-.zoom-controls {
-    position: absolute;
-    bottom: 30px;
-    display: flex;
-    gap: 30px;
-    background: rgba(35, 45, 54, 0.8);
-    padding: 10px 20px;
-    border-radius: 30px;
-}
 
-/* --- ENTRADA --- */
+
 .input-area { background: #111b21; padding: 8px; display: flex; align-items: center; gap: 8px; }
 .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
 #chat-input { background: transparent; border: none; outline: none; flex: 1; color: white; }
