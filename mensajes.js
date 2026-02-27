@@ -203,3 +203,55 @@ document.addEventListener('click', (e) => {
     if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) document.getElementById('emoji-panel').style.display = 'none';
     if(!e.target.closest('.bubble')) document.getElementById('context-menu').style.display = 'none';
 });
+
+
+// Abrir/Cerrar menú de cabecera
+function toggleHeaderMenu() {
+    const menu = document.getElementById('header-menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+}
+
+// Lógica para Vaciar Chat
+function vaciarChat() {
+    if(confirm("¿Estás seguro de que quieres vaciar todos los mensajes de este chat?")) {
+        db.ref("chats_privados/" + salaId).remove();
+        document.getElementById('header-menu').style.display = 'none';
+        chatContainer.innerHTML = ""; // Limpia la pantalla al instante
+    }
+}
+
+// Lógica para cambiar fondo de pantalla
+function cambiarFondo() {
+    document.getElementById('bg-input').click();
+}
+
+function aplicarNuevoFondo(inputEl) {
+    const file = inputEl.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            chatContainer.style.backgroundImage = `url('${e.target.result}')`;
+            chatContainer.style.backgroundSize = "cover";
+            // Guardar en localStorage para que no se pierda al recargar
+            localStorage.setItem("chat_bg_" + salaId, e.target.result);
+        };
+        reader.readAsDataURL(file);
+        document.getElementById('header-menu').style.display = 'none';
+    }
+}
+
+// Cargar fondo guardado al iniciar
+window.addEventListener('load', () => {
+    const bgSaved = localStorage.getItem("chat_bg_" + salaId);
+    if(bgSaved) {
+        chatContainer.style.backgroundImage = `url('${bgSaved}')`;
+        chatContainer.style.backgroundSize = "cover";
+    }
+});
+
+// Cerrar menú si se toca fuera
+document.addEventListener('click', (e) => {
+    if(!e.target.closest('.relative')) {
+        document.getElementById('header-menu').style.display = 'none';
+    }
+});
