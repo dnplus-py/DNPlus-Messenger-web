@@ -1,4 +1,3 @@
-<script>
 // Configuración de Firebase (Asegúrate de que coincida con tu proyecto)
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
@@ -189,4 +188,4 @@ document.addEventListener('click', (e) => {
         document.getElementById('emoji-panel').style.display = 'none';
     }
 });
-    </script>
+    
