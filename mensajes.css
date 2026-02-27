@@ -1,3 +1,54 @@
+/* DNPlus Messenger - Ajustes de Color y Medidas */
+:root {
+    --whatsapp-bg: #0b141a;
+    --msg-mine: #176f47;
+    --msg-theirs: #202c33;
+    --text-color-mine: #ffffff; /* CAMBIADO: Naranja por Blanco */
+    --header-color: #202c33; /* Color oscuro para la cabecera */
+}
+
+/* Corregir Cabecera */
+header {
+    background-color: var(--header-color) !important;
+    color: white !important;
+}
+#header-name { color: white; }
+
+/* Audio más corto (menos ancho) */
+.audio-wrapper {
+    width: 210px !important; /* Achicamos la caja */
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Burbuja con texto blanco */
+.bubble-mine {
+    background-color: var(--msg-mine);
+    color: var(--text-color-mine) !important;
+}
+
+/* Estilo para el Menú de Mensajes (Borrar/Reenviar) */
+.msg-menu {
+    position: absolute;
+    background: #232d36;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    z-index: 3000;
+    display: none;
+    flex-direction: column;
+    padding: 5px 0;
+}
+.menu-item {
+    padding: 10px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+.menu-item:hover { background: #374045; }
+
+
 /* DNPlus Messenger - Estilos Centralizados Profesional */
 :root {
     --whatsapp-bg: #0b141a;
