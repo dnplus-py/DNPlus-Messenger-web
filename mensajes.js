@@ -141,25 +141,43 @@ function manejarAdjunto(inputElement) {
 
 // 7. GRABACIÓN DE AUDIO
 
-let audioActual = null;
-let iconoActual = null;
+let mediaRecorder, audioChunks = [];
 
-function reproducirAudio(url, icono) {
-    if (audioActual && !audioActual.paused) {
-        audioActual.pause();
-        iconoActual.className = "fas fa-play text-2xl cursor-pointer";
-        if (audioActual.src === url) return; // Si es el mismo, solo pausa
+async function startRec() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+            const blob = new Blob(audioChunks, { type: 'audio/mp3' });
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                sendData({ 
+                    tipo: 'audio', 
+                    url: reader.result, 
+                    duracion: "0:05" // Aquí podrías calcular el tiempo real
+                });
+            };
+        };
+        
+        mediaRecorder.start();
+        document.getElementById('rec-overlay').style.display = 'flex';
+        console.log("Grabando...");
+    } catch (err) {
+        alert("No se pudo acceder al micrófono. Verifica los permisos.");
     }
-
-    audioActual = new Audio(url);
-    iconoActual = icono;
-    icono.className = "fas fa-pause text-2xl cursor-pointer";
-    
-    audioActual.play();
-    audioActual.onended = () => {
-        icono.className = "fas fa-play text-2xl cursor-pointer";
-    };
 }
+
+function stopRec() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        document.getElementById('rec-overlay').style.display = 'none';
+    }
+}
+
 
 // Menú para Borrar / Reenviar / Responder
 function showMsgMenu(e, key) {
