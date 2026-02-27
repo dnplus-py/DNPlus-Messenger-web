@@ -1,0 +1,151 @@
+/* DNPlus Messenger - Estilos Centralizados */
+:root {
+    --whatsapp-bg: #0b141a;
+    --msg-mine: #176f47;
+    --msg-theirs: #202c33;
+    --text-color-mine: #F08927;
+    --header-color: #085f56;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--whatsapp-bg);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    overflow: hidden;
+    color: white;
+}
+
+/* Header */
+header {
+    height: 62px;
+    background-color: var(--header-color);
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+}
+
+/* Contenedor de Chat */
+#chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+    background-blend-mode: overlay;
+    background-color: #0b141a;
+}
+
+/* Burbujas */
+.bubble {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    position: relative;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.bubble-mine {
+    align-self: flex-end;
+    background-color: var(--msg-mine);
+    border-top-right-radius: 2px;
+    color: var(--text-color-mine);
+}
+
+.bubble-theirs {
+    align-self: flex-start;
+    background-color: var(--msg-theirs);
+    border-top-left-radius: 2px;
+}
+
+/* FOTOS: Tamaño pedido 180x230 */
+.img-container {
+    width: 180px;
+    height: 230px;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* AUDIO: Tamaño pedido 60px de alto (flaquito) */
+.audio-wrapper {
+    width: 250px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.msg-time {
+    font-size: 10px;
+    opacity: 0.7;
+    text-align: right;
+    display: block;
+    color: white;
+}
+
+/* Input Area */
+.input-area {
+    background-color: #111b21;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.input-card {
+    background: #2a3942;
+    border-radius: 25px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    height: 48px;
+}
+
+.input-card input {
+    background: transparent;
+    border: none;
+    outline: none;
+    flex: 1;
+    color: white;
+    font-size: 16px;
+    margin-left: 12px; /* Separación del emoji */
+}
+
+/* Emojis y Menú */
+#emoji-panel {
+    display: none;
+    background: #232d36;
+    position: absolute;
+    bottom: 65px;
+    left: 10px;
+    width: 90%;
+    grid-template-columns: repeat(8, 1fr);
+    padding: 10px;
+    border-radius: 15px;
+    height: 180px;
+    overflow-y: auto;
+    z-index: 2000;
+}
+
+.action-btn {
+    background: var(--msg-mine);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: none;
+}
