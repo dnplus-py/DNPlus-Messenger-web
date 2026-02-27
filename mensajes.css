@@ -1,4 +1,6 @@
-/* DNPlus Messenger - Estilo Maestro Final Corregido */
+/* ============================================================
+   DNPlus Messenger - Estilo Maestro Final Corregido
+   ============================================================ */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
@@ -20,27 +22,41 @@ body {
 }
 
 /* --- CABECERAS --- */
-header, #action-header-menu {
-    height: 62px;
+header {
+    height: 62px !important;
     background-color: var(--header-color) !important;
     color: white !important;
-    padding: 0 10px;
-    display: flex;
-    align-items: center;
+    padding: 0 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important; /* Mantiene iconos a la derecha */
     z-index: 1000;
 }
+
+/* Contenedor de iconos en la cabecera (Teléfono y Menú) */
+header .flex.gap-3, #header-icons {
+    display: flex !important;
+    gap: 20px !important;
+    align-items: center !important;
+}
+
+header i { color: white !important; font-size: 20px; cursor: pointer; }
 
 #action-header-menu {
     display: none; 
     position: absolute;
     top: 0; left: 0;
     width: 100%;
+    height: 62px;
+    background-color: var(--header-color) !important;
     justify-content: flex-end;
+    align-items: center;
+    padding-right: 20px;
     gap: 25px;
     z-index: 6000;
 }
 
-#action-header-menu i { color: var(--accent-color) !important; font-size: 20px; cursor: pointer; }
+#action-header-menu i { color: var(--accent-color) !important; font-size: 20px; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
@@ -72,24 +88,17 @@ header, #action-header-menu {
 /* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
 .audio-wrapper {
     width: 250px !important;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    height: 54px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
 }
 
 .audio-wrapper img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%; /* Foto redonda */
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 50% !important;
     object-fit: cover;
-}
-
-.audio-controls {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 /* --- MULTIMEDIA (FOTOS) --- */
@@ -111,55 +120,33 @@ header, #action-header-menu {
     display: block;
 }
 
-/* --- PANEL DE EMOJIS (CORREGIDO) --- */
+/* --- PANEL DE EMOJIS (CUADRÍCULA 8 COLUMNAS) --- */
 #emoji-panel {
-    display: none;
-    background: #232d36;
-    width: 100%;
-    height: 250px;
-    padding: 10px;
-    overflow-y: auto;
-    display: grid; /* ESTO FALTABA */
-    grid-template-columns: repeat(8, 1fr); 
-    gap: 10px;
+    display: none; /* Se activa con JS */
+    background: #232d36 !important;
+    width: 100% !important;
+    height: 250px !important;
+    padding: 10px !important;
+    overflow-y: auto !important;
+    display: grid !important; 
+    grid-template-columns: repeat(8, 1fr) !important; 
+    gap: 10px !important;
     border-top: 1px solid #374045;
 }
 
 .emoji-item {
-    font-size: 24px;
-    text-align: center;
+    font-size: 26px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 45px !important;
     cursor: pointer;
 }
-
-/* --- MENÚS --- */
-.msg-menu {
-    position: absolute;
-    background: #232d36;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    z-index: 5000;
-    display: none;
-    flex-direction: column;
-    padding: 5px 0;
-    border: 1px solid #374045;
-}
-
-.menu-item {
-    padding: 12px 20px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.menu-item i { color: var(--accent-color) !important; width: 20px; text-align: center; }
 
 /* --- ENTRADA DE TEXTO --- */
 .input-area {
     background-color: #111b21;
-    padding: 8px;
+    padding: 8px 10px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -182,7 +169,6 @@ header, #action-header-menu {
     flex: 1;
     color: white;
     font-size: 16px;
-    margin-left: 10px;
 }
 
 .action-btn {
@@ -195,4 +181,11 @@ header, #action-header-menu {
     justify-content: center;
     color: white;
     border: none;
+}
+
+/* Visor de imágenes fijo para que no moleste abajo */
+#image-viewer {
+    display: none !important;
+    position: fixed !important;
+    z-index: 9999;
 }
