@@ -74,27 +74,55 @@ function dibujarBurbuja(data, key) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// 5. SISTEMA DE EMOJIS (Pack WhatsApp)
+// mensajes.js - Versión con Emojis Full WhatsApp
+
 function toggleEmojis() {
     const p = document.getElementById('emoji-panel');
-    p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
+    const isVisible = p.style.display === 'grid';
+    p.style.display = isVisible ? 'none' : 'grid';
+    
+    // Si mostramos emojis, bajamos el chat al final
+    if(!isVisible) {
+        setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 100);
+    }
 }
 
 function cargarEmojis() {
-    const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕"];
     const panel = document.getElementById('emoji-panel');
     panel.innerHTML = "";
-    emojis.forEach(e => {
-        const s = document.createElement('span');
-        s.className = 'text-2xl p-2 cursor-pointer text-center';
-        s.innerText = e;
-        s.onclick = () => { 
-            input.value += e; 
-            input.oninput(); // Actualiza el icono de enviar
-        };
-        panel.appendChild(s);
-    });
+
+    const pack = {
+        "Caritas": ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕"],
+        "Manos y Gestos": ["👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","👐","🤲","🤝","🙏"],
+        "Corazones": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟"],
+        "Banderas": ["🏁","🚩","🎌","🏴","🏳️","🏳️‍🌈","🏳️‍⚧️","🏴‍☠️","🇦🇷","🇧🇴","🇧🇷","🇨坚持","🇨🇴","🇵🇾","🇺🇾","🇪🇸","🇲🇽","🇺🇸"]
+    };
+
+    for (const [categoria, lista] of Object.entries(pack)) {
+        // Título de categoría
+        const title = document.createElement('div');
+        title.className = 'emoji-category-title';
+        title.innerText = categoria;
+        panel.appendChild(title);
+
+        // Emojis
+        lista.forEach(e => {
+            const s = document.createElement('span');
+            s.className = 'text-2xl p-2 cursor-pointer text-center hover:bg-[#374045] rounded-full';
+            s.innerText = e;
+            s.onclick = () => { 
+                input.value += e; 
+                input.focus();
+                input.oninput(); 
+            };
+            panel.appendChild(s);
+        });
+    }
 }
+
+
 
 // 6. EXTRAER URL DE ARCHIVOS
 function manejarAdjunto(inputElement) {
