@@ -12,7 +12,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
-<body>
+<body style="color: #F08927;"> <div id="action-header-menu">
+        <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
+        <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
+        <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
+        <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
+    </div>
 
     <header>
         <div class="flex items-center gap-2">
@@ -23,9 +28,14 @@
                 <div class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 relative">
             <i class="fas fa-phone p-2"></i>
-            <i class="fas fa-ellipsis-v p-2"></i>
+            <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
+            
+            <div id="header-menu" class="msg-menu" style="right: 10px; top: 40px; width: 180px;">
+                <div class="menu-item" onclick="cambiarFondo()"><i class="fas fa-image mr-2"></i> Fondo de pantalla</div>
+                <div class="menu-item" onclick="vaciarChat()"><i class="fas fa-broom mr-2"></i> Vaciar chat</div>
+            </div>
         </div>
     </header>
 
@@ -44,14 +54,18 @@
         <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
     </div>
 
-    <div id="context-menu" class="msg-menu">
-    <div class="menu-item" onclick="borrarMensaje()"><i class="fas fa-trash mr-2"></i> Borrar</div>
-    <div class="menu-item" onclick="alert('Función Reenviar')"><i class="fas fa-share mr-2"></i> Reenviar</div>
-    <div class="menu-item" onclick="alert('Función Responder')"><i class="fas fa-reply mr-2"></i> Responder</div>
-</div>
-
-
     <div id="emoji-panel"></div>
+
+    <div id="image-viewer">
+        <div class="absolute top-5 right-5 text-white text-4xl cursor-pointer" style="z-index:100" onclick="cerrarVisor()">&times;</div>
+        <img id="full-image" src="" alt="Zoom">
+        <div class="flex gap-10 mt-5">
+            <i class="fas fa-search-plus text-white text-3xl cursor-pointer" onclick="zoomImg(1.2)"></i>
+            <i class="fas fa-search-minus text-white text-3xl cursor-pointer" onclick="zoomImg(0.8)"></i>
+        </div>
+    </div>
+
+    <input type="file" id="bg-input" hidden accept="image/*" onchange="aplicarNuevoFondo(this)">
 
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
 
