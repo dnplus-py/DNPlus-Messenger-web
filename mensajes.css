@@ -1,10 +1,10 @@
-/* DNPlus Messenger - Estilos Finales Unificados */
+/* DNPlus Messenger - Estilos Finales Unificados PRO */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --text-color-mine: #ffffff; /* BLANCO PURO */
-    --header-color: #202c33;    /* CABECERA OSCURA */
+    --text-color-mine: #ffffff; 
+    --header-color: #202c33;    
 }
 
 body {
@@ -15,6 +15,22 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+}
+
+/* --- NUEVA BARRA DE ACCIONES SUPERIOR (Iconos de borrar/responder) --- */
+#action-header-menu {
+    display: none; /* Se activa desde JS */
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 62px;
+    background: #202c33;
+    z-index: 6000;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    gap: 25px;
+    color: white;
 }
 
 /* --- HEADER --- */
@@ -52,6 +68,7 @@ header {
     position: relative;
     font-size: 0.95rem;
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    transition: filter 0.2s; /* Para el efecto de selección */
 }
 
 .bubble-mine {
@@ -68,18 +85,26 @@ header {
     border-top-left-radius: 2px;
 }
 
-/* --- MULTIMEDIA (FOTOS Y AUDIO) --- */
-.img-container {
-    width: 180px;
-    height: 230px;
+/* --- MULTIMEDIA (CORRECCIÓN DE TAMAÑO) --- */
+/* El JS usa 'img-frame' para las fotos, hay que darle estilo */
+.img-frame {
+    width: 250px !important;   
+    height: 300px !important;  
     border-radius: 10px;
-    object-fit: cover;
-    display: block;
+    overflow: hidden;
+    cursor: pointer;
     margin-bottom: 4px;
+    background: #111b21;
+}
+
+.img-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .audio-wrapper {
-    width: 210px !important; /* FLAQUITO (210px) */
+    width: 210px !important; 
     height: 60px;
     display: flex;
     align-items: center;
@@ -95,6 +120,25 @@ header {
     margin-top: 4px;
 }
 
+/* --- VISOR DE IMAGEN (FULL SCREEN) --- */
+#image-viewer {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#full-image {
+    max-width: 95%;
+    max-height: 80%;
+    transition: transform 0.3s ease;
+}
+
 /* --- ÁREA DE ENTRADA --- */
 .input-area {
     background-color: #111b21;
@@ -102,6 +146,7 @@ header {
     display: flex;
     align-items: center;
     gap: 8px;
+    position: relative;
 }
 
 .input-card {
@@ -121,10 +166,10 @@ header {
     flex: 1;
     color: white;
     font-size: 16px;
-    margin-left: 15px !important; /* SEPARACIÓN CARITA */
+    margin-left: 10px !important; 
 }
 
-/* --- PACK DE EMOJIS --- */
+/* --- PANEL DE EMOJIS --- */
 #emoji-panel {
     display: none;
     background: #232d36;
@@ -145,7 +190,7 @@ header {
     font-weight: bold;
 }
 
-/* --- MENÚ CONTEXTUAL --- */
+/* --- MENÚ DE TRES PUNTOS (HEADER) --- */
 .msg-menu {
     position: absolute;
     background: #232d36;
