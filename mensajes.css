@@ -1,10 +1,12 @@
-/* DNPlus Messenger - Estilo Maestro Final */
+/* ============================================================
+   PARTE 1: COLORES, VARIABLES Y CABECERAS (HEADER)
+   ============================================================ */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --header-color: #085f56;    
-    --accent-color: #F08927;    
+    --header-color: #085f56;    /* Verde oscuro DNPlus */
+    --accent-color: #F08927;    /* Tu naranja favorito */
 }
 
 body {
@@ -37,8 +39,9 @@ header, #action-header-menu {
     z-index: 6000;
 }
 
-
-
+/* ============================================================
+   PARTE 2: CHAT Y BURBUJAS (AUDIO FINO Y ELEGANTE)
+   ============================================================ */
 #chat-container {
     flex: 1;
     overflow-y: auto;
@@ -61,10 +64,9 @@ header, #action-header-menu {
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* AUDIO FINO Y ELEGANTE */
 .audio-wrapper {
     width: 230px !important;
-    height: 38px !important; 
+    height: 38px !important; /* Altura delgada como pediste */
     display: flex;
     align-items: center;
     gap: 8px;
@@ -77,8 +79,9 @@ header, #action-header-menu {
     object-fit: cover;
 }
 
-
-
+/* ============================================================
+   PARTE 3: PANEL DE EMOJIS (CUADRÍCULA)
+   ============================================================ */
 #emoji-panel {
     display: none;
     background: #232d36;
@@ -95,19 +98,14 @@ header, #action-header-menu {
     gap: 12px;
 }
 
-.emoji-title {
-    color: #8696a0;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-    padding: 10px 0;
-    width: 100%;
-}
+.emoji-item { font-size: 26px; text-align: center; cursor: pointer; }
 
-/* VISOR PANTALLA COMPLETA - ESTO QUITA LO DE ABAJO */
+/* ============================================================
+   PARTE 4: VISOR DE IMÁGENES (FIXED - NO SALE ABAJO)
+   ============================================================ */
 #image-viewer {
     display: none;
-    position: fixed; 
+    position: fixed; /* Esto evita que aparezca al final de la página */
     top: 0; left: 0;
     width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.95);
@@ -117,11 +115,14 @@ header, #action-header-menu {
     align-items: center;
 }
 
+#image-viewer img { max-width: 95%; max-height: 80vh; object-fit: contain; }
 
-
+/* ============================================================
+   PARTE 5: ENTRADA DE TEXTO
+   ============================================================ */
 .input-area { background: #111b21; padding: 8px; display: flex; align-items: center; gap: 8px; }
 .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
-#chat-input { background: transparent; border: none; outline: none; flex: 1; color: white; }
+#chat-input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; margin-left: 10px; }
 
 .action-btn {
     background: var(--msg-mine);
