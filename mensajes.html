@@ -15,7 +15,6 @@
             --msg-theirs: #202c33;
             --text-color-mine: #F08927;
             --header-color: #085f56;
-            --wa-blue: #34B7F1;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--whatsapp-bg); height: 100vh; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
@@ -32,7 +31,7 @@
         .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
         .bubble-mine .text-content { color: var(--text-color-mine); font-weight: 500; }
 
-        /* AJUSTE: Caja de audio de 60px x 270px */
+        /* CAJA DE AUDIO 270px x 60px */
         .audio-wrapper { 
             width: 270px; 
             height: 60px; 
@@ -41,7 +40,7 @@
             gap: 12px; 
             padding: 5px;
         }
-        .audio-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .audio-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
 
         .input-area { background-color: #111b21; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 100; }
         .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
@@ -53,34 +52,18 @@
             background: #111b21; border-radius: 25px; display: none; align-items: center; 
             padding: 0 20px; z-index: 101; 
         }
-
-        #menu-dots { position: absolute; top: 50px; right: 10px; background: #232d36; border-radius: 8px; display: none; flex-direction: column; width: 180px; z-index: 2000; }
-        .menu-item { padding: 12px 16px; color: #e9edef; cursor: pointer; }
-        
-        #call-screen { position: fixed; inset: 0; background: #075e54; z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 0; color: white; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <div id="call-screen">
-        <div class="text-center">
-            <img id="call-photo" src="" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-            <div id="call-name" class="text-2xl font-bold">Nombre</div>
-            <div id="call-status" class="mt-2">Llamando...</div>
-        </div>
-        <div class="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl cursor-pointer" onclick="endCall()">
-            <i class="fas fa-phone-slash"></i>
-        </div>
-    </div>
-
     <header>
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
             <img id="header-photo" src="" class="avatar">
-            <div id="header-name" class="font-bold">Cargando...</div>
+            <div id="header-name" class="font-bold text-sm">Cargando...</div>
         </div>
-        <i class="fas fa-phone text-lg cursor-pointer" onclick="startCall()"></i>
+        <i class="fas fa-phone text-lg cursor-pointer"></i>
     </header>
 
     <main id="chat-container"></main>
@@ -107,15 +90,13 @@
         const idOtro = localStorage.getItem("chat_destinatario_id");
         const salaId = localStorage.getItem("chat_sala_id");
 
-        // Carga de mensajes y datos
         window.onload = () => {
+            if(!idOtro || !salaId) return;
             db.ref("usuarios_registrados/" + idOtro).on("value", s => {
                 const d = s.val();
                 if(d) {
                     document.getElementById('header-name').innerText = d.nombre || idOtro;
-                    document.getElementById('header-photo').src = d.foto || "";
-                    document.getElementById('call-photo').src = d.foto || "";
-                    document.getElementById('call-name').innerText = d.nombre || idOtro;
+                    document.getElementById('header-photo').src = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 }
             });
             db.ref("chats_privados/" + salaId).on("child_added", s => dibujarBurbuja(s.val()));
@@ -127,14 +108,13 @@
             b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
             
             if(data.tipo === 'audio') {
-                b.innerHTML = `
-                <div class="audio-wrapper">
+                b.innerHTML = `<div class="audio-wrapper">
                     <img src="${esMio ? 'https://i.postimg.cc/mD8zM1vW/david-profile.jpg' : document.getElementById('header-photo').src}" class="audio-avatar">
-                    <i class="fas fa-play text-xl cursor-pointer" onclick="new Audio('${data.url}').play()"></i>
-                    <div class="text-xs">Mensaje de voz (${data.duracion})</div>
+                    <i class="fas fa-play text-xl cursor-pointer p-2" onclick="new Audio('${data.url}').play()"></i>
+                    <div class="text-[11px] opacity-80">Voz (${data.duracion})</div>
                 </div>`;
             } else if(data.tipo === 'imagen') {
-                b.innerHTML = `<div class="media-container"><img src="${data.url}" class="media-content"></div>`;
+                b.innerHTML = `<img src="${data.url}" style="max-width:200px; border-radius:8px;">`;
             } else {
                 b.innerHTML = `<div class="${esMio ? 'text-content' : ''}">${data.mensaje}</div>`;
             }
@@ -146,7 +126,6 @@
             db.ref("chats_privados/" + salaId).push({ ...p, emisor: miId, hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
         }
 
-        // --- LÓGICA DE GRABACIÓN Y CRONÓMETRO ---
         let mediaRecorder, audioChunks = [], recInterval, startTime, isRecording = false;
 
         async function startRecording() {
@@ -155,28 +134,22 @@
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
                 isRecording = true;
-                
                 document.getElementById('rec-overlay').style.display = 'flex';
                 startTime = Date.now();
-                
                 recInterval = setInterval(() => {
                     const s = Math.floor((Date.now() - startTime) / 1000);
                     document.getElementById('rec-timer').innerText = `0:${s.toString().padStart(2,'0')}`;
                 }, 1000);
-
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
-                    const duracionFinal = document.getElementById('rec-timer').innerText;
+                    const dur = document.getElementById('rec-timer').innerText;
                     const blob = new Blob(audioChunks, { type: 'audio/mp3' });
                     const r = new FileReader();
                     r.readAsDataURL(blob);
-                    r.onloadend = () => {
-                        sendData({ tipo: 'audio', url: r.result, duracion: duracionFinal });
-                        document.getElementById('rec-timer').innerText = "0:00";
-                    };
+                    r.onloadend = () => { if(audioChunks.length > 0) sendData({ tipo: 'audio', url: r.result, duracion: dur }); };
                 };
                 mediaRecorder.start();
-            } catch (e) { alert("Permite el acceso al micrófono"); }
+            } catch (e) { console.error(e); }
         }
 
         function stopRecording() {
@@ -189,23 +162,21 @@
         }
 
         const actionBtn = document.getElementById('action-btn');
-        const input = document.getElementById('chat-input');
+        // Soporte para PC y Móvil (Sketchware)
+        actionBtn.onmousedown = (e) => { e.preventDefault(); if(!document.getElementById('chat-input').value) startRecording(); };
+        actionBtn.ontouchstart = (e) => { e.preventDefault(); if(!document.getElementById('chat-input').value) startRecording(); };
+        actionBtn.onmouseup = () => { if(isRecording) setTimeout(stopRecording, 300); };
+        actionBtn.ontouchend = () => { if(isRecording) setTimeout(stopRecording, 300); };
 
-        actionBtn.onmousedown = () => { if(!input.value) startRecording(); };
-        actionBtn.onmouseup = () => { if(isRecording) setTimeout(stopRecording, 250); }; // Delay para que no se corte
-        
         actionBtn.onclick = () => {
-            if(input.value) {
-                sendData({ tipo: 'texto', mensaje: input.value });
+            const input = document.getElementById('chat-input');
+            if(input.value.trim()) {
+                sendData({ tipo: 'texto', mensaje: input.value.trim() });
                 input.value = "";
                 document.getElementById('action-icon').className = "fas fa-microphone";
             }
         };
 
-        input.oninput = () => document.getElementById('action-icon').className = input.value ? "fas fa-paper-plane" : "fas fa-microphone";
-
-        function startCall() { document.getElementById('call-screen').style.display = 'flex'; }
-        function endCall() { document.getElementById('call-screen').style.display = 'none'; }
         function handleFileUpload(f) { const r = new FileReader(); r.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result }); r.readAsDataURL(f.files[0]); }
     </script>
 </body>
