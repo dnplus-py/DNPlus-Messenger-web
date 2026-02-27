@@ -1,13 +1,11 @@
-/* ============================================================
-   DNPlus Messenger - Estilo Maestro Final Corregido
-   ============================================================ */
+/* DNPlus Messenger - Estilo Maestro Final Corregido */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
-    --header-color: #085f56;
-    --accent-color: #ffffff;
+    --header-color: #085f56;    /* Verde oscuro profesional */
+    --accent-color: #F08927;    /* Naranja DNPlus */
 }
 
 body {
@@ -21,62 +19,33 @@ body {
     position: relative;
 }
 
-/* --- CABECERAS (HEADER) --- */
-header {
-    height: 62px !important;
+/* --- CABECERAS --- */
+header, #action-header-menu {
+    height: 62px;
     background-color: var(--header-color) !important;
     color: white !important;
-    padding: 0 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    position: relative !important; /* Base para el menú flotante */
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
     z-index: 1000;
 }
 
-/* Contenedor de iconos: Cámara, Teléfono, 3 puntos */
-header .flex.items-center.gap-4, 
-header .flex.gap-3,
-#header-icons {
-    display: flex !important;
-    gap: 18px !important;
-    align-items: center !important;
-    margin-left: auto;
+#action-header-menu {
+    display: none; /* Oculto por defecto, se muestra con JS */
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: calc(100% - 20px); /* Ajuste para padding */
+    justify-content: flex-end;
+    gap: 25px;
+    z-index: 6000;
 }
 
-header i { 
-    color: white !important; 
-    font-size: 20px !important; 
+#action-header-menu i { 
+    color: var(--accent-color) !important; 
+    font-size: 20px; 
     cursor: pointer; 
 }
-
-/* --- MENÚ 3 PUNTOS (FLOTANTE DEFINITIVO) --- */
-.options-menu, .dropdown-menu, #main-menu {
-    position: absolute !important;
-    top: 55px !important;   /* Lo baja un poco para que no tape el header */
-    right: 10px !important; 
-    background-color: #232d36 !important;
-    min-width: 180px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.5) !important;
-    z-index: 9999 !important;
-    display: none; 
-    padding: 8px 0 !important;
-    border: 1px solid #374045 !important;
-}
-
-.menu-item, .dropdown-item {
-    padding: 12px 20px !important;
-    color: #e9edef !important;
-    font-size: 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 15px !important;
-    cursor: pointer !important;
-}
-
-.menu-item:hover { background-color: #182229 !important; }
-.menu-item i { color: var(--accent-color) !important; font-size: 18px !important; width: 20px; text-align: center; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
@@ -88,7 +57,8 @@ header i {
     gap: 12px;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     background-blend-mode: overlay;
-    background-color: #0b141a;
+    background-color: var(--whatsapp-bg);
+    background-size: cover; /* Añadido para ajustar la imagen de fondo */
 }
 
 /* --- BURBUJAS DE MENSAJE --- */
@@ -101,38 +71,156 @@ header i {
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     word-wrap: break-word;
 }
-.bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
-.bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- DISEÑO DE AUDIO --- */
+.bubble-mine { 
+    align-self: flex-end; 
+    background-color: var(--msg-mine); 
+    color: var(--text-color-mine); 
+    border-top-right-radius: 2px; 
+}
+
+.bubble-theirs { 
+    align-self: flex-start; 
+    background-color: var(--msg-theirs); 
+    color: white; 
+    border-top-left-radius: 2px; 
+}
+
+/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
 .audio-wrapper {
     width: 250px !important;
-    height: 54px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0; /* Añadido para separación */
 }
-.audio-wrapper img { width: 45px !important; height: 45px !important; border-radius: 50% !important; object-fit: cover; }
 
-/* --- PANEL DE EMOJIS (8 COLUMNAS) --- */
+.audio-wrapper img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%; 
+    object-fit: cover;
+}
+
+.audio-controls {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- MULTIMEDIA (FOTOS) --- */
+.img-frame {
+    width: 250px !important;   
+    height: 300px !important;  
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.img-frame img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+}
+
+.msg-time {
+    font-size: 10px;
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 4px;
+    display: block;
+}
+
+/* --- PANEL DE EMOJIS (CORREGIDO) --- */
 #emoji-panel {
-    display: none;
-    background: #232d36 !important;
-    width: 100% !important;
-    height: 250px !important;
-    padding: 10px !important;
-    overflow-y: auto !important;
-    display: grid !important; 
-    grid-template-columns: repeat(8, 1fr) !important; 
-    gap: 10px !important;
+    display: none; /* Por defecto oculto, se muestra con JS */
+    background: #232d36;
+    width: 100%;
+    height: 250px;
+    padding: 10px;
+    overflow-y: auto;
+    grid-template-columns: repeat(8, 1fr); 
+    gap: 10px;
     border-top: 1px solid #374045;
 }
-.emoji-item { font-size: 26px !important; display: flex !important; justify-content: center !important; align-items: center !important; height: 45px !important; cursor: pointer; }
+
+.emoji-item {
+    font-size: 24px;
+    text-align: center;
+    cursor: pointer;
+    padding: 5px 0; /* Añadido para mejor clic */
+}
+
+/* --- MENÚS --- */
+.msg-menu {
+    position: absolute;
+    background: #232d36;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 5000;
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    padding: 5px 0;
+    border: 1px solid #374045;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-item i { 
+    color: var(--accent-color) !important; 
+    width: 20px; 
+    text-align: center; 
+}
 
 /* --- ENTRADA DE TEXTO --- */
-.input-area { background-color: #111b21; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
-.input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
-#chat-input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; }
-.action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; }
+.input-area {
+    background-color: #111b21;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative; /* Evita desbordamientos */
+}
 
-#image-viewer { display: none !important; position: fixed !important; z-index: 9999; }
+.input-card {
+    background: #2a3942;
+    border-radius: 25px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    height: 48px;
+}
+
+#chat-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    flex: 1;
+    color: white;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.action-btn {
+    background: var(--msg-mine);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
