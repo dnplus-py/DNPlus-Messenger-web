@@ -1,11 +1,11 @@
-/* DNPlus Messenger - Estilo Maestro Unificado PRO */
+/* DNPlus Messenger - Estilo Maestro Final PRO */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
-    --header-color: #085f56;    /* NUEVO COLOR DE CABECERA PEDIDO */
-    --accent-color: #F08927;    /* Tu naranja favorito */
+    --header-color: #085f56;    /* Color verde oscuro pedido */
+    --accent-color: #F08927;    /* Tu naranja favorito para iconos */
 }
 
 body {
@@ -19,13 +19,13 @@ body {
     position: relative;
 }
 
-/* --- BARRA DE ACCIONES (Borrar/Responder) --- */
+/* --- BARRA DE ACCIONES (Cuando seleccionas para borrar) --- */
 #action-header-menu {
     display: none; 
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 62px;
-    background: var(--header-color); /* Mismo color que la cabecera */
+    background: var(--header-color);
     z-index: 6000;
     align-items: center;
     justify-content: flex-end;
@@ -39,7 +39,7 @@ body {
     cursor: pointer;
 }
 
-/* --- HEADER --- */
+/* --- CABECERA PRINCIPAL --- */
 header {
     height: 62px;
     background-color: var(--header-color) !important;
@@ -90,28 +90,29 @@ header {
     border-top-left-radius: 2px;
 }
 
-/* --- AJUSTE DE AUDIO (ESTILO CAPTURA) --- */
+/* --- DISEÑO DE AUDIO (IGUAL A LA CAPTURA) --- */
 .audio-wrapper {
-    width: 260px !important; /* Medida ideal para ver la foto y la onda */
-    height: 50px;
+    width: 260px !important; /* Medida ancha para mostrar todo */
+    height: 55px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 5px 0;
 }
 
 .audio-wrapper img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%; /* Foto redonda como en tu captura */
+    width: 45px;
+    height: 45px;
+    border-radius: 50%; /* Foto circular como en WhatsApp */
     object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .audio-controls {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 /* --- MULTIMEDIA (FOTOS) --- */
@@ -133,10 +134,9 @@ header {
     text-align: right;
     display: block;
     color: white;
-    margin-top: 2px;
 }
 
-/* --- MENÚS --- */
+/* --- MENÚS (3 PUNTOS Y CONTEXTUAL) --- */
 .msg-menu {
     position: absolute;
     background: #232d36;
@@ -156,16 +156,39 @@ header {
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .menu-item i {
-    color: var(--accent-color) !important;
+    color: var(--accent-color) !important; /* Iconos en naranja */
     width: 20px;
     text-align: center;
 }
 
-/* --- ENTRADA DE MENSAJES --- */
+.menu-item:hover { background: #374045; }
+
+/* --- VISOR DE IMAGEN (FULL SCREEN) --- */
+#image-viewer {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#image-viewer i { color: var(--accent-color) !important; }
+
+#full-image {
+    max-width: 95%;
+    max-height: 80%;
+    transition: transform 0.3s ease;
+}
+
+/* --- ÁREA DE ENTRADA --- */
 .input-area {
     background-color: #111b21;
     padding: 8px;
