@@ -4,48 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DNpPlus Messenger</title>
+    
+    <link rel="stylesheet" href="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.css">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    <style>
-        :root { --whatsapp-bg: #0b141a; --msg-mine: #176f47; --msg-theirs: #202c33; --text-color-mine: #F08927; --header-color: #085f56; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--whatsapp-bg); height: 100vh; display: flex; flex-direction: column; margin: 0; overflow: hidden; color: white; }
-        header { height: 62px; background-color: var(--header-color); padding: 0 10px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; }
-        #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: #0b141a; }
-        
-        /* Burbujas y Diseño */
-        .bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; position: relative; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.3); cursor: pointer; }
-        .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; color: var(--text-color-mine); }
-        .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
-        .msg-time { font-size: 10px; opacity: 0.7; text-align: right; margin-top: 4px; display: block; color: white; }
-
-        /* Caja de Audio 270x60 */
-        .audio-wrapper { width: 270px; height: 60px; display: flex; align-items: center; gap: 10px; }
-        .audio-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-
-        /* Input y Controles */
-        .input-area { background-color: #111b21; padding: 8px; display: flex; align-items: center; gap: 8px; position: relative; }
-        .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 12px; height: 48px; }
-        .input-card input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; }
-        
-        /* Menús */
-        #msg-menu, #emoji-panel { display: none; background: #232d36; position: absolute; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        #msg-menu { width: 180px; border-radius: 8px; flex-direction: column; }
-        .menu-item { padding: 12px 16px; border-bottom: 1px solid #374045; cursor: pointer; }
-        #emoji-panel { bottom: 65px; left: 10px; width: 90%; grid-template-columns: repeat(8, 1fr); padding: 10px; border-radius: 15px; height: 150px; overflow-y: auto; }
-        
-        .action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border:none; cursor:pointer; }
-        #rec-overlay { position: absolute; left: 0; right: 65px; height: 100%; background: #111b21; display: none; align-items: center; padding: 0 20px; z-index: 101; border-radius: 25px; }
-    </style>
 </head>
 <body>
-
-    <div id="msg-menu">
-        <div class="menu-item" onclick="accionMsg('responder')"><i class="fas fa-reply mr-2"></i> Responder</div>
-        <div class="menu-item" onclick="accionMsg('reenviar')"><i class="fas fa-share mr-2"></i> Reenviar</div>
-        <div class="menu-item text-red-400" onclick="accionMsg('eliminar')"><i class="fas fa-trash mr-2"></i> Eliminar</div>
-    </div>
 
     <header>
         <div class="flex items-center gap-2">
@@ -53,12 +20,12 @@
             <img id="header-photo" src="" class="w-10 h-10 rounded-full">
             <div>
                 <div id="header-name" class="font-bold text-sm">Cargando...</div>
-                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
+                <div class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
         <div class="flex gap-3">
             <i class="fas fa-phone p-2"></i>
-            <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="alert('Opciones de chat')"></i>
+            <i class="fas fa-ellipsis-v p-2"></i>
         </div>
     </header>
 
@@ -67,10 +34,6 @@
     <div id="emoji-panel"></div>
 
     <div class="input-area">
-        <div id="rec-overlay">
-            <i class="fas fa-microphone text-red-500 animate-pulse mr-3"></i>
-            <span id="rec-timer" class="flex-1">0:00</span>
-        </div>
         <div class="input-card">
             <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
             <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
