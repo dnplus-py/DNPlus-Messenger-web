@@ -173,60 +173,52 @@ pointer; }
 }
 
 /* ============================================================
-   ARREGLO TOTAL: EMOJIS Y VISOR (Pega esto completo)
+   PARTE 5: CONFIGURACIÓN DE EMOJIS
    ============================================================ */
-
-/* 1. ASEGURAR COLORES (Revisa que tenga los : al principio) */
-:root {
-    --whatsapp-bg: #0b141a;
-    --msg-mine: #176f47;
-    --msg-theirs: #202c33;
-    --header-color: #085f56;
-}
-
-/* 2. PANEL DE EMOJIS - FORZADO A 8 COLUMNAS */
 #emoji-panel {
-    display: grid !important; 
-    grid-template-columns: repeat(8, 1fr) !important; 
+    display: grid !important; /* Forzamos rejilla */
+    grid-template-columns: repeat(8, 1fr) !important; /* 8 columnas fijas */
     background-color: #232d36 !important;
     width: 100% !important;
     height: 250px !important;
     overflow-y: auto !important;
-    gap: 5px !important;
     padding: 10px !important;
     border-top: 1px solid #374045 !important;
+    gap: 5px !important;
+    align-content: start !important;
 }
 
-/* Esto obliga a cada emoji a ser un cuadradito */
-#emoji-panel span, .emoji-item {
+/* Forzamos que los emojis (span o div) se porten bien */
+#emoji-panel span, 
+#emoji-panel div:not(.emoji-section-title), 
+.emoji-item {
+    font-size: 26px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 26px !important;
     height: 45px !important;
+    width: 100% !important;
+    cursor: pointer !important;
 }
 
-/* 3. VISOR DE IMAGEN - PARA QUE NO SALGA ABAJO */
-#image-viewer {
-    display: none !important; /* Lo ocultamos por completo */
-    position: fixed !important; /* Lo sacamos del flujo del chat */
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.95);
-    z-index: 9999;
+/* Para que los títulos de sección NO se metan en las columnas */
+.emoji-section-title, 
+#emoji-panel b, 
+#emoji-panel strong {
+    grid-column: span 8 !important; /* Ocupa toda la fila */
+    color: #8696a0 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    padding: 10px 0 5px 5px !important;
+    text-align: left !important;
 }
 
-/* Ocultar cualquier barra de preview que estorbe abajo */
-[id*="preview"], .preview-container {
-    display: none !important;
-    height: 0 !important;
+/* Scroll fino para que no estorbe */
+#emoji-panel::-webkit-scrollbar { 
+    width: 4px; 
 }
 
-/* 4. ENTRADA DE TEXTO (Para que se vea bien sobre los emojis) */
-.input-area {
-    background: #111b21;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    z-index: 1000;
+#emoji-panel::-webkit-scrollbar-thumb { 
+    background: #374045; 
+    border-radius: 10px; 
 }
