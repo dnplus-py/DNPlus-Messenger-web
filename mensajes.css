@@ -1,61 +1,10 @@
-/* DNPlus Messenger - Ajustes de Color y Medidas */
+/* DNPlus Messenger - Estilos Finales Unificados */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --text-color-mine: #ffffff; /* CAMBIADO: Naranja por Blanco */
-    --header-color: #202c33; /* Color oscuro para la cabecera */
-}
-
-/* Corregir Cabecera */
-header {
-    background-color: var(--header-color) !important;
-    color: white !important;
-}
-#header-name { color: white; }
-
-/* Audio más corto (menos ancho) */
-.audio-wrapper {
-    width: 210px !important; /* Achicamos la caja */
-    height: 60px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Burbuja con texto blanco */
-.bubble-mine {
-    background-color: var(--msg-mine);
-    color: var(--text-color-mine) !important;
-}
-
-/* Estilo para el Menú de Mensajes (Borrar/Reenviar) */
-.msg-menu {
-    position: absolute;
-    background: #232d36;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    z-index: 3000;
-    display: none;
-    flex-direction: column;
-    padding: 5px 0;
-}
-.menu-item {
-    padding: 10px 20px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-}
-.menu-item:hover { background: #374045; }
-
-
-/* DNPlus Messenger - Estilos Centralizados Profesional */
-:root {
-    --whatsapp-bg: #0b141a;
-    --msg-mine: #176f47;
-    --msg-theirs: #202c33;
-    --text-color-mine: #F08927; /* Color naranja pedido */
-    --header-color: #085f56;
+    --text-color-mine: #ffffff; /* BLANCO PURO */
+    --header-color: #202c33;    /* CABECERA OSCURA */
 }
 
 body {
@@ -71,13 +20,16 @@ body {
 /* --- HEADER --- */
 header {
     height: 62px;
-    background-color: var(--header-color);
+    background-color: var(--header-color) !important;
+    color: white !important;
     padding: 0 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     z-index: 1000;
 }
+
+#header-name { color: white !important; font-weight: bold; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
@@ -105,7 +57,7 @@ header {
 .bubble-mine {
     align-self: flex-end;
     background-color: var(--msg-mine);
-    color: var(--text-color-mine);
+    color: var(--text-color-mine) !important;
     border-top-right-radius: 2px;
 }
 
@@ -116,7 +68,7 @@ header {
     border-top-left-radius: 2px;
 }
 
-/* --- FOTOS (180x230) --- */
+/* --- MULTIMEDIA (FOTOS Y AUDIO) --- */
 .img-container {
     width: 180px;
     height: 230px;
@@ -126,9 +78,8 @@ header {
     margin-bottom: 4px;
 }
 
-/* --- AUDIO (60px de alto "flaquito") --- */
 .audio-wrapper {
-    width: 250px;
+    width: 210px !important; /* FLAQUITO (210px) */
     height: 60px;
     display: flex;
     align-items: center;
@@ -159,7 +110,7 @@ header {
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 0 15px !important; /* Separación interna corregida */
+    padding: 0 15px !important;
     height: 48px;
 }
 
@@ -170,16 +121,16 @@ header {
     flex: 1;
     color: white;
     font-size: 16px;
-    margin-left: 15px !important; /* Separación de la carita pedida */
+    margin-left: 15px !important; /* SEPARACIÓN CARITA */
 }
 
-/* --- PACK DE EMOJIS (DEBAJO DEL INPUT) --- */
+/* --- PACK DE EMOJIS --- */
 #emoji-panel {
     display: none;
     background: #232d36;
     width: 100%;
-    height: 250px !important; /* Altura de teclado real */
-    grid-template-columns: repeat(7, 1fr) !important; /* 7 por fila pedido */
+    height: 250px !important;
+    grid-template-columns: repeat(7, 1fr) !important;
     padding: 10px;
     overflow-y: auto;
     border-top: 1px solid #374045;
@@ -194,7 +145,27 @@ header {
     font-weight: bold;
 }
 
-/* --- BOTÓN DE ACCIÓN --- */
+/* --- MENÚ CONTEXTUAL --- */
+.msg-menu {
+    position: absolute;
+    background: #232d36;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    z-index: 3000;
+    display: none;
+    flex-direction: column;
+    padding: 5px 0;
+}
+
+.menu-item {
+    padding: 10px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.menu-item:hover { background: #374045; }
+
 .action-btn {
     background: var(--msg-mine);
     width: 48px;
