@@ -118,61 +118,43 @@ pointer; }
     align-items: center;
 }
 
+
 /* ============================================================
-   PARTE 3: PANEL DE EMOJIS (DISEÑO PROFESIONAL)
+   PARTE 3: PANEL DE EMOJIS (CUADRÍCULA FORZADA)
    ============================================================ */
 #emoji-panel {
-    display: none; /* Se activa con el icono de la carita */
-    background-color: #232d36;
-    width: 100%;
-    height: 250px;
-    overflow-y: auto;
-    padding: 10px 5px;
-    border-top: 1px solid #374045;
-    z-index: 500;
+    display: none; 
+    background-color: #232d36 !important;
+    width: 100% !important;
+    height: 250px !important;
+    overflow-y: auto !important;
+    padding: 10px !important;
+    border-top: 1px solid #374045 !important;
+    /* ESTO FUERZA LA CUADRÍCULA SI O SÍ */
+    display: grid !important; 
+    grid-template-columns: repeat(8, 1fr) !important; 
+    gap: 10px !important;
+    align-content: start;
 }
 
-/* Títulos de las categorías (Caritas, Corazones, etc.) */
-.emoji-section-title {
-    color: #8696a0;
-    font-size: 12px;
-    font-weight: 600;
+/* Para que los títulos ocupen toda la fila y no se metan en la rejilla */
+.emoji-section-title, .emoji-title, #emoji-panel b {
+    grid-column: span 8 !important;
+    color: #8696a0 !important;
+    font-size: 11px !important;
     text-transform: uppercase;
-    padding: 15px 10px 8px 10px;
-    width: 100%;
-    display: block;
+    padding: 10px 5px !important;
+    text-align: left;
 }
 
-/* La rejilla donde van los emojis */
-.emoji-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr); /* 8 emojis por fila */
-    gap: 10px;
-    padding: 0 5px;
-}
-
-/* Estilo individual de cada emoji */
-.emoji-item {
-    font-size: 28px; /* Tamaño ideal para móvil */
-    text-align: center;
-    cursor: pointer;
-    padding: 5px;
-    transition: transform 0.1s ease;
-    user-select: none;
-}
-
-.emoji-item:active {
-    transform: scale(1.3); /* Efecto al tocarlo */
-}
-
-/* Personalización del scroll del panel */
-#emoji-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-#emoji-panel::-webkit-scrollbar-thumb {
-    background: #374045;
-    border-radius: 3px;
+.emoji-item, #emoji-panel span {
+    font-size: 28px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 45px !important;
 }
 
 
