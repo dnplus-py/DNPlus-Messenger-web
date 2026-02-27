@@ -31,42 +31,57 @@
         .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
         .bubble-mine .text-content { color: var(--text-color-mine); font-weight: 500; }
 
-        /* CAJA DE AUDIO 270px x 60px */
-        .audio-wrapper { 
-            width: 270px; 
-            height: 60px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            padding: 5px;
-        }
-        .audio-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        /* Caja de audio solicitada */
+        .audio-wrapper { width: 270px; height: 60px; display: flex; align-items: center; gap: 12px; padding: 5px; }
+        .audio-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
 
+        /* Área de entrada y Emojis */
         .input-area { background-color: #111b21; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 100; }
         .input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
         .input-card input { background: transparent; border: none; outline: none; flex: 1; color: white; font-size: 16px; }
-        .action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; flex-shrink: 0; }
-
-        #rec-overlay { 
-            position: absolute; left: 10px; right: 70px; top: 8px; bottom: 8px; 
-            background: #111b21; border-radius: 25px; display: none; align-items: center; 
-            padding: 0 20px; z-index: 101; 
+        
+        #emoji-panel { 
+            display: none; grid-template-columns: repeat(8, 1fr); gap: 10px; 
+            background: #232d36; padding: 10px; height: 180px; overflow-y: auto; border-top: 1px solid #374045;
         }
+        .emoji-item { font-size: 22px; cursor: pointer; text-align: center; }
+
+        /* Menú 3 puntos */
+        #menu-dots { 
+            position: absolute; top: 55px; right: 10px; background: #232d36; 
+            border-radius: 8px; display: none; flex-direction: column; width: 170px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 2000; 
+        }
+        .menu-item { padding: 12px 16px; color: #e9edef; cursor: pointer; font-size: 15px; }
+        .menu-item:hover { background: #182229; }
+
+        .action-btn { background: var(--msg-mine); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; flex-shrink: 0; }
+        #rec-overlay { position: absolute; left: 10px; right: 70px; top: 8px; bottom: 8px; background: #111b21; border-radius: 25px; display: none; align-items: center; padding: 0 20px; z-index: 101; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
 <body>
 
+    <div id="menu-dots">
+        <div class="menu-item" onclick="alert('Info del contacto')">Info. del contacto</div>
+        <div class="menu-item" onclick="vaciarChat()">Vaciar chat</div>
+    </div>
+
     <header>
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
-            <img id="header-photo" src="" class="avatar">
+            <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
             <div id="header-name" class="font-bold text-sm">Cargando...</div>
         </div>
-        <i class="fas fa-phone text-lg cursor-pointer"></i>
+        <div class="flex gap-4 items-center">
+            <i class="fas fa-phone text-lg cursor-pointer"></i>
+            <i class="fas fa-ellipsis-v text-lg cursor-pointer p-2" onclick="toggleMenu()"></i>
+        </div>
     </header>
 
     <main id="chat-container"></main>
+
+    <div id="emoji-panel"></div>
 
     <div class="input-area">
         <div id="rec-overlay">
@@ -74,6 +89,7 @@
             <span id="rec-timer" class="text-white font-medium flex-1">0:00</span>
         </div>
         <div class="input-card">
+            <i class="far fa-smile text-[#8696a0] text-xl mr-3 cursor-pointer" onclick="toggleEmojis()"></i>
             <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
             <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
             <input type="file" id="file-input" hidden onchange="handleFileUpload(this)">
@@ -89,9 +105,10 @@
         const miId = localStorage.getItem("user_phone") || "595992536184";
         const idOtro = localStorage.getItem("chat_destinatario_id");
         const salaId = localStorage.getItem("chat_sala_id");
+        const input = document.getElementById('chat-input');
 
+        // --- CARGA DE DATOS ---
         window.onload = () => {
-            if(!idOtro || !salaId) return;
             db.ref("usuarios_registrados/" + idOtro).on("value", s => {
                 const d = s.val();
                 if(d) {
@@ -100,6 +117,7 @@
                 }
             });
             db.ref("chats_privados/" + salaId).on("child_added", s => dibujarBurbuja(s.val()));
+            cargarEmojis();
         };
 
         function dibujarBurbuja(data) {
@@ -113,8 +131,6 @@
                     <i class="fas fa-play text-xl cursor-pointer p-2" onclick="new Audio('${data.url}').play()"></i>
                     <div class="text-[11px] opacity-80">Voz (${data.duracion})</div>
                 </div>`;
-            } else if(data.tipo === 'imagen') {
-                b.innerHTML = `<img src="${data.url}" style="max-width:200px; border-radius:8px;">`;
             } else {
                 b.innerHTML = `<div class="${esMio ? 'text-content' : ''}">${data.mensaje}</div>`;
             }
@@ -122,37 +138,61 @@
             document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
         }
 
-        function sendData(p) {
-            db.ref("chats_privados/" + salaId).push({ ...p, emisor: miId, hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+        // --- FUNCIONES DE INTERFAZ ---
+        function toggleMenu() {
+            const menu = document.getElementById('menu-dots');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
         }
 
+        function toggleEmojis() {
+            const panel = document.getElementById('emoji-panel');
+            panel.style.display = panel.style.display === 'grid' ? 'none' : 'grid';
+        }
+
+        function cargarEmojis() {
+            const lista = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳"];
+            const panel = document.getElementById('emoji-panel');
+            lista.forEach(e => {
+                const span = document.createElement('span');
+                span.className = 'emoji-item';
+                span.innerText = e;
+                span.onclick = () => { input.value += e; input.dispatchEvent(new Event('input')); };
+                panel.appendChild(span);
+            });
+        }
+
+        function vaciarChat() {
+            if(confirm("¿Vaciar todos los mensajes?")) {
+                db.ref("chats_privados/" + salaId).remove();
+                location.reload();
+            }
+        }
+
+        // --- LÓGICA DE AUDIO ---
         let mediaRecorder, audioChunks = [], recInterval, startTime, isRecording = false;
 
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                isRecording = true;
-                document.getElementById('rec-overlay').style.display = 'flex';
-                startTime = Date.now();
-                recInterval = setInterval(() => {
-                    const s = Math.floor((Date.now() - startTime) / 1000);
-                    document.getElementById('rec-timer').innerText = `0:${s.toString().padStart(2,'0')}`;
-                }, 1000);
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const dur = document.getElementById('rec-timer').innerText;
-                    const blob = new Blob(audioChunks, { type: 'audio/mp3' });
-                    const r = new FileReader();
-                    r.readAsDataURL(blob);
-                    r.onloadend = () => { if(audioChunks.length > 0) sendData({ tipo: 'audio', url: r.result, duracion: dur }); };
-                };
-                mediaRecorder.start();
-            } catch (e) { console.error(e); }
+        async function startRec() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            isRecording = true;
+            document.getElementById('rec-overlay').style.display = 'flex';
+            startTime = Date.now();
+            recInterval = setInterval(() => {
+                const s = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('rec-timer').innerText = `0:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const dur = document.getElementById('rec-timer').innerText;
+                const r = new FileReader();
+                r.readAsDataURL(new Blob(audioChunks, { type: 'audio/mp3' }));
+                r.onloadend = () => { if(audioChunks.length > 0) sendData({ tipo: 'audio', url: r.result, duracion: dur }); };
+            };
+            mediaRecorder.start();
         }
 
-        function stopRecording() {
+        function stopRec() {
             if(mediaRecorder && isRecording) {
                 mediaRecorder.stop();
                 isRecording = false;
@@ -161,23 +201,15 @@
             }
         }
 
-        const actionBtn = document.getElementById('action-btn');
-        // Soporte para PC y Móvil (Sketchware)
-        actionBtn.onmousedown = (e) => { e.preventDefault(); if(!document.getElementById('chat-input').value) startRecording(); };
-        actionBtn.ontouchstart = (e) => { e.preventDefault(); if(!document.getElementById('chat-input').value) startRecording(); };
-        actionBtn.onmouseup = () => { if(isRecording) setTimeout(stopRecording, 300); };
-        actionBtn.ontouchend = () => { if(isRecording) setTimeout(stopRecording, 300); };
+        function sendData(p) {
+            db.ref("chats_privados/" + salaId).push({ ...p, emisor: miId, hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+        }
 
-        actionBtn.onclick = () => {
-            const input = document.getElementById('chat-input');
-            if(input.value.trim()) {
-                sendData({ tipo: 'texto', mensaje: input.value.trim() });
-                input.value = "";
-                document.getElementById('action-icon').className = "fas fa-microphone";
-            }
-        };
-
-        function handleFileUpload(f) { const r = new FileReader(); r.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result }); r.readAsDataURL(f.files[0]); }
+        const btn = document.getElementById('action-btn');
+        btn.onmousedown = btn.ontouchstart = (e) => { e.preventDefault(); if(!input.value) startRec(); };
+        btn.onmouseup = btn.ontouchend = () => { if(isRecording) setTimeout(stopRec, 300); };
+        btn.onclick = () => { if(input.value) { sendData({tipo:'texto', mensaje: input.value}); input.value=""; document.getElementById('action-icon').className="fas fa-microphone"; } };
+        input.oninput = () => document.getElementById('action-icon').className = input.value ? "fas fa-paper-plane" : "fas fa-microphone";
     </script>
 </body>
 </html>
