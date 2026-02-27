@@ -1,44 +1,23 @@
-/* Separación del Input y Emoji */
-.input-card {
-    padding: 0 15px !important;
-}
-
-#chat-input {
-    margin-left: 15px !important; /* Aquí se separa de la carita */
-}
-
-/* Pack de Emojis estilo WhatsApp */
-#emoji-panel {
-    grid-template-columns: repeat(7, 1fr) !important;
-    gap: 10px;
-    height: 200px !important;
-}
-
-/* Medida de la foto de audio */
-/* Decidimos quitarla para que el mensaje de voz sea de 60px "flaquito" */
-
-
-/* DNPlus Messenger - Estilos Centralizados */
+/* DNPlus Messenger - Estilos Centralizados Profesional */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --text-color-mine: #F08927;
+    --text-color-mine: #F08927; /* Color naranja pedido */
     --header-color: #085f56;
 }
 
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: var(--whatsapp-bg);
+    margin: 0;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    margin: 0;
     overflow: hidden;
-    color: white;
 }
 
-/* Header */
+/* --- HEADER --- */
 header {
     height: 62px;
     background-color: var(--header-color);
@@ -49,7 +28,7 @@ header {
     z-index: 1000;
 }
 
-/* Contenedor de Chat */
+/* --- CONTENEDOR DE CHAT --- */
 #chat-container {
     flex: 1;
     overflow-y: auto;
@@ -62,7 +41,7 @@ header {
     background-color: #0b141a;
 }
 
-/* Burbujas */
+/* --- BURBUJAS --- */
 .bubble {
     max-width: 85%;
     padding: 8px 12px;
@@ -75,17 +54,18 @@ header {
 .bubble-mine {
     align-self: flex-end;
     background-color: var(--msg-mine);
-    border-top-right-radius: 2px;
     color: var(--text-color-mine);
+    border-top-right-radius: 2px;
 }
 
 .bubble-theirs {
     align-self: flex-start;
     background-color: var(--msg-theirs);
+    color: white;
     border-top-left-radius: 2px;
 }
 
-/* FOTOS: Tamaño pedido 180x230 */
+/* --- FOTOS (180x230) --- */
 .img-container {
     width: 180px;
     height: 230px;
@@ -95,7 +75,7 @@ header {
     margin-bottom: 4px;
 }
 
-/* AUDIO: Tamaño pedido 60px de alto (flaquito) */
+/* --- AUDIO (60px de alto "flaquito") --- */
 .audio-wrapper {
     width: 250px;
     height: 60px;
@@ -110,16 +90,16 @@ header {
     text-align: right;
     display: block;
     color: white;
+    margin-top: 4px;
 }
 
-/* Input Area */
+/* --- ÁREA DE ENTRADA --- */
 .input-area {
     background-color: #111b21;
     padding: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
-    position: relative;
 }
 
 .input-card {
@@ -128,36 +108,42 @@ header {
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 0 15px;
+    padding: 0 15px !important; /* Separación interna corregida */
     height: 48px;
 }
 
-.input-card input {
+#chat-input {
     background: transparent;
     border: none;
     outline: none;
     flex: 1;
     color: white;
     font-size: 16px;
-    margin-left: 12px; /* Separación del emoji */
+    margin-left: 15px !important; /* Separación de la carita pedida */
 }
 
-/* Emojis y Menú */
+/* --- PACK DE EMOJIS (DEBAJO DEL INPUT) --- */
 #emoji-panel {
     display: none;
     background: #232d36;
-    position: absolute;
-    bottom: 65px;
-    left: 10px;
-    width: 90%;
-    grid-template-columns: repeat(8, 1fr);
+    width: 100%;
+    height: 250px !important; /* Altura de teclado real */
+    grid-template-columns: repeat(7, 1fr) !important; /* 7 por fila pedido */
     padding: 10px;
-    border-radius: 15px;
-    height: 180px;
     overflow-y: auto;
-    z-index: 2000;
+    border-top: 1px solid #374045;
 }
 
+.emoji-category-title {
+    grid-column: span 7;
+    font-size: 11px;
+    color: #00a884;
+    padding: 15px 0 5px 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* --- BOTÓN DE ACCIÓN --- */
 .action-btn {
     background: var(--msg-mine);
     width: 48px;
