@@ -1,16 +1,13 @@
-// mensajes.js - COMPLETO Y CORREGIDO PARA DAVID OVIEDO
-console.log("✅ DNPlus Messenger: Cargando sistema completo...");
+// mensajes.js - Versión Final Corregida para David Oviedo
+console.log("✅ DNPlus Messenger: Sistema Activado");
 
-// 1. CONFIGURACIÓN FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
 };
-
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 2. VARIABLES GLOBALES
 const miId = localStorage.getItem("user_phone") || "595992536184";
 const idOtro = localStorage.getItem("chat_destinatario_id");
 const salaId = localStorage.getItem("chat_sala_id");
@@ -18,12 +15,11 @@ const input = document.getElementById('chat-input');
 const actionIcon = document.getElementById('action-icon');
 const chatContainer = document.getElementById('chat-container');
 let msgSeleccionado = null;
+let mediaRecorder, audioChunks = [], isRecording = false;
 
-// 3. CARGA INICIAL
 window.onload = () => {
     if(!idOtro || !salaId) return;
 
-    // Cargar info del contacto
     db.ref("usuarios_registrados/" + idOtro).on("value", s => {
         const d = s.val();
         if(d) {
@@ -32,26 +28,32 @@ window.onload = () => {
         }
     });
 
-    // Escuchar mensajes
+    // Escuchar mensajes nuevos
     db.ref("chats_privados/" + salaId).on("child_added", s => {
         dibujarBurbuja(s.val(), s.key);
+    });
+
+    // Escuchar cuando se borra un mensaje para quitarlo de la pantalla sin recargar
+    db.ref("chats_privados/" + salaId).on("child_removed", s => {
+        const el = document.getElementById(s.key);
+        if(el) el.remove();
     });
 
     cargarEmojis();
 };
 
-// 4. DIBUJAR BURBUJAS (Medidas exactas de David)
 function dibujarBurbuja(data, key) {
     const esMio = data.emisor === miId;
     const b = document.createElement('div');
+    b.id = key; // ID para poder borrarlo luego
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
     b.oncontextmenu = (e) => { e.preventDefault(); showMsgMenu(e, key); };
 
     if (data.tipo === 'audio') {
         b.innerHTML = `
-        <div class="audio-wrapper" style="height:60px; display:flex; align-items:center; gap:10px; width:250px;">
-            <i class="fas fa-play text-2xl cursor-pointer" onclick="new Audio('${data.url}').play()"></i>
+        <div class="audio-wrapper">
+            <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
             <div class="flex-1">
                 <div class="h-[4px] bg-gray-600 w-full rounded-full"><div class="h-full bg-white w-0 rounded-full"></div></div>
                 <div class="text-[10px] mt-1">Voz (${data.duracion || '0:05'})</div>
@@ -61,7 +63,7 @@ function dibujarBurbuja(data, key) {
     } 
     else if (data.tipo === 'imagen') {
         b.innerHTML = `
-        <div style="width:180px; height:230px; overflow:hidden; border-radius:10px;">
+        <div class="img-frame" onclick="verImagen('${data.url}')">
             <img src="${data.url}" style="width:100%; height:100%; object-fit:cover;">
         </div>
         <span class="msg-time">${data.hora}</span>`;
@@ -74,112 +76,56 @@ function dibujarBurbuja(data, key) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// mensajes.js - Versión con Emojis Full WhatsApp
-
-function toggleEmojis() {
-    const p = document.getElementById('emoji-panel');
-    const isVisible = p.style.display === 'grid';
-    p.style.display = isVisible ? 'none' : 'grid';
-    
-    // Si mostramos emojis, bajamos el chat al final
-    if(!isVisible) {
-        setTimeout(() => {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 100);
+// --- FUNCIONES DE AUDIO ---
+let audioActual = null, iconoActual = null;
+function reproducirAudio(url, icono) {
+    if (audioActual && !audioActual.paused) {
+        audioActual.pause();
+        iconoActual.className = "fas fa-play text-2xl";
+        if (audioActual.src === url) return;
     }
+    audioActual = new Audio(url);
+    iconoActual = icono;
+    icono.className = "fas fa-pause text-2xl";
+    audioActual.play();
+    audioActual.onended = () => icono.className = "fas fa-play text-2xl";
 }
-
-function cargarEmojis() {
-    const panel = document.getElementById('emoji-panel');
-    panel.innerHTML = "";
-
-    const pack = {
-        "Caritas": ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕"],
-        "Manos y Gestos": ["👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","👐","🤲","🤝","🙏"],
-        "Corazones": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟"],
-        "Banderas": ["🏁","🚩","🎌","🏴","🏳️","🏳️‍🌈","🏳️‍⚧️","🏴‍☠️","🇦🇷","🇧🇴","🇧🇷","🇨坚持","🇨🇴","🇵🇾","🇺🇾","🇪🇸","🇲🇽","🇺🇸"]
-    };
-
-    for (const [categoria, lista] of Object.entries(pack)) {
-        // Título de categoría
-        const title = document.createElement('div');
-        title.className = 'emoji-category-title';
-        title.innerText = categoria;
-        panel.appendChild(title);
-
-        // Emojis
-        lista.forEach(e => {
-            const s = document.createElement('span');
-            s.className = 'text-2xl p-2 cursor-pointer text-center hover:bg-[#374045] rounded-full';
-            s.innerText = e;
-            s.onclick = () => { 
-                input.value += e; 
-                input.focus();
-                input.oninput(); 
-            };
-            panel.appendChild(s);
-        });
-    }
-}
-
-
-
-// 6. EXTRAER URL DE ARCHIVOS
-function manejarAdjunto(inputElement) {
-    const archivo = inputElement.files[0];
-    if (!archivo) return;
-    const lector = new FileReader();
-    lector.readAsDataURL(archivo);
-    lector.onload = (e) => {
-        sendData({
-            tipo: archivo.type.includes('image') ? 'imagen' : 'archivo',
-            url: e.target.result,
-            mensaje: "Archivo enviado"
-        });
-    };
-}
-
-// 7. GRABACIÓN DE AUDIO
-
-let mediaRecorder, audioChunks = [];
 
 async function startRec() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
-        
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.onstop = async () => {
-            const blob = new Blob(audioChunks, { type: 'audio/mp3' });
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-                sendData({ 
-                    tipo: 'audio', 
-                    url: reader.result, 
-                    duracion: "0:05" // Aquí podrías calcular el tiempo real
-                });
-            };
-        };
-        
-        mediaRecorder.start();
+        isRecording = true;
         document.getElementById('rec-overlay').style.display = 'flex';
-        console.log("Grabando...");
-    } catch (err) {
-        alert("No se pudo acceder al micrófono. Verifica los permisos.");
-    }
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.start();
+    } catch (err) { alert("Permiso de micrófono denegado"); }
 }
 
 function stopRec() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
+        isRecording = false;
         document.getElementById('rec-overlay').style.display = 'none';
+        mediaRecorder.onstop = () => {
+            const reader = new FileReader();
+            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/mp3' }));
+            reader.onloadend = () => {
+                sendData({ tipo: 'audio', url: reader.result, duracion: "Voz" });
+            };
+        };
     }
 }
 
+// --- VISOR DE IMAGEN ---
+function verImagen(url) {
+    const v = document.getElementById('image-viewer');
+    document.getElementById('full-image').src = url;
+    v.style.display = 'flex';
+}
 
-// Menú para Borrar / Reenviar / Responder
+// --- MENÚ Y BORRADO ---
 function showMsgMenu(e, key) {
     e.preventDefault();
     msgSeleccionado = key;
@@ -193,52 +139,67 @@ function borrarMensaje() {
     if(msgSeleccionado) {
         db.ref("chats_privados/" + salaId + "/" + msgSeleccionado).remove();
         document.getElementById('context-menu').style.display = 'none';
-        location.reload(); // Recargar para limpiar la vista
+        // Ya no hace falta reload, child_removed lo quita solo
     }
 }
 
+// --- EMOJIS ---
+function toggleEmojis() {
+    const p = document.getElementById('emoji-panel');
+    p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
+}
 
-function stopRec() {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        document.getElementById('rec-overlay').style.display = 'none';
-        mediaRecorder.onstop = () => {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/mp3' }));
-            reader.onloadend = () => {
-                sendData({ tipo: 'audio', url: reader.result, duracion: "0:05" });
-            };
-        };
+function cargarEmojis() {
+    const panel = document.getElementById('emoji-panel');
+    const pack = {
+        "Caritas": ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺"],
+        "Gestos": ["👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝"],
+        "Corazones": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞"],
+        "Banderas": ["🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"]
+    };
+    panel.innerHTML = "";
+    for (const [cat, lista] of Object.entries(pack)) {
+        const t = document.createElement('div');
+        t.className = 'emoji-category-title'; t.innerText = cat;
+        panel.appendChild(t);
+        lista.forEach(e => {
+            const s = document.createElement('span');
+            s.className = 'text-2xl p-2 cursor-pointer text-center';
+            s.innerText = e;
+            s.onclick = () => { input.value += e; input.focus(); input.oninput(); };
+            panel.appendChild(s);
+        });
     }
 }
 
-// 8. ENVÍO Y BOTONES
+function manejarAdjunto(el) {
+    const file = el.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result });
+}
+
 function sendData(p) {
     const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     db.ref("chats_privados/" + salaId).push({ ...p, emisor: miId, hora: hora });
 }
 
-input.oninput = () => {
-    actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
-};
+input.oninput = () => actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
 
 const btn = document.getElementById('action-btn');
 btn.onclick = () => {
     if(input.value.trim()) {
         sendData({ tipo: 'texto', mensaje: input.value });
-        input.value = "";
-        input.oninput();
+        input.value = ""; input.oninput();
     }
 };
 
-// Toque largo para grabar
+// Eventos de grabación
 btn.onmousedown = btn.ontouchstart = (e) => { if(!input.value) startRec(); };
 btn.onmouseup = btn.ontouchend = () => { if(isRecording) stopRec(); };
 
-// Cerrar paneles al hacer clic en el chat
 document.addEventListener('click', (e) => {
-    if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) {
-        document.getElementById('emoji-panel').style.display = 'none';
-    }
+    if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) document.getElementById('emoji-panel').style.display = 'none';
+    if(!e.target.closest('.bubble')) document.getElementById('context-menu').style.display = 'none';
 });
