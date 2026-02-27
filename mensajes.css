@@ -1,40 +1,66 @@
-/* DNPLUS MOBILE OPTIMIZED */
+/* ============================================================
+   DNPLUS - CÓDIGO DE REPARACIÓN TOTAL
+   ============================================================ */
 :root {
-    --bg-chat: #0b141a;
-    --mio: #176f47;
-    --header: #085f56;
+    --whatsapp-bg: #0b141a;
+    --msg-mine: #176f47;
+    --msg-theirs: #202c33;
+    --header-color: #085f56;
+    --accent: #ffffff;
 }
 
-/* CABECERA: Iconos a la derecha y nombre a la izquierda */
+/* 1. ESTRUCTURA Y CUERPO */
+body {
+    background-color: var(--whatsapp-bg);
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 2. CABECERA CON ICONOS (TELÉFONO Y TRES PUNTOS) */
 header {
     height: 62px !important;
-    background-color: var(--header) !important;
+    background-color: var(--header-color) !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     padding: 0 15px !important;
+    color: white !important;
+    z-index: 1000;
 }
-header i { color: white !important; font-size: 20px !important; }
 
-/* AUDIOS: Estilo fino 38px */
+header .flex.gap-3, header #header-icons {
+    display: flex !important;
+    gap: 20px !important;
+    align-items: center !important;
+}
+
+header i { color: white !important; font-size: 20px !important; cursor: pointer; }
+
+/* 3. BURBUJAS DE AUDIO (FINAS 38PX) */
 .audio-wrapper {
     height: 38px !important;
     width: 220px !important;
     display: flex !important;
     align-items: center !important;
+    gap: 8px;
 }
 
-/* EMOJIS: 8 columnas fijas sin errores */
+/* 4. PANEL DE EMOJIS (8 COLUMNAS) */
 #emoji-panel {
     display: grid !important;
     grid-template-columns: repeat(8, 1fr) !important;
-    background: #232d36 !important;
+    background-color: #232d36 !important;
     height: 250px !important;
     overflow-y: auto !important;
     gap: 5px !important;
     padding: 10px !important;
     border-top: 1px solid #374045 !important;
 }
+
 .emoji-item, #emoji-panel span {
     font-size: 26px !important;
     display: flex !important;
@@ -43,7 +69,7 @@ header i { color: white !important; font-size: 20px !important; }
     height: 45px !important;
 }
 
-/* VISOR: Fixed para que no aparezca abajo de los emojis */
+/* 5. VISOR DE IMÁGENES (FIXED PARA QUE NO MOLESTE) */
 #image-viewer {
     display: none !important;
     position: fixed !important;
@@ -53,9 +79,9 @@ header i { color: white !important; font-size: 20px !important; }
     z-index: 9999;
 }
 
-/* ELIMINAR ESPACIOS MUERTOS ABAJO */
-[id*="preview"], .preview-container { 
-    display: none !important; 
-    height: 0 !important; 
+/* OCULTAR CUALQUIER BARRA DE PREVIEW ABAJO */
+[id*="preview"], .preview-container {
+    display: none !important;
+    height: 0 !important;
     margin: 0 !important;
 }
