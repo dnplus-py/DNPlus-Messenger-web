@@ -1,15 +1,27 @@
 /* ============================================================
-   PARTE 1: CABECERA, ICONOS Y VARIABLES
+ 
+/* ============================================================
+   PARTE 1: COLORES, VARIABLES Y CABECERAS (HEADER)
    ============================================================ */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --header-color: #085f56;    /* El verde oscuro que elegiste */
-    --accent-color: #ffffff;    /* Iconos blancos */
+    --header-color: #085f56;    
+    --accent-color: #ffffff;    
 }
 
-/* Forzamos que la cabecera sea flexible para que los iconos se vayan a la derecha */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--whatsapp-bg);
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- ESTILO DE LA CABECERA PRINCIPAL --- */
 header {
     height: 62px !important;
     background-color: var(--header-color) !important;
@@ -17,24 +29,25 @@ header {
     padding: 0 15px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important; /* Esto empuja los iconos al final */
+    justify-content: space-between !important; /* Mantiene nombre a la izquierda e iconos a la derecha */
     z-index: 1000;
 }
 
-/* Contenedor de los iconos (Teléfono y 3 puntos) */
+/* Contenedor de iconos (Teléfono, Cámara, 3 puntos) */
+header .flex.items-center.gap-4, 
 header .flex.gap-3 {
     display: flex !important;
-    gap: 20px !important;
+    gap: 18px !important;
     align-items: center !important;
 }
 
 header i {
     color: white !important;
-    font-size: 18px !important;
+    font-size: 20px !important;
     cursor: pointer;
 }
 
-/* Barra de acciones (Borrar) - Debe tapar la cabecera original */
+/* --- BARRA DE ACCIÓN (CUANDO ELIGES MENSAJES) --- */
 #action-header-menu {
     display: none; 
     position: absolute;
@@ -48,7 +61,6 @@ header i {
     gap: 25px;
     z-index: 6000;
 }
-
 
 /* ============================================================
    PARTE 2: CHAT Y BURBUJAS (AUDIO FINO Y ELEGANTE)
