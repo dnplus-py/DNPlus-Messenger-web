@@ -108,129 +108,86 @@
         <button id="action-btn" class="action-btn"><i id="action-icon" class="fas fa-microphone"></i></button>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+   <style>
+    .audio-wrapper { 
+        width: 270px; 
+        height: 60px; 
+        display: flex; 
+        align-items: center; 
+        gap: 12px; 
+        padding: 5px 10px;
+    }
+    .audio-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+    
+    /* Asegurar que el overlay de grabación sea persistente */
+    #rec-overlay { 
+        position: absolute; 
+        left: 10px; 
+        right: 70px; 
+        top: 8px; 
+        bottom: 8px; 
+        background: #111b21; 
+        border-radius: 25px; 
+        display: none; 
+        align-items: center; 
+        padding: 0 20px; 
+        z-index: 500; 
+    }
+</style>
 
-        const miId = localStorage.getItem("user_phone") || "595992536184";
-        const idOtro = localStorage.getItem("chat_destinatario_id");
-        const salaId = localStorage.getItem("chat_sala_id");
+<script>
+    // Lógica mejorada para el cronómetro y envío
+    let startTime, recInterval;
 
-        const input = document.getElementById('chat-input');
-        const container = document.getElementById('chat-container');
-        const actionBtn = document.getElementById('action-btn');
-        const actionIcon = document.getElementById('action-icon');
-
-        // --- CARGA INICIAL ---
-        window.onload = () => {
-            if(!idOtro || !salaId) return;
-
-            // Datos del contacto
-            db.ref("usuarios_registrados/" + idOtro).on("value", (snap) => {
-                const data = snap.val();
-                if(data) {
-                    document.getElementById('header-name').innerText = data.nombre || idOtro;
-                    document.getElementById('header-photo').src = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                    document.getElementById('call-name').innerText = data.nombre || idOtro;
-                    document.getElementById('call-photo').src = data.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                }
-            });
-
-            // Escuchar mensajes y notificar
-            db.ref("chats_privados/" + salaId).on("child_added", (snap) => {
-                const msg = snap.val();
-                dibujarBurbuja(msg);
-                if(msg.emisor !== miId && navigator.vibrate) navigator.vibrate(100);
-            });
-
-            // Escuchar llamadas entrantes
-            db.ref("llamadas/" + miId).on("value", (snap) => {
-                if(snap.exists()) {
-                    document.getElementById('call-screen').style.display = 'flex';
-                    document.getElementById('call-status').innerText = "Llamada entrante...";
-                } else {
-                    document.getElementById('call-screen').style.display = 'none';
-                }
-            });
-        };
-
-        // --- DIBUJAR BURBUJAS ---
-        function dibujarBurbuja(data) {
-            const esMio = data.emisor === miId;
-            const b = document.createElement('div');
-            b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
-            
-            if(data.tipo === 'audio') {
-                b.innerHTML = `<div class="flex items-center gap-3 p-1">
-                    <i class="fas fa-play cursor-pointer" onclick="new Audio('${data.url}').play()"></i>
-                    <span class="text-xs">Mensaje de voz (${data.duracion})</span>
-                </div>`;
-            } else if(data.tipo === 'imagen' || data.tipo === 'video') {
-                b.innerHTML = `<div class="media-container"><img src="${data.url}" class="media-content"></div>`;
-            } else {
-                b.innerHTML = `<div class="${esMio ? 'text-content' : ''}">${data.mensaje}</div>`;
-            }
-
-            b.innerHTML += `<div class="msg-info"><span>${data.hora}</span></div>`;
-            container.appendChild(b);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // --- ENVIAR DATOS ---
-        function sendData(payload) {
-            db.ref("chats_privados/" + salaId).push({
-                ...payload, emisor: miId,
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                fecha: Date.now()
-            });
-        }
-
-        // --- GRABACIÓN DE VOZ REAL ---
-        let mediaRecorder, audioChunks = [];
-        async function startRec() {
+    async function startRec() {
+        try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
+            
             document.getElementById('rec-overlay').style.display = 'flex';
+            startTime = Date.now();
+            
+            // Cronómetro preciso
+            recInterval = setInterval(() => {
+                const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+                const min = Math.floor(totalSeconds / 60);
+                const sec = (totalSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('rec-timer').innerText = `${min}:${sec}`;
+            }, 100);
+
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
             mediaRecorder.onstop = () => {
+                clearInterval(recInterval);
                 const blob = new Blob(audioChunks, { type: 'audio/mp3' });
                 const reader = new FileReader();
                 reader.readAsDataURL(blob);
-                reader.onloadend = () => sendData({ tipo: 'audio', url: reader.result, duracion: "0:05" });
+                reader.onloadend = () => {
+                    sendData({ 
+                        tipo: 'audio', 
+                        url: reader.result, 
+                        duracion: document.getElementById('rec-timer').innerText 
+                    });
+                    // Resetear timer después de enviar
+                    document.getElementById('rec-timer').innerText = "0:00";
+                };
             };
             mediaRecorder.start();
+        } catch (err) {
+            console.error("Error al acceder al micro:", err);
         }
+    }
 
-        function stopRec() {
-            if(mediaRecorder) mediaRecorder.stop();
-            document.getElementById('rec-overlay').style.display = 'none';
+    // Evento de soltar corregido para evitar cortes accidentales
+    actionBtn.onmouseup = () => {
+        clearTimeout(pressTimer);
+        if (isRecording) {
+            isRecording = false;
+            setTimeout(() => {
+                stopRec(); // Pequeño delay para asegurar que capte el final
+            }, 150);
         }
-
-        // --- EVENTOS DE BOTONES ---
-        actionBtn.onmousedown = () => { if(!input.value) startRec(); };
-        actionBtn.onmouseup = () => { if(!input.value) stopRec(); };
-        actionBtn.onclick = () => { if(input.value) { sendData({ tipo: 'texto', mensaje: input.value }); input.value = ""; actionIcon.className = "fas fa-microphone"; } };
-        input.oninput = () => actionIcon.className = input.value ? "fas fa-paper-plane" : "fas fa-microphone";
-
-        // --- EXTRAS ---
-        function toggleMenu() { const m = document.getElementById('menu-dots'); m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; }
-        function startCall() { document.getElementById('call-screen').style.display = 'flex'; db.ref("llamadas/" + idOtro).set({ emisor: miId, status: 'llamando' }); }
-        function endCall() { document.getElementById('call-screen').style.display = 'none'; db.ref("llamadas/" + idOtro).remove(); }
-        function handleFileUpload(f) { const r = new FileReader(); r.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result }); r.readAsDataURL(f.files[0]); }
-        
-        // Emojis
-        const emojis = ["😀","😂","😍","🙌","👍","🔥","❤️"];
-        emojis.forEach(e => {
-            const s = document.createElement('span'); s.className='emoji-item'; s.innerText=e;
-            s.onclick=()=>{input.value+=e; input.dispatchEvent(new Event('input'));};
-            document.getElementById('emoji-panel').appendChild(s);
-        });
-        document.getElementById('emoji-toggle').onclick = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; };
-    </script>
+    };
+</script>
 </body>
 </html>
