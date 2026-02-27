@@ -1,3 +1,5 @@
+// mensajes.js - LIBRERÍA CENTRAL DNPLUS
+console.log("✅ DNPlus Messenger: Librería centralizada cargada");
 
 // Configuración de Firebase
 const firebaseConfig = {
