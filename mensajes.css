@@ -1,3 +1,23 @@
+/* Separación del Input y Emoji */
+.input-card {
+    padding: 0 15px !important;
+}
+
+#chat-input {
+    margin-left: 15px !important; /* Aquí se separa de la carita */
+}
+
+/* Pack de Emojis estilo WhatsApp */
+#emoji-panel {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 10px;
+    height: 200px !important;
+}
+
+/* Medida de la foto de audio */
+/* Decidimos quitarla para que el mensaje de voz sea de 60px "flaquito" */
+
+
 /* DNPlus Messenger - Estilos Centralizados */
 :root {
     --whatsapp-bg: #0b141a;
