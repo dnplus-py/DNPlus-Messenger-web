@@ -1,4 +1,4 @@
-/* DNPlus Messenger - Estilo Maestro Final CORREGIDO */
+/* DNPlus Messenger - Estilo Maestro Final Corregido */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
@@ -16,7 +16,6 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative;
 }
 
 /* --- CABECERAS --- */
@@ -40,9 +39,7 @@ header, #action-header-menu {
     z-index: 6000;
 }
 
-#action-header-menu i { color: var(--accent-color) !important; font-size: 20px; cursor: pointer; }
-
-/* --- CONTENEDOR DE CHAT --- */
+/* --- CHAT --- */
 #chat-container {
     flex: 1;
     overflow-y: auto;
@@ -52,35 +49,33 @@ header, #action-header-menu {
     gap: 12px;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     background-blend-mode: overlay;
-    background-color: #0b141a;
 }
 
 /* --- BURBUJAS --- */
 .bubble {
     max-width: 85%;
-    padding: 8px 12px;
-    border-radius: 12px;
-    position: relative;
+    padding: 6px 10px;
+    border-radius: 10px;
     font-size: 0.95rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    word-wrap: break-word;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- DISEÑO DE AUDIO (RETOQUE DE CRONÓMETRO) --- */
+/* --- AUDIO (AHORA MÁS FINO Y ESTILIZADO) --- */
 .audio-wrapper {
-    width: 280px !important; /* Ancho fijo para que no se agrande */
-    height: 55px;
+    width: 240px !important;
+    height: 40px !important; /* Reducido de 60px a 40px para que no sea grueso */
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 2px 0;
 }
 
 .audio-wrapper img {
-    width: 45px;
-    height: 45px;
+    width: 35px !important; /* Foto más pequeña para que quepa en el audio fino */
+    height: 35px !important;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -89,94 +84,74 @@ header, #action-header-menu {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 5px;
-    overflow: hidden; /* Evita que los controles estiren el div */
-}
-
-/* Estilo para el tiempo/cronómetro del audio */
-.audio-time {
-    font-size: 12px;
-    min-width: 35px; /* Evita que el texto baile al cambiar los segundos */
-    color: #8696a0;
-}
-
-/* Barra de progreso del audio */
-.audio-progress {
-    flex: 1;
-    height: 3px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 2px;
-}
-
-/* --- MULTIMEDIA (FOTOS) --- */
-.img-frame {
-    width: 250px !important;   
-    height: 300px !important;  
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 4px;
-}
-
-.img-frame img { width: 100%; height: 100%; object-fit: cover; }
-
-.msg-time {
-    font-size: 10px;
-    opacity: 0.7;
-    text-align: right;
-    margin-top: 4px;
-    display: block;
-}
-
-/* --- PANEL DE EMOJIS --- */
-#emoji-panel {
-    display: none;
-    background: #232d36;
-    width: 100%;
-    height: 250px;
-    padding: 10px;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr); 
-    gap: 10px;
-}
-
-/* --- ENTRADA DE TEXTO --- */
-.input-area {
-    background-color: #111b21;
-    padding: 8px;
-    display: flex;
-    align-items: center;
     gap: 8px;
 }
 
-.input-card {
-    background: #2a3942;
-    border-radius: 25px;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    height: 48px;
+/* --- EMOJIS (CUADRÍCULA COMPLETA) --- */
+#emoji-panel {
+    display: none; /* Se activa por JS */
+    background: #232d36;
+    width: 100%;
+    height: 250px;
+    overflow-y: auto;
+    padding: 10px;
+    border-top: 1px solid #374045;
 }
 
-#chat-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    flex: 1;
-    color: white;
-    font-size: 16px;
-    margin-left: 10px;
+/* Clase para las secciones de emojis (Caritas, Corazones) */
+.emoji-section {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr); 
+    gap: 10px;
+    margin-bottom: 20px;
 }
+
+.emoji-title {
+    color: #8696a0;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 5px 0;
+    grid-column: span 8;
+}
+
+.emoji-item {
+    font-size: 24px;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* --- VISOR DE IMAGEN (ARREGLO POSICIÓN ABAJO) --- */
+#image-viewer {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* La barra de zoom que salía abajo */
+.zoom-controls {
+    position: absolute;
+    bottom: 30px;
+    display: flex;
+    gap: 30px;
+    background: rgba(35, 45, 54, 0.8);
+    padding: 10px 20px;
+    border-radius: 30px;
+}
+
+/* --- ENTRADA --- */
+.input-area { background: #111b21; padding: 8px; display: flex; align-items: center; gap: 8px; }
+.input-card { background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; }
+#chat-input { background: transparent; border: none; outline: none; flex: 1; color: white; }
 
 .action-btn {
     background: var(--msg-mine);
-    width: 48px;
-    height: 48px;
+    width: 45px; height: 45px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    border: none;
+    border: none; color: white;
 }
