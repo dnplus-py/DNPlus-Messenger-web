@@ -1,15 +1,13 @@
-/* ============================================================
-   DNPlus Messenger - CÓDIGO MAESTRO INTEGRAL (FINAL)
-   ============================================================ */
+/* DNPlus Messenger - Estilo Maestro Final Corregido */
 :root {
     --whatsapp-bg: #0b141a;
     --msg-mine: #176f47;
     --msg-theirs: #202c33;
-    --header-color: #202c33; 
-    --accent-color: #ffffff;
+    --text-color-mine: #ffffff; 
+    --header-color: #085f56;    /* Verde oscuro profesional */
+    --accent-color: #F08927;    /* Tu naranja DNPlus */
 }
 
-/* --- ESTRUCTURA BASE --- */
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: var(--whatsapp-bg);
@@ -18,55 +16,31 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
 }
 
-/* --- CABECERA (HEADER) --- */
-header {
-    height: 62px !important;
+/* --- CABECERAS --- */
+header, #action-header-menu {
+    height: 62px;
     background-color: var(--header-color) !important;
     color: white !important;
-    padding: 0 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    position: relative !important;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
     z-index: 1000;
 }
 
-header img {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    object-fit: cover;
+#action-header-menu {
+    display: none; 
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 25px;
+    z-index: 6000;
 }
 
-/* --- MENÚ DE LOS 3 PUNTOS (FLOTANTE) --- */
-#header-menu {
-    position: absolute !important;
-    top: 55px !important; 
-    right: 15px !important;
-    background-color: #232d36 !important;
-    min-width: 190px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.6) !important;
-    z-index: 5000 !important;
-    border: 1px solid #374045 !important;
-    padding: 8px 0 !important;
-}
-
-#header-menu:not(.hidden) { display: block !important; }
-
-.menu-item {
-    padding: 12px 18px !important;
-    color: #e9edef !important;
-    font-size: 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    cursor: pointer;
-}
-.menu-item:hover { background-color: #2a3942 !important; }
-.menu-item i { color: #8696a0 !important; width: 20px; text-align: center; }
+#action-header-menu i { color: var(--accent-color) !important; font-size: 20px; cursor: pointer; }
 
 /* --- CONTENEDOR DE CHAT --- */
 #chat-container {
@@ -76,118 +50,149 @@ header img {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background-color: #0b141a;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     background-blend-mode: overlay;
+    background-color: #0b141a;
 }
 
-/* --- BURBUJAS CON "COLITA" --- */
+/* --- BURBUJAS DE MENSAJE --- */
 .bubble {
     max-width: 85%;
     padding: 8px 12px;
-    border-radius: 10px;
+    border-radius: 12px;
     position: relative;
-    font-size: 15px;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     word-wrap: break-word;
-    color: white;
 }
 
-.bubble-mine { 
-    align-self: flex-end; 
-    background-color: var(--msg-mine); 
-    border-top-right-radius: 0; /* Para que la colita salga de la esquina */
-}
-.bubble-mine::after {
-    content: ""; position: absolute; top: 0; right: -8px;
-    width: 0; height: 0;
-    border-left: 12px solid var(--msg-mine);
-    border-bottom: 12px solid transparent;
-}
+.bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
+.bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-.bubble-theirs { 
-    align-self: flex-start; 
-    background-color: var(--msg-theirs); 
-    border-top-left-radius: 0;
-}
-.bubble-theirs::after {
-    content: ""; position: absolute; top: 0; left: -8px;
-    width: 0; height: 0;
-    border-right: 12px solid var(--msg-theirs);
-    border-bottom: 12px solid transparent;
-}
-
-.msg-time {
-    font-size: 11px;
-    opacity: 0.6;
-    display: block;
-    text-align: right;
-    margin-top: 4px;
-}
-
-/* --- AUDIOS Y MULTIMEDIA --- */
+/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
 .audio-wrapper {
-    width: 240px !important;
-    height: 50px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-.audio-wrapper img { width: 42px !important; height: 42px !important; border-radius: 50% !important; }
-
-.img-frame {
-    max-width: 250px !important;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 5px;
-}
-.img-frame img { width: 100%; height: auto; object-fit: cover; }
-
-/* --- PANEL DE EMOJIS (IGUAL A CAPTURA) --- */
-#emoji-panel {
-    background-color: #232d36 !important;
-    height: 250px !important;
-    width: 100% !important;
-    position: fixed !important;
-    bottom: 62px !important; 
-    left: 0 !important;
-    z-index: 3000 !important;
-    padding: 10px !important;
-    overflow-y: auto !important;
-    border-top: 1px solid #374045;
-}
-
-#emoji-panel:not(.hidden) { 
-    display: grid !important; 
-    grid-template-columns: repeat(8, 1fr) !important; 
-}
-
-/* --- ÁREA DE ENTRADA --- */
-.input-area {
-    background-color: #202c33;
-    padding: 10px;
+    width: 250px !important;
+    height: 60px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    z-index: 4000;
+    gap: 12px;
 }
 
-/* OVERLAY GRABANDO (TEXTO ROJO) */
-#rec-overlay:not(.hidden) {
-    display: flex !important;
-    position: absolute;
-    left: 50px;
-    color: #f15c5c;
-    font-weight: 500;
+.audio-wrapper img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%; /* Foto redonda */
+    object-fit: cover;
+}
+
+.audio-controls {
+    flex: 1;
+    display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* --- VISOR DE IMAGEN (SOLUCIÓN BARRA NEGRA) --- */
-#image-viewer {
-    background-color: black !important;
-    z-index: 9999 !important;
-    height: 100vh !important;
-    width: 100vw !important;
+/* --- MULTIMEDIA (FOTOS) --- */
+.img-frame {
+    width: 250px !important;   
+    height: 300px !important;  
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 4px;
 }
-#image-viewer:not(.hidden) { display: flex !important; }
+
+.img-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+.msg-time {
+    font-size: 10px;
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 4px;
+    display: block;
+}
+
+/* --- PANEL DE EMOJIS (CORREGIDO) --- */
+#emoji-panel {
+    display: none;
+    background: #232d36;
+    width: 100%;
+    height: 250px;
+    padding: 10px;
+    overflow-y: auto;
+    display: grid; /* ESTO FALTABA */
+    grid-template-columns: repeat(8, 1fr); 
+    gap: 10px;
+    border-top: 1px solid #374045;
+}
+
+.emoji-item {
+    font-size: 24px;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* --- MENÚS --- */
+.msg-menu {
+    position: absolute;
+    background: #232d36;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 5000;
+    display: none;
+    flex-direction: column;
+    padding: 5px 0;
+    border: 1px solid #374045;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-item i { color: var(--accent-color) !important; width: 20px; text-align: center; }
+
+/* --- ENTRADA DE TEXTO --- */
+.input-area {
+    background-color: #111b21;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-card {
+    background: #2a3942;
+    border-radius: 25px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    height: 48px;
+}
+
+#chat-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    flex: 1;
+    color: white;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.action-btn {
+    background: var(--msg-mine);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: none;
+}
