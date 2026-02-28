@@ -12,61 +12,65 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
-<body style="background-color: #0b141a;"> <div id="action-header-menu">
+<body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
+
+    <div id="action-header-menu" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 62px; background: #202c33; z-index: 6000; align-items: center; justify-content: flex-end; gap: 25px; padding: 0 20px;">
         <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
         <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
         <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
         <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
     </div>
 
-    <header>
+    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white;">
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
-            <img id="header-photo" src="" class="w-10 h-10 rounded-full object-cover">
+            <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full object-cover">
             <div>
                 <div id="header-name" class="font-bold text-sm">Cargando...</div>
-                <div class="text-[10px] text-green-400">en línea</div>
+                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
         <div class="flex gap-3 relative">
             <i class="fas fa-phone p-2"></i>
             <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
             
-            <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none;">
-                <div class="menu-item" onclick="cambiarFondo()">
+            <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none; position: absolute; background: #232d36; border-radius: 8px; flex-direction: column; z-index: 5000;">
+                <div class="menu-item" style="padding: 12px; cursor: pointer; color: white;" onclick="cambiarFondo()">
                     <i class="fas fa-image mr-2"></i> Fondo de pantalla
                 </div>
-                <div class="menu-item" onclick="vaciarChat()">
+                <div class="menu-item" style="padding: 12px; cursor: pointer; color: white;" onclick="vaciarChat()">
                     <i class="fas fa-broom mr-2"></i> Vaciar chat
                 </div>
             </div>
         </div>
     </header>
 
-    <main id="chat-container"></main>
+    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; position: relative;"></main>
 
-    <div class="input-area" style="position: relative;"> <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: calc(100% - 65px); height: 100%; left: 0; top: 0; align-items: center; padding-left: 20px; z-index: 50; border-radius: 25px;">
-        <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> 
-        <span style="color: #ff5252; font-weight: bold;">Grabando...</span>
+    <div class="input-area" style="position: relative; background: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px;">
+        
+        <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: calc(100% - 70px); height: 80%; left: 5px; top: 10%; align-items: center; padding-left: 20px; z-index: 50; border-radius: 25px;">
+            <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> 
+            <span style="color: #ff5252; font-weight: bold;">Grabando...</span>
+        </div>
+
+        <div class="input-card" style="background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 45px;">
+            <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
+            <input type="text" id="chat-input" style="background: transparent; border: none; outline: none; flex: 1; color: white; padding-left: 10px;" placeholder="Mensaje" autocomplete="off">
+            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
+            <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
+        </div>
+        
+        <button id="action-btn" class="action-btn" style="background: #00a884; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none;">
+            <i id="action-icon" class="fas fa-microphone"></i>
+        </button>
     </div>
 
-    <div class="input-card">
-        <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
-        <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
-        <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
-        <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
-    </div>
-    <button id="action-btn" class="action-btn">
-        <i id="action-icon" class="fas fa-microphone"></i>
-    </button>
-</div>
+    <div id="emoji-panel" style="display: none;"></div>
 
-
-    <div id="emoji-panel"></div>
-
-    <div id="image-viewer">
+    <div id="image-viewer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
         <span class="absolute top-5 right-5 text-white text-5xl cursor-pointer" style="z-index:100" onclick="cerrarVisor()">&times;</span>
-        <img id="full-image" src="" alt="Vista previa">
+        <img id="full-image" src="" style="max-width: 90%; max-height: 80%; object-fit: contain;">
         <div class="flex gap-10 mt-5">
             <i class="fas fa-search-plus text-white text-3xl cursor-pointer" onclick="zoomImg(1.2)"></i>
             <i class="fas fa-search-minus text-white text-3xl cursor-pointer" onclick="zoomImg(0.8)"></i>
