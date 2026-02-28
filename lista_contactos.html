@@ -2,19 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contactos DNPlus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; }
-        .header { background: #176f47; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; overflow-x: hidden; }
+        
+        /* Cabecera con el color solicitado */
+        .header { 
+            background: #085f56; 
+            padding: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); 
+        }
         .header h3 { margin: 0; font-size: 18px; color: #e9edef; }
         
         .contact-row { 
             display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
             cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); 
             transition: background 0.2s;
+            user-select: none; /* Evita seleccionar texto al mantener pulsado */
+            -webkit-tap-highlight-color: transparent;
         }
         .contact-row:active { background-color: #202c33; }
+        .contact-row.selected { background-color: #2a3942; }
         
         .img-perfil { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; border: 1px solid rgba(255,255,255,0.1); }
         .info { flex: 1; }
@@ -22,14 +38,22 @@
         .status { font-size: 13px; color: #8696a0; margin-top: 2px; }
         
         #contador { font-size: 12px; color: #d1d7db; opacity: 0.9; }
-        
         .no-contacts { text-align: center; padding: 40px; color: #8696a0; font-size: 14px; }
+
+        /* Modal de Borrado */
+        #modal-borrar {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-box {
+            background: #232d36; padding: 20px; border-radius: 12px; width: 100%; max-width: 320px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div onclick="history.back()" style="cursor:pointer; font-size: 20px;">⬅</div>
+        <div onclick="history.back()" style="cursor:pointer; font-size: 20px;"><i class="fas fa-arrow-left"></i></div>
         <div>
             <h3>Seleccionar contacto</h3>
             <span id="contador">Buscando usuarios...</span>
@@ -37,6 +61,17 @@
     </div>
 
     <div id="lista-contactos-real"></div>
+
+    <div id="modal-borrar" onclick="cerrarModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h3 style="margin-top:0; color:white;">¿Eliminar contacto?</h3>
+            <p style="color:#8696a0; font-size:14px;">El contacto se eliminará de tu lista de DNPlus.</p>
+            <div style="display:flex; justify-content:flex-end; gap:20px; margin-top:20px;">
+                <button onclick="cerrarModal()" style="color:#00a884; font-weight:bold; background:none; border:none; cursor:pointer;">CANCELAR</button>
+                <button id="btn-borrar-ok" style="color:#ef4444; font-weight:bold; background:none; border:none; cursor:pointer;">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -49,59 +84,88 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // Obtenemos tu número de teléfono (que es tu ID) del localStorage
         const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
+        let timerPulsacion;
+        let contactoSeleccionadoId = null;
 
         function cargarContactos() {
             if (!miId) {
-                document.getElementById("lista-contactos-real").innerHTML = "<p class='no-contacts'>Error: No se detectó tu número de registro.</p>";
+                document.getElementById("lista-contactos-real").innerHTML = "<p class='no-contacts'>Error de sesión.</p>";
                 return;
             }
 
-            // Referencia directa a la carpeta unificada
             db.ref("usuarios_registrados").on("value", (snapshot) => {
                 const container = document.getElementById("lista-contactos-real");
                 const txtContador = document.getElementById("contador");
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    container.innerHTML = "<p class='no-contacts'>Aún no hay usuarios en DNPlus.</p>";
+                    container.innerHTML = "<p class='no-contacts'>No hay usuarios registrados.</p>";
                     txtContador.innerText = "0 contactos";
                     return;
                 }
 
                 let total = 0;
                 snapshot.forEach((child) => {
-                    const userId = child.key; // Este es el número de teléfono (ej: 5959...)
+                    const userId = child.key;
                     const user = child.val();
 
-                    // No te muestras a ti mismo en la lista
                     if (userId !== miId) {
                         total++;
-                        container.innerHTML += `
-                            <div class="contact-row" onclick="iniciarChat('${userId}', '${user.nombre}', '${user.foto}')">
-                                <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="img-perfil">
-                                <div class="info">
-                                    <div class="name">${user.nombre || 'Usuario DNPlus'}</div>
-                                    <div class="status">${user.estado || 'Disponible'}</div>
-                                </div>
+                        const row = document.createElement("div");
+                        row.className = "contact-row";
+                        row.innerHTML = `
+                            <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="img-perfil">
+                            <div class="info">
+                                <div class="name">${user.nombre || 'Usuario DNPlus'}</div>
+                                <div class="status">${user.estado || 'Disponible'}</div>
                             </div>`;
+
+                        // --- Pulsación Corta: Abrir Chat ---
+                        row.onclick = () => iniciarChat(userId, user.nombre, user.foto);
+
+                        // --- Pulsación Larga: Borrar (3 segundos) ---
+                        row.onmousedown = row.ontouchstart = (e) => {
+                            timerPulsacion = setTimeout(() => {
+                                abrirConfirmacion(userId, row);
+                            }, 3000); // 3 SEGUNDOS
+                        };
+
+                        row.onmouseup = row.onmouseleave = row.ontouchend = () => {
+                            clearTimeout(timerPulsacion);
+                        };
+
+                        container.appendChild(row);
                     }
                 });
                 txtContador.innerText = total + " contactos";
-            }, (error) => {
-                console.error(error);
-                document.getElementById("lista-contactos-real").innerHTML = "<p class='no-contacts'>Error al cargar la base de datos.</p>";
             });
         }
 
+        function abrirConfirmacion(id, elemento) {
+            contactoSeleccionadoId = id;
+            elemento.classList.add("selected");
+            document.getElementById("modal-borrar").style.display = "flex";
+            
+            document.getElementById("btn-borrar-ok").onclick = () => {
+                // Esto borra al usuario de la lista general (usuarios_registrados)
+                // Ten cuidado: solo bórralo si tienes permiso o si es una lista personal
+                db.ref("usuarios_registrados/" + contactoSeleccionadoId).remove().then(() => {
+                    cerrarModal();
+                });
+            };
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal-borrar").style.display = "none";
+            document.querySelectorAll(".contact-row").forEach(r => r.classList.remove("selected"));
+            contactoSeleccionadoId = null;
+        }
+
         function iniciarChat(idOtro, nombre, foto) {
-            // Generamos el salaId ordenando los números de teléfono
-            // Esto evita que se creen dos salas diferentes para las mismas dos personas
             const ids = [miId, idOtro].sort();
             const salaId = ids[0] + "_" + ids[1];
 
-            // Guardamos los datos del destinatario para la pantalla de mensajes
             localStorage.setItem("chat_sala_id", salaId);
             localStorage.setItem("chat_destinatario_id", idOtro);
             localStorage.setItem("chat_destinatario_nombre", nombre);
