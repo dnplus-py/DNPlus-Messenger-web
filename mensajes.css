@@ -69,21 +69,20 @@ header, #action-header-menu {
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- SECCIÓN DE AUDIO ESTILO WHATSAPP (CORREGIDA) --- */
+/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
 .audio-wrapper {
     width: 280px !important;
-    height: 50px !important; /* Aumentado para que la foto no se corte */
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .audio-wrapper img {
-    width: 45px !important;
-    height: 45px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    border: 1.5px solid rgba(255,255,255,0.2);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%; /* Foto redonda */
+    object-fit: cover;
 }
 
 .audio-controls {
@@ -91,55 +90,7 @@ header, #action-header-menu {
     display: flex;
     align-items: center;
     gap: 13px;
-    color: white;
 }
-
-/* --- OVERLAY DE GRABACIÓN (SOLUCIÓN AL ERROR DE EXPANSIÓN) --- */
-#rec-overlay {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #111b21; /* Color oscuro del fondo de entrada */
-    display: none; /* Se activa con .flex desde JS */
-    align-items: center;
-    padding-left: 20px;
-    z-index: 5000; /* Por encima de la entrada de texto */
-    border-radius: 25px; /* Para que encaje con el diseño redondeado */
-}
-
-/* Cuando está activo (removiendo .hidden en JS) */
-#rec-overlay:not(.hidden) {
-    display: flex !important;
-}
-
-#rec-overlay i {
-    color: #ff5252;
-    margin-right: 12px;
-    font-size: 1.2rem;
-    animation: blink 1s infinite;
-}
-
-#rec-overlay span {
-    color: #ff5252;
-    font-weight: 500;
-    font-size: 16px;
-    letter-spacing: 0.5px;
-}
-
-/* Animación de parpadeo para el micro rojo */
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
-}
-
-/* Ajuste del botón de acción para que no desaparezca al grabar */
-.action-btn {
-    z-index: 5100;
-}
-
 
 /* --- MULTIMEDIA (FOTOS) --- */
 .img-frame {
@@ -245,107 +196,3 @@ header, #action-header-menu {
     color: white;
     border: none;
 }
-
-
-    /* --- CONTINUACIÓN DEL CÓDIGO MAESTRO DNPlus --- */
-
-/* --- DETALLES DE LAS BURBUJAS (LAS COLITAS) --- */
-.bubble-mine::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -8px;
-    width: 0;
-    height: 0;
-    border-left: 12px solid var(--msg-mine);
-    border-bottom: 12px solid transparent;
-}
-
-.bubble-theirs::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -8px;
-    width: 0;
-    height: 0;
-    border-right: 12px solid var(--msg-theirs);
-    border-bottom: 12px solid transparent;
-}
-
-/* --- ESTILO DE GRABACIÓN (EL TEXTO ROJO DE TU CAPTURA) --- */
-#rec-overlay {
-    position: absolute;
-    inset: 0;
-    background-color: #111b21;
-    display: none; /* Se activa con .flex por JS */
-    align-items: center;
-    padding-left: 20px;
-    z-index: 20;
-}
-
-#rec-overlay i {
-    color: #ff5252;
-    margin-right: 10px;
-    font-size: 1.2rem;
-}
-
-#rec-overlay span {
-    color: #ff5252;
-    font-weight: 500;
-    font-size: 15px;
-}
-
-/* --- VISOR DE IMÁGENES (PANTALLA COMPLETA) --- */
-#image-viewer {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.95);
-    display: none; /* Se activa por JS */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-#full-image {
-    max-width: 95%;
-    max-height: 80vh;
-    object-fit: contain;
-    transition: transform 0.2s ease;
-}
-
-.viewer-close {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    color: white;
-    font-size: 40px;
-    cursor: pointer;
-}
-
-/* --- AJUSTES PARA DISPOSITIVOS MÓVILES --- */
-@media (max-width: 480px) {
-    .bubble { max-width: 90%; }
-    .audio-wrapper { width: 220px !important; }
-    #emoji-panel { grid-template-columns: repeat(7, 1fr); } /* Más emojis en móviles */
-}
-
-/* --- ESTADO "EN LÍNEA" --- */
-#header-status {
-    font-size: 11px;
-    color: #00e676;
-    font-weight: normal;
-}
-
-/* --- ANIMACIÓN PARA NUEVOS MENSAJES --- */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.bubble {
-    animation: slideIn 0.2s ease-out;
-}
-
-/* Evitar que Tailwind oculte elementos necesarios */
-.hidden { display: none !important; }
