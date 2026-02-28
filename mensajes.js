@@ -278,3 +278,48 @@ document.addEventListener('click', (e) => {
         if(hm) hm.style.display = 'none';
     }
 });
+
+let miFotoGlobal = ""; // Variable para tu foto (David Oviedo)
+
+window.onload = () => {
+    if(!idOtro || !salaId) return;
+
+    // --- 1. CARGAR MI FOTO REAL ---
+    db.ref("usuarios_registrados/" + miId).on("value", s => {
+        const d = s.val();
+        if(d && d.foto) {
+            miFotoGlobal = d.foto;
+        } else {
+            miFotoGlobal = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        }
+    });
+
+    // --- 2. CARGAR FOTO DEL DESTINATARIO ---
+    db.ref("usuarios_registrados/" + idOtro).on("value", s => {
+        const d = s.val();
+        if(d) {
+            fotoOtroGlobal = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            document.getElementById('header-name').innerText = d.nombre || idOtro;
+            document.getElementById('header-photo').src = fotoOtroGlobal;
+        }
+    });
+
+    // --- 3. ESCUCHAR MENSAJES ---
+    db.ref("chats_privados/" + salaId).on("child_added", s => {
+        dibujarBurbuja(s.val(), s.key);
+    });
+
+    db.ref("chats_privados/" + salaId).on("child_removed", s => {
+        const el = document.getElementById(s.key);
+        if(el) el.remove();
+    });
+
+    // --- 4. CARGAR FONDO ---
+    const bgSaved = localStorage.getItem("chat_bg_" + salaId);
+    if(bgSaved) {
+        chatContainer.style.backgroundImage = `url('${bgSaved}')`;
+        chatContainer.style.backgroundSize = "cover";
+    }
+
+    cargarEmojis();
+};
