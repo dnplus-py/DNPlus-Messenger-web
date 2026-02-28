@@ -69,13 +69,12 @@ function dibujarBurbuja(data, key) {
         
         b.innerHTML = `
         <div class="audio-wrapper">
-            <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
-            
             <div class="audio-photo-container">
                 <img src="${fotoParaAudio}" class="audio-user-photo">
-                <i class="fas fa-microphone micro-audio-icon"></i>
             </div>
 
+            <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
+            
             <div class="flex-1">
                 <div class="h-[3px] bg-gray-600 w-full rounded-full relative">
                     <div class="h-full bg-white w-0 rounded-full"></div>
@@ -99,6 +98,7 @@ function dibujarBurbuja(data, key) {
     chatContainer.appendChild(b);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
 
 // --- AUDIO ---
 let audioActual = null, iconoActual = null;
