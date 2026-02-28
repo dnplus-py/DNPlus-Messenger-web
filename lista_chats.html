@@ -2,26 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chats DNPlus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: #e9edef; overflow-x: hidden; }
         .chat-list-container { display: flex; flex-direction: column; padding-bottom: 80px; }
         
+        /* Efecto de selección al mantener pulsado */
         .chat-row { 
             display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
             cursor: pointer; border-bottom: 1px solid rgba(134, 150, 160, 0.08); 
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .chat-row:active { background-color: #202c33; }
+        .chat-row.selected { background-color: #2a3942; }
         
         .profile-img { width: 55px; height: 55px; border-radius: 50%; background-color: #232d36; object-fit: cover; border: 1px solid #176f47; }
-        .chat-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .chat-details { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
         .chat-header { display: flex; justify-content: space-between; align-items: center; }
         .name { font-size: 16px; font-weight: 500; color: #e9edef; }
         .time { font-size: 12px; color: #8696a0; }
         
         .last-msg-container { display: flex; justify-content: space-between; align-items: center; margin-top: 3px; }
-        .message { font-size: 14px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        .message { font-size: 14px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; }
         
         .fab-chats {
             position: fixed; bottom: 25px; right: 25px;
@@ -29,6 +36,15 @@
             border-radius: 50%; display: flex; align-items: center;
             justify-content: center; font-size: 24px; color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 99; cursor: pointer;
+        }
+
+        /* Modal de borrado */
+        #delete-modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-content {
+            background: #232d36; padding: 20px; border-radius: 15px; width: 100%; max-width: 300px;
         }
     </style>
 </head>
@@ -38,7 +54,20 @@
         <p style="text-align:center; padding:20px; color:#8696a0;">Cargando mensajes de DNPlus...</p>
     </div>
 
-    <div class="fab-chats" onclick="window.top.location.href='lista_contactos.html'">💬</div>
+    <div class="fab-chats" onclick="window.location.href='lista_contactos.html'">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div id="delete-modal" onclick="cerrarModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-top:0; color:white;">¿Eliminar chat?</h3>
+            <p style="color:#8696a0; font-size:14px;">Se eliminarán todos los mensajes de esta conversación para ti.</p>
+            <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:20px;">
+                <button onclick="cerrarModal()" style="color:#00a884; font-weight:bold; background:none; border:none;">CANCELAR</button>
+                <button id="btn-eliminar-confirmar" style="color:#ef4444; font-weight:bold; background:none; border:none;">ELIMINAR CHAT</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -51,8 +80,10 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // ID del usuario actual (tú)
-        const miId = localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
+        // ID del usuario actual
+        const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
+        let salaParaBorrar = null;
+        let timerPulsacion;
 
         function cargarChats() {
             if (!miId) {
@@ -60,7 +91,6 @@
                 return;
             }
 
-            // Escuchamos 'chats_privados'
             db.ref("chats_privados").on("value", (snapshot) => {
                 const container = document.getElementById("contenedor-chats-real");
                 container.innerHTML = "";
@@ -72,45 +102,46 @@
 
                 snapshot.forEach((child) => {
                     const salaId = child.key;
-                    
-                    // Verificamos si miId participa en esta sala
                     if (salaId.includes(miId)) {
-                        // Extraemos el ID del otro usuario
-                        // Ejemplo: salaId es "123_456" y miId es "123", idOtro será "456"
                         const idOtro = salaId.replace(miId, "").replace("_", "");
                         
-                        // Buscamos los datos de ese otro usuario en usuarios_registrados
                         db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
                             const user = uSnap.val() || {};
-                            
-                            // Obtenemos el último mensaje
                             const mensajesSala = child.val();
                             const llaves = Object.keys(mensajesSala);
                             const ultimoMsg = mensajesSala[llaves[llaves.length - 1]];
                             
-                            let texto = ultimoMsg.mensaje || ultimoMsg.contenido || "Archivo/Imagen";
-                            let hora = "";
-                            
-                            if (ultimoMsg.fecha) {
-                                hora = new Date(ultimoMsg.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                            }
+                            let texto = ultimoMsg.mensaje || (ultimoMsg.tipo === 'audio' ? '🎵 Audio' : '📷 Imagen');
+                            let hora = ultimoMsg.hora || "";
 
-                            // Creamos la fila y la insertamos
-                            const rowHTML = `
-                                <div class="chat-row" onclick="abrirChat('${salaId}', '${idOtro}', '${user.nombre || 'Usuario DNPlus'}', '${user.foto || ''}')">
-                                    <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
-                                    <div class="chat-details">
-                                        <div class="chat-header">
-                                            <span class="name">${user.nombre || 'Usuario DNPlus'}</span>
-                                            <span class="time">${hora}</span>
-                                        </div>
-                                        <div class="last-msg-container">
-                                            <span class="message">${texto}</span>
-                                        </div>
+                            const div = document.createElement("div");
+                            div.className = "chat-row";
+                            div.innerHTML = `
+                                <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
+                                <div class="chat-details">
+                                    <div class="chat-header">
+                                        <span class="name">${user.nombre || idOtro}</span>
+                                        <span class="time">${hora}</span>
+                                    </div>
+                                    <div class="last-msg-container">
+                                        <span class="message">${texto}</span>
                                     </div>
                                 </div>`;
+
+                            // --- Lógica de Pulsación Corta y Larga ---
+                            div.onclick = () => abrirChat(salaId, idOtro, user.nombre, user.foto);
                             
-                            container.insertAdjacentHTML('beforeend', rowHTML);
+                            div.onmousedown = div.ontouchstart = (e) => {
+                                timerPulsacion = setTimeout(() => {
+                                    confirmarBorrar(salaId, div);
+                                }, 800); // 800ms para detectar pulsación larga
+                            };
+
+                            div.onmouseup = div.onmouseleave = div.ontouchend = () => {
+                                clearTimeout(timerPulsacion);
+                            };
+
+                            container.appendChild(div);
                         });
                     }
                 });
@@ -120,9 +151,28 @@
         function abrirChat(sala, id, nom, foto) {
             localStorage.setItem("chat_sala_id", sala);
             localStorage.setItem("chat_destinatario_id", id);
-            localStorage.setItem("chat_destinatario_nombre", nom);
-            localStorage.setItem("chat_destinatario_foto", foto);
+            localStorage.setItem("chat_destinatario_nombre", nom || "Usuario");
+            localStorage.setItem("chat_destinatario_foto", foto || "");
             window.top.location.href = "mensajes.html";
+        }
+
+        function confirmarBorrar(salaId, elemento) {
+            salaParaBorrar = salaId;
+            elemento.classList.add("selected");
+            document.getElementById("delete-modal").style.display = "flex";
+            
+            document.getElementById("btn-eliminar-confirmar").onclick = () => {
+                db.ref("chats_privados/" + salaParaBorrar).remove()
+                .then(() => {
+                    cerrarModal();
+                });
+            };
+        }
+
+        function cerrarModal() {
+            document.getElementById("delete-modal").style.display = "none";
+            document.querySelectorAll(".chat-row").forEach(el => el.classList.remove("selected"));
+            salaParaBorrar = null;
         }
 
         window.onload = cargarChats;
