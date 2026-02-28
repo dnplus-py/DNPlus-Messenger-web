@@ -1,5 +1,5 @@
 /* ============================================================
-   DNPlus Messenger - CÓDIGO MAESTRO INTEGRAL (REPARADO)
+   DNPlus Messenger - CÓDIGO MAESTRO INTEGRAL (FINALIZADO)
    ============================================================ */
 :root {
     --whatsapp-bg: #0b141a;
@@ -95,6 +95,24 @@ header img {
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
 
+/* Colas de las burbujas */
+.bubble-mine::before {
+    content: ""; position: absolute; top: 0; right: -10px;
+    border: 10px solid transparent; border-top-color: var(--msg-mine); border-left-color: var(--msg-mine);
+}
+.bubble-theirs::before {
+    content: ""; position: absolute; top: 0; left: -10px;
+    border: 10px solid transparent; border-top-color: var(--msg-theirs); border-right-color: var(--msg-theirs);
+}
+
+.msg-time {
+    font-size: 10px;
+    opacity: 0.6;
+    display: block;
+    text-align: right;
+    margin-top: 4px;
+}
+
 /* --- AUDIOS Y FOTOS --- */
 .audio-wrapper {
     width: 240px !important;
@@ -119,7 +137,7 @@ header img {
     height: 250px !important;
     width: 100% !important;
     position: fixed !important;
-    bottom: 62px !important; 
+    bottom: 65px !important; 
     left: 0 !important;
     z-index: 3000 !important;
     padding: 15px !important;
@@ -180,9 +198,37 @@ header img {
     color: white;
 }
 
+/* --- OVERLAY GRABACIÓN --- */
+#rec-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--whatsapp-bg);
+    display: none;
+    align-items: center;
+    padding-left: 20px;
+    color: #ff5252;
+    font-weight: bold;
+    z-index: 4500;
+}
+#rec-overlay:not(.hidden) { display: flex !important; }
+
 /* --- VISOR DE IMAGEN --- */
 #image-viewer {
     background-color: rgba(0,0,0,0.95) !important;
     z-index: 9999 !important;
 }
 #image-viewer:not(.hidden) { display: flex !important; }
+
+/* --- MENÚ DE ACCIÓN (BORRAR MENSAJES) --- */
+#action-header-menu {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 62px;
+    background-color: #202c33 !important;
+    z-index: 6000;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+#action-header-menu:not(.hidden) { display: flex !important; }
