@@ -303,21 +303,27 @@ header, #action-header-menu {
     border-bottom: 12px solid transparent;
 }
 
-/* --- ESTILO DE GRABACIÓN (EL TEXTO ROJO DE TU CAPTURA) --- */
+/* --- CORRECCIÓN: OVERLAY DE GRABACIÓN (SOLO EN LA BARRA DE ENTRADA) --- */
 #rec-overlay {
     position: absolute;
-    inset: 0;
+    /* En lugar de inset: 0, le damos la posición exacta de la barra de texto */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     background-color: #111b21;
     display: none; /* Se activa con .flex por JS */
     align-items: center;
     padding-left: 20px;
-    z-index: 20;
+    z-index: 5000; /* Asegura que tape solo el input */
+    border-radius: 25px; /* Para que mantenga la forma redondeada */
 }
 
 #rec-overlay i {
     color: #ff5252;
     margin-right: 10px;
     font-size: 1.2rem;
+    animation: blink 1s infinite;
 }
 
 #rec-overlay span {
@@ -326,57 +332,39 @@ header, #action-header-menu {
     font-size: 15px;
 }
 
-/* --- VISOR DE IMÁGENES (PANTALLA COMPLETA) --- */
+/* --- MEDIDA EXACTA PARA LA CAJA DE AUDIO (280px x 35px) --- */
+.audio-wrapper {
+    width: 280px !important;
+    height: 35px !important; /* Medida exacta que pediste */
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 2px 5px !important;
+}
+
+/* Ajuste de la foto dentro del audio para que quepa en 35px */
+.audio-wrapper img {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+}
+
+/* --- ANIMACIÓN DE PARPADEO PARA EL MICRO --- */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* --- VISOR DE IMÁGENES --- */
 #image-viewer {
     position: fixed;
     inset: 0;
     background-color: rgba(0, 0, 0, 0.95);
-    display: none; /* Se activa por JS */
+    display: none; 
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 9999;
 }
-
-#full-image {
-    max-width: 95%;
-    max-height: 80vh;
-    object-fit: contain;
-    transition: transform 0.2s ease;
-}
-
-.viewer-close {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    color: white;
-    font-size: 40px;
-    cursor: pointer;
-}
-
-/* --- AJUSTES PARA DISPOSITIVOS MÓVILES --- */
-@media (max-width: 480px) {
-    .bubble { max-width: 90%; }
-    .audio-wrapper { width: 220px !important; }
-    #emoji-panel { grid-template-columns: repeat(7, 1fr); } /* Más emojis en móviles */
-}
-
-/* --- ESTADO "EN LÍNEA" --- */
-#header-status {
-    font-size: 11px;
-    color: #00e676;
-    font-weight: normal;
-}
-
-/* --- ANIMACIÓN PARA NUEVOS MENSAJES --- */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.bubble {
-    animation: slideIn 0.2s ease-out;
-}
-
-/* Evitar que Tailwind oculte elementos necesarios */
-.hidden { display: none !important; }
