@@ -306,75 +306,53 @@ header, #action-header-menu {
     font-size: 15px;
 }
 
-/* --- MEDIDA EXACTA PARA LA CAJA DE AUDIO (280px x 35px) --- */
+/* --- CONTENEDOR DE AUDIO ESTILO WHATSAPP --- */
 .audio-wrapper {
     width: 280px !important;
-    height: 35px !important; /* Medida exacta que pediste */
+    height: 65px !important; /* Aumentamos el alto para que la foto de 50px respire */
     display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    padding: 2px 5px !important;
+    align-items: center !important; /* Centra horizontalmente foto, play y barra */
+    gap: 12px !important;
+    padding: 5px 10px !important;
 }
 
-/* Ajuste de la foto dentro del audio para que quepa en 35px */
-.audio-wrapper img {
-    width: 30px !important;
-    height: 30px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-}
-
-/* --- ANIMACIÓN DE PARPADEO PARA EL MICRO --- */
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; }
-    100% { opacity: 1; }
-}
-
-/* --- VISOR DE IMÁGENES --- */
-#image-viewer {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.95);
-    display: none; 
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-/* Burbuja de audio con foto a la derecha */
-.audio-wrapper {
-    width: 280px !important;
-    height: 34px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-}
-
-.audio-controls-visual {
-    flex: 1;
+/* LA FOTO: Grande y a la izquierda */
+.audio-photo-container {
+    width: 50px !important;
+    height: 50px !important;
+    flex-shrink: 0 !important;
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(0,0,0,0.1);
-    padding: 5px 10px;
-    border-radius: 20px;
 }
 
-/* LA FOTO: Más grande y al lado del Play */
 .audio-user-photo {
-    width: 50px !important;  /* Tamaño aumentado */
-    height: 50px !important; /* Tamaño aumentado */
+    width: 50px !important;
+    height: 50px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
-    border: 2px solid rgba(255,255,255,0.2) !important;
-    flex-shrink: 0 !important; /* Evita que la foto se aplaste */
+    border: 1.5px solid rgba(255,255,255,0.1) !important;
 }
 
-/* Ajuste del icono play para que no quede pegado */
-.audio-wrapper i {
-    margin-left: 5px;
-    color: #8696a0; /* Color gris suave de WhatsApp */
+/* CONTENEDOR DE BARRA Y TIEMPO: Para centrar y bajar el cronómetro */
+.audio-info-container {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; /* Centra la barra y el texto verticalmente */
+}
+
+/* Ajuste del cronómetro "Voz" para que baje un poco */
+.audio-time-text {
+    font-size: 11px !important;
+    color: #8696a0 !important;
+    margin-top: 5px !important; /* Esto baja el cronómetro de la barra */
+    opacity: 0.8;
+}
+
+/* Icono Play centrado */
+.audio-wrapper i.fa-play, .audio-wrapper i.fa-pause {
+    color: #8696a0 !important;
+    font-size: 1.4rem !important;
+    display: flex;
+    align-items: center;
 }
