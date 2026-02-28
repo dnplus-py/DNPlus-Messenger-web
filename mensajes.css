@@ -71,8 +71,8 @@ header, #action-header-menu {
 
 /* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
 .audio-wrapper {
-    width: 250px !important;
-    height: 60px;
+    width: 280px !important;
+    height: 35px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -89,7 +89,7 @@ header, #action-header-menu {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 13px;
 }
 
 /* --- MULTIMEDIA (FOTOS) --- */
