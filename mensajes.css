@@ -368,3 +368,33 @@ header, #action-header-menu {
     justify-content: center;
     z-index: 9999;
 }
+
+/* Burbuja de audio con foto a la derecha */
+.audio-wrapper {
+    width: 280px !important;
+    height: 45px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+.audio-controls-visual {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.1);
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+/* La foto redonda dentro del mensaje de voz */
+.audio-user-photo {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1.5px solid var(--msg-mine);
+}
+
