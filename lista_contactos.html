@@ -3,14 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Contactos DNPlus</title>
+    <title>Seleccionar contacto</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; overflow-x: hidden; }
         
+        /* CABECERA PROPIA (Para que no aparezca debajo de los tabs) */
+        .header { 
+            background: #085f56; 
+            padding: 12px 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+        }
+        .header-info h3 { margin: 0; font-size: 18px; color: #e9edef; font-weight: 500; }
+        .header-info span { font-size: 13px; color: #d1d7db; }
+
         .contact-list-container { display: flex; flex-direction: column; }
 
-        /* Estilo para las opciones fijas (Nuevo grupo, etc) */
+        /* Estilo para las opciones fijas */
         .action-row {
             display: flex; align-items: center; padding: 12px 15px; gap: 15px;
             cursor: pointer; transition: background 0.2s;
@@ -27,7 +41,7 @@
             text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;
         }
 
-        /* Estilo de los contactos de la lista */
+        /* Estilo de los contactos */
         .contact-row { 
             display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
             cursor: pointer; transition: background 0.2s;
@@ -49,11 +63,20 @@
         }
         .modal-box {
             background: #232d36; padding: 22px; border-radius: 15px; width: 100%; max-width: 300px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        .btn-modal { font-weight: bold; background: none; border: none; cursor: pointer; padding: 10px; font-size: 14px; }
+        .btn-modal { font-weight: bold; background: none; border: none; cursor: pointer; padding: 10px; font-size: 14px; text-transform: uppercase; }
     </style>
 </head>
 <body>
+
+    <div class="header">
+        <i class="fas fa-arrow-left" onclick="history.back()" style="cursor:pointer; font-size: 18px;"></i>
+        <div class="header-info">
+            <h3>Seleccionar contacto</h3>
+            <span id="contador-contactos">Buscando...</span>
+        </div>
+    </div>
 
     <div class="contact-list-container">
         <div class="action-row">
@@ -63,16 +86,14 @@
         
         <div class="action-row" onclick="window.location.href='cresr_new_contactos.html'">
             <div class="icon-circle"><i class="fas fa-user-plus"></i></div>
-            <div class="info">
-                <div class="name">Nuevo contacto</div>
-            </div>
+            <div class="info"><div class="name">Nuevo contacto</div></div>
             <i class="fas fa-qrcode" style="color: #8696a0;"></i>
         </div>
 
         <div class="section-title">Contactos en DNPlus</div>
 
         <div id="lista-contactos-real">
-            <p style="text-align:center; padding:20px; color:#8696a0;">Cargando contactos...</p>
+            <p style="text-align:center; padding:20px; color:#8696a0;">Cargando...</p>
         </div>
 
         <div class="action-row" style="margin-top: 10px;">
@@ -89,8 +110,8 @@
     <div id="modal-borrar" onclick="cerrarModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
             <h3 style="margin-top:0; color:white; font-size: 18px;">¿Eliminar contacto?</h3>
-            <p style="color:#8696a0; font-size:14px;">El contacto se eliminará de tu lista.</p>
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+            <p style="color:#8696a0; font-size:14px; line-height: 1.4;">Este usuario se eliminará de tu lista de contactos de DNPlus.</p>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
                 <button class="btn-modal" onclick="cerrarModal()" style="color:#8696a0;">CANCELAR</button>
                 <button id="btn-borrar-ok" class="btn-modal" style="color:#ef4444;">ELIMINAR</button>
             </div>
@@ -117,18 +138,22 @@
 
             db.ref("usuarios_registrados").on("value", (snapshot) => {
                 const container = document.getElementById("lista-contactos-real");
+                const txtContador = document.getElementById("contador-contactos");
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
                     container.innerHTML = "<p class='no-contacts'>No hay contactos aún.</p>";
+                    txtContador.innerText = "0 contactos";
                     return;
                 }
 
+                let total = 0;
                 snapshot.forEach((child) => {
                     const userId = child.key;
                     const user = child.val();
 
                     if (userId !== miId) {
+                        total++;
                         const row = document.createElement("div");
                         row.className = "contact-row";
                         row.innerHTML = `
@@ -138,40 +163,55 @@
                                 <div class="status">${user.estado || 'Disponible'}</div>
                             </div>`;
 
+                        // Click normal: Abrir Chat
                         row.onclick = () => {
                             if (!row.classList.contains('selected')) {
                                 iniciarChat(userId, user.nombre, user.foto);
                             }
                         };
 
-                        // Pulsación larga de 2.5 segundos para borrar
-                        const startPress = () => {
-                            timerPulsacion = setTimeout(() => abrirConfirmacion(userId, row), 2500);
+                        // Lógica de pulsación larga mejorada
+                        const startPress = (e) => {
+                            timerPulsacion = setTimeout(() => {
+                                abrirConfirmacion(userId, row);
+                            }, 800); // 800ms para que sea más rápido y fluido
                         };
+
                         const endPress = () => clearTimeout(timerPulsacion);
 
-                        row.onmousedown = row.ontouchstart = startPress;
-                        row.onmouseup = row.ontouchend = row.onmouseleave = endPress;
+                        row.addEventListener('touchstart', startPress);
+                        row.addEventListener('touchend', endPress);
+                        row.addEventListener('mousedown', startPress);
+                        row.addEventListener('mouseup', endPress);
+                        row.addEventListener('mouseleave', endPress);
+                        // Prevenir menú contextual del navegador
+                        row.addEventListener('contextmenu', (e) => e.preventDefault());
 
                         container.appendChild(row);
                     }
                 });
+                txtContador.innerText = total + " contactos";
             });
         }
 
         function abrirConfirmacion(id, elemento) {
             contactoSeleccionadoId = id;
+            // Quitamos selección previa
+            document.querySelectorAll(".contact-row").forEach(r => r.classList.remove("selected"));
             elemento.classList.add("selected");
             document.getElementById("modal-borrar").style.display = "flex";
             
             document.getElementById("btn-borrar-ok").onclick = () => {
-                db.ref("usuarios_registrados/" + contactoSeleccionadoId).remove().then(() => cerrarModal());
+                db.ref("usuarios_registrados/" + contactoSeleccionadoId).remove().then(() => {
+                    cerrarModal();
+                });
             };
         }
 
         function cerrarModal() {
             document.getElementById("modal-borrar").style.display = "none";
             document.querySelectorAll(".contact-row").forEach(r => r.classList.remove("selected"));
+            contactoSeleccionadoId = null;
         }
 
         function iniciarChat(idOtro, nombre, foto) {
@@ -180,7 +220,8 @@
             localStorage.setItem("chat_destinatario_id", idOtro);
             localStorage.setItem("chat_destinatario_nombre", nombre);
             localStorage.setItem("chat_destinatario_foto", foto);
-            window.top.location.href = "mensajes.html";
+            // Redirigir asegurando que salga del iframe si es necesario
+            window.location.href = "mensajes.html";
         }
 
         window.onload = cargarContactos;
