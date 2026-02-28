@@ -18,7 +18,7 @@ const chatContainer = document.getElementById('chat-container');
 let msgSeleccionado = null;
 let mediaRecorder, audioChunks = [], isRecording = false;
 let currentZoom = 1;
-let fotoOtroGlobal = ""; // Para guardar la foto y usarla en los audios
+let fotoOtroGlobal = ""; 
 
 window.onload = () => {
     if(!idOtro || !salaId) return;
@@ -52,32 +52,46 @@ window.onload = () => {
     cargarEmojis();
 };
 
-// Dentro de dibujarBurbuja(data, key)...
-if (data.tipo === 'audio') {
+function dibujarBurbuja(data, key) {
     const esMio = data.emisor === miId;
-    // Buscamos la foto: si es del otro usamos fotoOtroGlobal, si es mía intentamos sacarla de algún lado o una por defecto
-    const miFoto = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Puedes cambiar esto por tu foto real
-    const fotoParaAudio = esMio ? miFoto : fotoOtroGlobal;
+    const b = document.createElement('div');
+    b.id = key;
+    b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
-    b.innerHTML = `
-    <div class="audio-wrapper">
-        <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
+    b.oncontextmenu = (e) => { 
+        e.preventDefault(); 
+        showMsgMenu(key); 
+    };
+
+    if (data.tipo === 'audio') {
+        const miFoto = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
+        const fotoParaAudio = esMio ? miFoto : fotoOtroGlobal;
         
-        <div class="audio-photo-container">
-            <img src="${fotoParaAudio}" class="audio-user-photo">
-            <i class="fas fa-microphone micro-audio-icon"></i>
-        </div>
-
-        <div class="flex-1">
-            <div class="h-[3px] bg-gray-600 w-full rounded-full relative">
-                <div class="h-full bg-white w-0 rounded-full"></div>
+        b.innerHTML = `
+        <div class="audio-wrapper">
+            <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
+            
+            <div class="audio-photo-container">
+                <img src="${fotoParaAudio}" class="audio-user-photo">
+                <i class="fas fa-microphone micro-audio-icon"></i>
             </div>
-            <div class="text-[10px] mt-1 opacity-70">Voz (${data.duracion || '0:05'})</div>
-        </div>
-    </div>
-    <span class="msg-time">${data.hora}</span>`;
-}
 
+            <div class="flex-1">
+                <div class="h-[3px] bg-gray-600 w-full rounded-full relative">
+                    <div class="h-full bg-white w-0 rounded-full"></div>
+                </div>
+                <div class="text-[10px] mt-1 opacity-70">Voz (${data.duracion || '0:05'})</div>
+            </div>
+        </div>
+        <span class="msg-time">${data.hora}</span>`;
+    } 
+    else if (data.tipo === 'imagen') {
+        b.innerHTML = `
+        <div class="img-frame" onclick="verImagen('${data.url}')">
+            <img src="${data.url}">
+        </div>
+        <span class="msg-time">${data.hora}</span>`;
+    } 
     else {
         b.innerHTML = `<div class="text-content">${data.mensaje}</div><span class="msg-time">${data.hora}</span>`;
     }
@@ -107,7 +121,6 @@ async function startRec() {
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         isRecording = true;
-        // Mostrar overlay de forma segura
         const overlay = document.getElementById('rec-overlay');
         if(overlay) overlay.style.display = 'flex';
         
@@ -130,7 +143,6 @@ function stopRec() {
                 sendData({ tipo: 'audio', url: reader.result, duracion: "Voz" });
             };
         };
-        // Detener micro
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
 }
@@ -194,19 +206,15 @@ function toggleEmojis() {
 
 function cargarEmojis() {
     const panel = document.getElementById('emoji-panel');
-    const pack = {
-        "Emojis": ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺","👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"]
-    };
+    const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺","👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"];
     panel.innerHTML = "";
-    for (const [cat, lista] of Object.entries(pack)) {
-        lista.forEach(e => {
-            const s = document.createElement('span');
-            s.className = 'emoji-item';
-            s.innerText = e;
-            s.onclick = () => { input.value += e; input.focus(); input.oninput(); };
-            panel.appendChild(s);
-        });
-    }
+    emojis.forEach(e => {
+        const s = document.createElement('span');
+        s.className = 'emoji-item';
+        s.innerText = e;
+        s.onclick = () => { input.value += e; input.focus(); input.oninput(); };
+        panel.appendChild(s);
+    });
 }
 
 // --- OTROS ---
