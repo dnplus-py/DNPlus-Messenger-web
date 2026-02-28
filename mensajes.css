@@ -5,7 +5,7 @@
     --msg-theirs: #202c33;
     --text-color-mine: #ffffff; 
     --header-color: #085f56;    /* Verde oscuro profesional */
-    --accent-color: #F08927;    /* Tu naranja DNPlus */
+    --accent-color: #ffffff;    /* Tu naranja DNPlus */
 }
 
 body {
@@ -94,8 +94,8 @@ header, #action-header-menu {
 
 /* --- MULTIMEDIA (FOTOS) --- */
 .img-frame {
-    width: 250px !important;   
-    height: 300px !important;  
+    width: 190px !important;   
+    height: 200px !important;  
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 4px;
@@ -120,7 +120,7 @@ header, #action-header-menu {
     padding: 10px;
     overflow-y: auto;
     display: grid; /* ESTO FALTABA */
-    grid-template-columns: repeat(8, 1fr); 
+    grid-template-columns: repeat(6, 1fr); 
     gap: 10px;
     border-top: 1px solid #374045;
 }
