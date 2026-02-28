@@ -3,143 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DNPlus Messenger</title>
+    <title>DNpPlus Messenger</title>
     
     <link rel="stylesheet" href="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.css">
-
-    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-
-    <!-- Configuración mínima de Tailwind para evitar conflictos -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {},
-            }
-        }
-    </script>
 </head>
-<body class="bg-gray-900 text-white overflow-hidden h-screen flex flex-col">
+<body>
 
-    <!-- Menú de acciones del header - Corregido posicionamiento y estilos -->
-    <div id="action-header-menu" class="fixed top-0 left-0 w-full bg-[#202c33] p-3 flex justify-between items-center z-50 hidden">
-        <div class="flex gap-4">
-            <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
-            <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
-            <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
-        </div>
-        <i class="fas fa-times text-xl cursor-pointer" onclick="cerrarMenuAcciones()"></i>
+    <div id="action-header-menu">
+        <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
+        <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
+        <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
+        <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
     </div>
 
-    <!-- Header - Mejorada estructura y estilos -->
-    <header class="bg-[#202c33] p-3 flex justify-between items-center relative z-40">
+    <header>
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
-            <img id="header-photo" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full object-cover border border-gray-700">
+            <img id="header-photo" src="" class="w-10 h-10 rounded-full object-cover">
             <div>
                 <div id="header-name" class="font-bold text-sm">Cargando...</div>
-                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
+                <div class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
         <div class="flex gap-3 relative">
-            <i class="fas fa-phone p-2 cursor-pointer"></i>
+            <i class="fas fa-phone p-2"></i>
             <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
             
-            <!-- Menú desplegable - Corregido display y estilos -->
-            <div id="header-menu" class="msg-menu absolute right-2 top-full mt-2 bg-[#202c33] rounded-lg shadow-lg border border-gray-700 w-44 hidden">
-                <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer flex items-center" onclick="cambiarFondo()">
+            <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none;">
+                <div class="menu-item" onclick="cambiarFondo()">
                     <i class="fas fa-image mr-2"></i> Fondo de pantalla
                 </div>
-                <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer flex items-center" onclick="vaciarChat()">
+                <div class="menu-item" onclick="vaciarChat()">
                     <i class="fas fa-broom mr-2"></i> Vaciar chat
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Contenedor de chat - Añadido estilo para scroll y altura -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 bg-[#111b21]">
-        <!-- Mensajes se cargarán aquí -->
-    </main>
+    <main id="chat-container"></main>
 
-    <!-- Área de entrada - Corregido posicionamiento y estilos -->
-    <div class="input-area bg-[#202c33] p-3 flex items-center relative">
-        <div id="rec-overlay" class="hidden absolute inset-0 bg-[#111b21] flex items-center pl-5 z-20">
+    <div class="input-area">
+        <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: 80%; height: 100%; align-items: center; padding-left: 20px; z-index: 20;">
             <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> Grabando...
         </div>
-        <div class="input-card flex items-center flex-1 bg-[#2a3942] rounded-full px-4 py-2">
-            <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer mr-2" onclick="toggleEmojis()"></i>
-            <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off" class="bg-transparent border-none outline-none flex-1 text-white">
-            <label for="file-input" class="cursor-pointer">
-                <i class="fas fa-paperclip text-[#8696a0] text-xl mx-2"></i>
-            </label>
+        <div class="input-card">
+            <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
+            <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
+            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
             <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
         </div>
-        <button id="action-btn" class="action-btn ml-2 w-10 h-10 rounded-full bg-[#00a884] flex items-center justify-center">
-            <i id="action-icon" class="fas fa-microphone text-white"></i>
+        <button id="action-btn" class="action-btn">
+            <i id="action-icon" class="fas fa-microphone"></i>
         </button>
     </div>
 
-    <!-- Panel de emojis - Añadido estilo base -->
-    <div id="emoji-panel" class="fixed bottom-16 left-0 right-0 bg-[#2a3942] p-3 hidden z-30"></div>
+    <div id="emoji-panel"></div>
 
-    <!-- Visor de imágenes - Corregido estilos -->
-    <div id="image-viewer" class="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center hidden z-50">
-        <span class="absolute top-5 right-5 text-white text-5xl cursor-pointer" onclick="cerrarVisor()">&times;</span>
-        <img id="full-image" src="" alt="Vista previa" class="max-w-full max-h-[80vh] object-contain">
+    <div id="image-viewer">
+        <span class="absolute top-5 right-5 text-white text-5xl cursor-pointer" style="z-index:100" onclick="cerrarVisor()">&times;</span>
+        <img id="full-image" src="" alt="Vista previa">
         <div class="flex gap-10 mt-5">
             <i class="fas fa-search-plus text-white text-3xl cursor-pointer" onclick="zoomImg(1.2)"></i>
             <i class="fas fa-search-minus text-white text-3xl cursor-pointer" onclick="zoomImg(0.8)"></i>
         </div>
     </div>
 
-    <!-- Input para fondo - Sin cambios necesarios -->
     <input type="file" id="bg-input" hidden accept="image/*" onchange="aplicarNuevoFondo(this)">
 
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
-
-    <!-- Funciones básicas faltantes para evitar errores -->
-    <script>
-        // Funciones que se llaman desde el HTML y deben estar definidas
-        function toggleHeaderMenu() {
-            const menu = document.getElementById('header-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        function cerrarMenuAcciones() {
-            document.getElementById('action-header-menu').classList.add('hidden');
-        }
-
-        function toggleEmojis() {
-            const panel = document.getElementById('emoji-panel');
-            panel.classList.toggle('hidden');
-            // Aquí iría la lógica para cargar emojis
-        }
-
-        function cerrarVisor() {
-            document.getElementById('image-viewer').classList.add('hidden');
-            document.getElementById('full-image').src = '';
-        }
-
-        function zoomImg(factor) {
-            const img = document.getElementById('full-image');
-            const currentZoom = parseFloat(img.style.transform.replace('scale(', '') || '1');
-            img.style.transform = `scale(${currentZoom * factor})`;
-        }
-
-        function cambiarFondo() {
-            document.getElementById('bg-input').click();
-        }
-
-        // Funciones que dependen de mensajes.js pero se definen aquí como respaldo
-        function borrarMensaje() {}
-        function vaciarChat() {}
-        function manejarAdjunto(input) {}
-        function aplicarNuevoFondo(input) {}
-    </script>
 
 </body>
 </html>
