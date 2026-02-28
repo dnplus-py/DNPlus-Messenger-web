@@ -1,4 +1,4 @@
-// mensajes.js - Versión Final DNPlus para David Oviedo
+// mensajes.js - Versión Final DNPlus para David Oviedo (Corregida)
 console.log("✅ DNPlus Messenger: Sistema Activado");
 
 const firebaseConfig = {
@@ -18,18 +18,22 @@ const chatContainer = document.getElementById('chat-container');
 let msgSeleccionado = null;
 let mediaRecorder, audioChunks = [], isRecording = false;
 let currentZoom = 1;
+let fotoOtroGlobal = ""; // Para guardar la foto y usarla en los audios
 
 window.onload = () => {
     if(!idOtro || !salaId) return;
 
+    // Cargar datos del destinatario
     db.ref("usuarios_registrados/" + idOtro).on("value", s => {
         const d = s.val();
         if(d) {
+            fotoOtroGlobal = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
             document.getElementById('header-name').innerText = d.nombre || idOtro;
-            document.getElementById('header-photo').src = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            document.getElementById('header-photo').src = fotoOtroGlobal;
         }
     });
 
+    // Escuchar mensajes
     db.ref("chats_privados/" + salaId).on("child_added", s => {
         dibujarBurbuja(s.val(), s.key);
     });
@@ -39,7 +43,6 @@ window.onload = () => {
         if(el) el.remove();
     });
 
-    // Cargar fondo guardado
     const bgSaved = localStorage.getItem("chat_bg_" + salaId);
     if(bgSaved) {
         chatContainer.style.backgroundImage = `url('${bgSaved}')`;
@@ -55,13 +58,15 @@ function dibujarBurbuja(data, key) {
     b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
-    // Toque largo / Clic derecho para activar menú superior
     b.oncontextmenu = (e) => { 
         e.preventDefault(); 
         showMsgMenu(key); 
     };
 
     if (data.tipo === 'audio') {
+        // Obtenemos la foto del emisor (si es mío usamos una genérica o la nuestra, si es del otro usamos la suya)
+        const fotoParaAudio = esMio ? "https://cdn-icons-png.flaticon.com/512/149/149071.png" : fotoOtroGlobal;
+        
         b.innerHTML = `
         <div class="audio-wrapper">
             <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
@@ -69,6 +74,7 @@ function dibujarBurbuja(data, key) {
                 <div class="h-[4px] bg-gray-600 w-full rounded-full"><div class="h-full bg-white w-0 rounded-full"></div></div>
                 <div class="text-[10px] mt-1">Voz (${data.duracion || '0:05'})</div>
             </div>
+            <img src="${fotoParaAudio}" class="audio-user-photo">
         </div>
         <span class="msg-time">${data.hora}</span>`;
     } 
@@ -108,7 +114,10 @@ async function startRec() {
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         isRecording = true;
-        document.getElementById('rec-overlay').style.display = 'flex';
+        // Mostrar overlay de forma segura
+        const overlay = document.getElementById('rec-overlay');
+        if(overlay) overlay.style.display = 'flex';
+        
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.start();
     } catch (err) { alert("Permiso de micrófono denegado"); }
@@ -118,18 +127,22 @@ function stopRec() {
     if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         isRecording = false;
-        document.getElementById('rec-overlay').style.display = 'none';
+        const overlay = document.getElementById('rec-overlay');
+        if(overlay) overlay.style.display = 'none';
+        
         mediaRecorder.onstop = () => {
             const reader = new FileReader();
-            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/mp3' }));
+            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
             reader.onloadend = () => {
                 sendData({ tipo: 'audio', url: reader.result, duracion: "Voz" });
             };
         };
+        // Detener micro
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
 }
 
-// --- VISOR DE IMAGEN Y ZOOM ---
+// --- VISOR DE IMAGEN ---
 function verImagen(url) {
     const v = document.getElementById('image-viewer');
     const img = document.getElementById('full-image');
@@ -148,43 +161,30 @@ function cerrarVisor() {
     document.getElementById('image-viewer').style.display = 'none';
 }
 
-// --- MENÚ DE ACCIONES (CABECERA) ---
-
-// Esta función se activa al mantener presionado un mensaje
+// --- MENÚ DE ACCIONES ---
 function showMsgMenu(key) {
     msgSeleccionado = key;
-    // Resaltar burbuja seleccionada para saber cuál vamos a borrar
     document.querySelectorAll('.bubble').forEach(el => el.style.filter = "none");
     const el = document.getElementById(key);
     if(el) el.style.filter = "brightness(0.8)";
-    
-    // Mostrar barra superior con los iconos de acciones
     document.getElementById('action-header-menu').style.display = 'flex';
 }
 
-// Función para cerrar la barra superior de acciones (El "Close")
 function cerrarMenuAcciones() {
     if (msgSeleccionado) {
-        // Quitamos el resaltado del mensaje para que vuelva a su color normal
         const el = document.getElementById(msgSeleccionado);
         if (el) el.style.filter = "none";
     }
-    // ESCONDEMOS la barra de la cabecera por completo
     document.getElementById('action-header-menu').style.display = 'none';
     msgSeleccionado = null;
 }
 
-// Función para borrar y que se limpie la interfaz al instante
 function borrarMensaje() {
     if (msgSeleccionado) {
-        // Borramos el dato real de la base de datos de Firebase
         db.ref("chats_privados/" + salaId + "/" + msgSeleccionado).remove();
-        
-        // Cerramos el menú para que la cabecera vuelva a la normalidad
         cerrarMenuAcciones();
     }
 }
-
 
 function vaciarChat() {
     if(confirm("¿Vaciar todos los mensajes?")) {
@@ -196,25 +196,19 @@ function vaciarChat() {
 // --- EMOJIS ---
 function toggleEmojis() {
     const p = document.getElementById('emoji-panel');
-    p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
+    p.style.display = (p.style.display === 'grid') ? 'none' : 'grid';
 }
 
 function cargarEmojis() {
     const panel = document.getElementById('emoji-panel');
     const pack = {
-        "Caritas": ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺"],
-        "Gestos": ["👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝"],
-        "Corazones": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞"],
-        "Banderas": ["🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"]
+        "Emojis": ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺","👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"]
     };
     panel.innerHTML = "";
     for (const [cat, lista] of Object.entries(pack)) {
-        const t = document.createElement('div');
-        t.className = 'emoji-category-title'; t.innerText = cat;
-        panel.appendChild(t);
         lista.forEach(e => {
             const s = document.createElement('span');
-            s.className = 'text-2xl p-2 cursor-pointer text-center';
+            s.className = 'emoji-item';
             s.innerText = e;
             s.onclick = () => { input.value += e; input.focus(); input.oninput(); };
             panel.appendChild(s);
@@ -225,7 +219,7 @@ function cargarEmojis() {
 // --- OTROS ---
 function toggleHeaderMenu() {
     const menu = document.getElementById('header-menu');
-    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
 }
 
 function cambiarFondo() { document.getElementById('bg-input').click(); }
@@ -267,7 +261,12 @@ btn.onclick = () => {
     }
 };
 
-btn.onmousedown = btn.ontouchstart = (e) => { if(!input.value) startRec(); };
+btn.onmousedown = btn.ontouchstart = (e) => { 
+    if(!input.value.trim()) {
+        e.preventDefault();
+        startRec(); 
+    }
+};
 btn.onmouseup = btn.ontouchend = () => { if(isRecording) stopRec(); };
 
 document.addEventListener('click', (e) => {
