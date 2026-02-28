@@ -309,7 +309,7 @@ header, #action-header-menu {
 /* --- CONTENEDOR DE AUDIO ESTILO WHATSAPP --- */
 .audio-wrapper {
     width: 280px !important;
-    height: 65px !important; /* Aumentamos el alto para que la foto de 50px respire */
+    height: 34px !important; /* Aumentamos el alto para que la foto de 50px respire */
     display: flex !important;
     align-items: center !important; /* Centra horizontalmente foto, play y barra */
     gap: 12px !important;
