@@ -19,11 +19,19 @@ let msgSeleccionado = null;
 let mediaRecorder, audioChunks = [], isRecording = false;
 let currentZoom = 1;
 let fotoOtroGlobal = ""; 
+let miFotoGlobal = ""; // Variable para tu foto real
 
+// --- ÚNICO WINDOW.ONLOAD ---
 window.onload = () => {
     if(!idOtro || !salaId) return;
 
-    // Cargar datos del destinatario
+    // 1. Cargar MI FOTO (David Oviedo)
+    db.ref("usuarios_registrados/" + miId).on("value", s => {
+        const d = s.val();
+        miFotoGlobal = (d && d.foto) ? d.foto : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    });
+
+    // 2. Cargar datos del DESTINATARIO
     db.ref("usuarios_registrados/" + idOtro).on("value", s => {
         const d = s.val();
         if(d) {
@@ -33,7 +41,7 @@ window.onload = () => {
         }
     });
 
-    // Escuchar mensajes
+    // 3. Escuchar mensajes
     db.ref("chats_privados/" + salaId).on("child_added", s => {
         dibujarBurbuja(s.val(), s.key);
     });
@@ -43,6 +51,7 @@ window.onload = () => {
         if(el) el.remove();
     });
 
+    // 4. Cargar fondo guardado
     const bgSaved = localStorage.getItem("chat_bg_" + salaId);
     if(bgSaved) {
         chatContainer.style.backgroundImage = `url('${bgSaved}')`;
@@ -64,22 +73,22 @@ function dibujarBurbuja(data, key) {
     };
 
     if (data.tipo === 'audio') {
-        const miFoto = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
-        const fotoParaAudio = esMio ? miFoto : fotoOtroGlobal;
+        // CORRECCIÓN: Usar miFotoGlobal para mis mensajes
+        const fotoParaAudio = esMio ? miFotoGlobal : fotoOtroGlobal;
         
         b.innerHTML = `
-        <div class="audio-wrapper">
+        <div class="audio-wrapper" style="display: flex; align-items: center; gap: 10px; padding: 5px;">
             <div class="audio-photo-container">
-                <img src="${fotoParaAudio}" class="audio-user-photo">
+                <img src="${fotoParaAudio}" class="audio-user-photo" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
             </div>
 
             <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
             
-            <div class="flex-1">
+            <div class="flex-1" style="display: flex; flex-direction: column; justify-content: center;">
                 <div class="h-[3px] bg-gray-600 w-full rounded-full relative">
                     <div class="h-full bg-white w-0 rounded-full"></div>
                 </div>
-                <div class="text-[10px] mt-1 opacity-70">Voz (${data.duracion || '0:05'})</div>
+                <div class="text-[10px] mt-1 opacity-70" style="margin-top: 4px;">Voz (${data.duracion || '0:05'})</div>
             </div>
         </div>
         <span class="msg-time">${data.hora}</span>`;
@@ -98,7 +107,6 @@ function dibujarBurbuja(data, key) {
     chatContainer.appendChild(b);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
-
 
 // --- AUDIO ---
 let audioActual = null, iconoActual = null;
@@ -278,48 +286,3 @@ document.addEventListener('click', (e) => {
         if(hm) hm.style.display = 'none';
     }
 });
-
-let miFotoGlobal = ""; // Variable para tu foto (David Oviedo)
-
-window.onload = () => {
-    if(!idOtro || !salaId) return;
-
-    // --- 1. CARGAR MI FOTO REAL ---
-    db.ref("usuarios_registrados/" + miId).on("value", s => {
-        const d = s.val();
-        if(d && d.foto) {
-            miFotoGlobal = d.foto;
-        } else {
-            miFotoGlobal = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        }
-    });
-
-    // --- 2. CARGAR FOTO DEL DESTINATARIO ---
-    db.ref("usuarios_registrados/" + idOtro).on("value", s => {
-        const d = s.val();
-        if(d) {
-            fotoOtroGlobal = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-            document.getElementById('header-name').innerText = d.nombre || idOtro;
-            document.getElementById('header-photo').src = fotoOtroGlobal;
-        }
-    });
-
-    // --- 3. ESCUCHAR MENSAJES ---
-    db.ref("chats_privados/" + salaId).on("child_added", s => {
-        dibujarBurbuja(s.val(), s.key);
-    });
-
-    db.ref("chats_privados/" + salaId).on("child_removed", s => {
-        const el = document.getElementById(s.key);
-        if(el) el.remove();
-    });
-
-    // --- 4. CARGAR FONDO ---
-    const bgSaved = localStorage.getItem("chat_bg_" + salaId);
-    if(bgSaved) {
-        chatContainer.style.backgroundImage = `url('${bgSaved}')`;
-        chatContainer.style.backgroundSize = "cover";
-    }
-
-    cargarEmojis();
-};
