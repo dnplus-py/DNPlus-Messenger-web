@@ -3,100 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Seleccionar contacto</title>
+    <title>Mis Contactos DNPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Forzamos que la página ocupe todo el alto para AppCreator */
+        /* Diseño para pantalla independiente (Fuera del ViewPager) */
         html, body { 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
+            margin: 0; padding: 0; 
             background-color: #0b141a; 
-            font-family: sans-serif;
-            overflow: hidden; 
+            height: 100vh; width: 100vw;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        body { display: flex; flex-direction: column; }
-
-        /* TOOLBAR FIJO ESTILO WHATSAPP (Color DNPlus) */
-        .toolbar-dn { 
+        /* TOOLBAR FIJO ESTILO DNPlus */
+        .toolbar-contactos { 
             background-color: #085f56; 
-            color: white;
-            padding: 15px; 
+            height: 60px;
             display: flex; 
             align-items: center; 
+            padding: 0 15px; 
             gap: 20px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 100;
         }
-        .toolbar-dn i { font-size: 20px; cursor: pointer; }
-        .toolbar-info h3 { margin: 0; font-size: 18px; font-weight: 500; }
-        .toolbar-info span { font-size: 12px; color: #cfd8dc; }
+        .toolbar-contactos i { font-size: 20px; color: white; cursor: pointer; }
+        .toolbar-info h3 { margin: 0; font-size: 18px; color: white; font-weight: 500; }
+        .toolbar-info span { font-size: 12px; color: #cfd8dc; opacity: 0.9; }
 
-        /* Área de scroll */
-        .lista-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; 
-        }
+        .lista-scrollable { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-        /* Filas de Opciones (Nuevo grupo/contacto) */
-        .row-opt {
+        /* Botones de Acción (Nuevo Grupo / Contacto) */
+        .btn-accion {
             display: flex; align-items: center; padding: 12px 16px; gap: 15px;
-            cursor: pointer; transition: 0.2s;
+            cursor: pointer; transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .row-opt:active { background-color: #202c33; }
+        .btn-accion:active { background-color: #202c33; }
         
-        .circle-green {
+        .icono-verde {
             width: 40px; height: 40px; border-radius: 50%; background-color: #00a884;
             display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 18px;
         }
 
-        .title-label {
+        .etiqueta-seccion {
             padding: 20px 16px 10px; font-size: 13px; color: #8696a0;
-            text-transform: uppercase; font-weight: bold;
+            text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;
         }
 
-        /* Estilo de la Lista de Contactos de Firebase */
-        .contact-card { 
+        /* Estilo de Contactos de Firebase */
+        .fila-contacto { 
             display: flex; align-items: center; padding: 12px 16px; gap: 15px; 
-            cursor: pointer;
+            cursor: pointer; transition: 0.2s;
         }
-        .contact-card:active { background-color: #232d36; }
+        .fila-contacto:active { background-color: #232d36; }
+        .fila-contacto.seleccionado { background-color: #2a3942; border-left: 4px solid #ef4444; }
         
-        .img-user { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #232d36; }
-        
-        .data-user { flex: 1; border-bottom: 0.5px solid rgba(134, 150, 160, 0.1); padding-bottom: 12px; }
-        .name-user { font-size: 16px; color: #e9edef; font-weight: 500; }
-        .status-user { font-size: 14px; color: #8696a0; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .avatar-contacto { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #232d36; border: 1px solid rgba(255,255,255,0.05); }
+        .info-contacto { flex: 1; border-bottom: 0.5px solid rgba(134, 150, 160, 0.1); padding-bottom: 12px; }
+        .nombre-contacto { font-size: 16px; color: #e9edef; font-weight: 500; }
+        .estado-contacto { font-size: 14px; color: #8696a0; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Modal de Confirmación de Borrado */
+        #modal-confirmar {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 1000; align-items: center; justify-content: center; padding: 25px;
+        }
+        .modal-caja { background: #232d36; padding: 25px; border-radius: 12px; width: 100%; max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-modal { background: none; border: none; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; padding: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="toolbar-dn">
+    <div class="toolbar-contactos">
         <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
         <div class="toolbar-info">
             <h3>Seleccionar contacto</h3>
-            <span id="total-cont">Cargando...</span>
+            <span id="cont-num">Contando usuarios...</span>
         </div>
     </div>
 
-    <div class="lista-container">
-        <div class="row-opt">
-            <div class="circle-green"><i class="fas fa-users"></i></div>
-            <div class="name-user">Nuevo grupo</div>
+    <div class="lista-scrollable">
+        <div class="btn-accion">
+            <div class="icono-verde"><i class="fas fa-users"></i></div>
+            <div class="nombre-contacto" style="color:#e9edef;">Nuevo grupo</div>
         </div>
         
-        <div class="row-opt" onclick="window.location.href='cresr_new_contactos.html'">
-            <div class="circle-green"><i class="fas fa-user-plus"></i></div>
-            <div class="name-user">Nuevo contacto</div>
+        <div class="btn-accion" onclick="window.location.href='cresr_new_contactos.html'">
+            <div class="icono-verde"><i class="fas fa-user-plus"></i></div>
+            <div class="nombre-contacto" style="color:#e9edef;">Nuevo contacto</div>
             <i class="fas fa-qrcode" style="margin-left: auto; color: #8696a0;"></i>
         </div>
 
-        <div class="title-label">Contactos en DNPlus</div>
+        <div class="etiqueta-seccion">Contactos en DNPlus</div>
 
-        <div id="box-contactos"></div>
+        <div id="contenedor-contactos"></div>
+    </div>
+
+    <div id="modal-confirmar" onclick="cerrarModal()">
+        <div class="modal-caja" onclick="event.stopPropagation()">
+            <h4 style="color:white; margin:0 0 10px; font-size: 19px;">¿Eliminar contacto?</h4>
+            <p style="color:#8696a0; font-size:14px; line-height: 1.5; margin-bottom:20px;">Este usuario se borrará de tu lista de contactos de DNPlus.</p>
+            <div style="display:flex; justify-content:flex-end; gap:15px;">
+                <button onclick="cerrarModal()" style="color:#8696a0;" class="btn-modal">CANCELAR</button>
+                <button id="btn-borrar-si" style="color:#ef4444;" class="btn-modal">ELIMINAR</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -110,48 +124,73 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
         const miId = localStorage.getItem("user_phone");
+        let timerPulsacion;
+        let idSeleccionado = null;
 
         function cargarContactos() {
-            db.ref("usuarios_registrados").on("value", (snapshot) => {
-                const contenedor = document.getElementById("box-contactos");
-                const contTxt = document.getElementById("total-cont");
+            db.ref("usuarios_registrados").on("value", (snap) => {
+                const contenedor = document.getElementById("contenedor-contactos");
+                const txtCont = document.getElementById("cont-num");
                 contenedor.innerHTML = "";
                 let count = 0;
 
-                if (!snapshot.exists()) {
-                    contTxt.innerText = "0 contactos";
-                    return;
-                }
-
-                snapshot.forEach((child) => {
+                snap.forEach((child) => {
                     const id = child.key;
-                    const u = child.val();
-
+                    const val = child.val();
                     if (id !== miId) {
                         count++;
                         const item = document.createElement("div");
-                        item.className = "contact-card";
+                        item.className = "fila-contacto";
                         item.innerHTML = `
-                            <img src="${u.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="img-user">
-                            <div class="data-user">
-                                <div class="name-user">${u.nombre || 'Usuario'}</div>
-                                <div class="status-user">${u.estado || 'Disponible'}</div>
+                            <img src="${val.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar-contacto">
+                            <div class="info-contacto">
+                                <div class="nombre-contacto">${val.nombre || 'Usuario'}</div>
+                                <div class="estado-contacto">${val.estado || '¡Hola! Estoy usando DNPlus.'}</div>
                             </div>`;
-                        
+
+                        // CLICK NORMAL: ABRIR CHAT
                         item.onclick = () => {
                             localStorage.setItem("chat_destinatario_id", id);
-                            localStorage.setItem("chat_destinatario_nombre", u.nombre);
-                            localStorage.setItem("chat_destinatario_foto", u.foto);
-                            // En AppCreator24, esto cargará la sección de mensajes
+                            localStorage.setItem("chat_destinatario_nombre", val.nombre);
+                            localStorage.setItem("chat_destinatario_foto", val.foto);
                             window.location.href = "mensajes.html";
                         };
+
+                        // PULSACIÓN LARGA: BORRAR (1 segundo)
+                        const iniciarPrensa = () => {
+                            timerPulsacion = setTimeout(() => {
+                                idSeleccionado = id;
+                                item.classList.add("seleccionado");
+                                document.getElementById("modal-confirmar").style.display = "flex";
+                            }, 1000);
+                        };
+                        const cancelarPrensa = () => clearTimeout(timerPulsacion);
+
+                        item.addEventListener("touchstart", iniciarPrensa);
+                        item.addEventListener("touchend", cancelarPrensa);
+                        item.addEventListener("mousedown", iniciarPrensa);
+                        item.addEventListener("mouseup", cancelarPrensa);
+                        item.addEventListener("contextmenu", (e) => e.preventDefault());
 
                         contenedor.appendChild(item);
                     }
                 });
-                contTxt.innerText = count + " contactos";
+                txtCont.innerText = count + " contactos";
             });
         }
+
+        document.getElementById("btn-borrar-si").onclick = () => {
+            if (idSeleccionado) {
+                db.ref("usuarios_registrados/" + idSeleccionado).remove().then(() => cerrarModal());
+            }
+        };
+
+        function cerrarModal() {
+            document.getElementById("modal-confirmar").style.display = "none";
+            document.querySelectorAll(".fila-contacto").forEach(f => f.classList.remove("seleccionado"));
+            idSeleccionado = null;
+        }
+
         window.onload = cargarContactos;
     </script>
 </body>
