@@ -277,32 +277,6 @@ header, #action-header-menu {
 /* Evitar que Tailwind oculte elementos necesarios */
 .hidden { display: none !important; }
 
-
-/* --- CONTINUACIÓN DEL CÓDIGO MAESTRO DNPlus --- */
-
-/* --- DETALLES DE LAS BURBUJAS (LAS COLITAS) --- */
-.bubble-mine::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -8px;
-    width: 0;
-    height: 0;
-    border-left: 12px solid var(--msg-mine);
-    border-bottom: 12px solid transparent;
-}
-
-.bubble-theirs::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -8px;
-    width: 0;
-    height: 0;
-    border-right: 12px solid var(--msg-theirs);
-    border-bottom: 12px solid transparent;
-}
-
 /* --- CORRECCIÓN: OVERLAY DE GRABACIÓN (SOLO EN LA BARRA DE ENTRADA) --- */
 #rec-overlay {
     position: absolute;
@@ -372,7 +346,7 @@ header, #action-header-menu {
 /* Burbuja de audio con foto a la derecha */
 .audio-wrapper {
     width: 280px !important;
-    height: 45px !important;
+    height: 34px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
