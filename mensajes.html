@@ -12,9 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
-<body>
-
-    <div id="action-header-menu">
+<body style="background-color: #0b141a;"> <div id="action-header-menu">
         <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
         <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
         <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
@@ -43,39 +41,4 @@
                 </div>
             </div>
         </div>
-    </header>
-
-    <main id="chat-container"></main>
-
-    <div class="input-area">
-        <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: 80%; height: 100%; align-items: center; padding-left: 20px; z-index: 20;">
-            <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> Grabando...
-        </div>
-        <div class="input-card">
-            <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
-            <input type="text" id="chat-input" placeholder="Mensaje" autocomplete="off">
-            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
-            <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
-        </div>
-        <button id="action-btn" class="action-btn">
-            <i id="action-icon" class="fas fa-microphone"></i>
-        </button>
-    </div>
-
-    <div id="emoji-panel"></div>
-
-    <div id="image-viewer">
-        <span class="absolute top-5 right-5 text-white text-5xl cursor-pointer" style="z-index:100" onclick="cerrarVisor()">&times;</span>
-        <img id="full-image" src="" alt="Vista previa">
-        <div class="flex gap-10 mt-5">
-            <i class="fas fa-search-plus text-white text-3xl cursor-pointer" onclick="zoomImg(1.2)"></i>
-            <i class="fas fa-search-minus text-white text-3xl cursor-pointer" onclick="zoomImg(0.8)"></i>
-        </div>
-    </div>
-
-    <input type="file" id="bg-input" hidden accept="image/*" onchange="aplicarNuevoFondo(this)">
-
-    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
-
-</body>
-</html>
+    </
