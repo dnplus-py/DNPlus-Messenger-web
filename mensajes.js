@@ -52,39 +52,32 @@ window.onload = () => {
     cargarEmojis();
 };
 
-function dibujarBurbuja(data, key) {
+// Dentro de dibujarBurbuja(data, key)...
+if (data.tipo === 'audio') {
     const esMio = data.emisor === miId;
-    const b = document.createElement('div');
-    b.id = key;
-    b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
+    // Buscamos la foto: si es del otro usamos fotoOtroGlobal, si es mía intentamos sacarla de algún lado o una por defecto
+    const miFoto = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Puedes cambiar esto por tu foto real
+    const fotoParaAudio = esMio ? miFoto : fotoOtroGlobal;
     
-    b.oncontextmenu = (e) => { 
-        e.preventDefault(); 
-        showMsgMenu(key); 
-    };
-
-    if (data.tipo === 'audio') {
-        // Obtenemos la foto del emisor (si es mío usamos una genérica o la nuestra, si es del otro usamos la suya)
-        const fotoParaAudio = esMio ? "https://cdn-icons-png.flaticon.com/512/149/149071.png" : fotoOtroGlobal;
+    b.innerHTML = `
+    <div class="audio-wrapper">
+        <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
         
-        b.innerHTML = `
-        <div class="audio-wrapper">
-            <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
-            <div class="flex-1">
-                <div class="h-[4px] bg-gray-600 w-full rounded-full"><div class="h-full bg-white w-0 rounded-full"></div></div>
-                <div class="text-[10px] mt-1">Voz (${data.duracion || '0:05'})</div>
-            </div>
+        <div class="audio-photo-container">
             <img src="${fotoParaAudio}" class="audio-user-photo">
+            <i class="fas fa-microphone micro-audio-icon"></i>
         </div>
-        <span class="msg-time">${data.hora}</span>`;
-    } 
-    else if (data.tipo === 'imagen') {
-        b.innerHTML = `
-        <div class="img-frame" onclick="verImagen('${data.url}')">
-            <img src="${data.url}">
+
+        <div class="flex-1">
+            <div class="h-[3px] bg-gray-600 w-full rounded-full relative">
+                <div class="h-full bg-white w-0 rounded-full"></div>
+            </div>
+            <div class="text-[10px] mt-1 opacity-70">Voz (${data.duracion || '0:05'})</div>
         </div>
-        <span class="msg-time">${data.hora}</span>`;
-    } 
+    </div>
+    <span class="msg-time">${data.hora}</span>`;
+}
+
     else {
         b.innerHTML = `<div class="text-content">${data.mensaje}</div><span class="msg-time">${data.hora}</span>`;
     }
