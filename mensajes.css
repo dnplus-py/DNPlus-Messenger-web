@@ -1,5 +1,5 @@
 /* ============================================================
-   DNPlus Messenger - CÓDIGO MAESTRO INTEGRAL (FINALIZADO)
+   DNPlus Messenger - CÓDIGO MAESTRO INTEGRAL (FINAL)
    ============================================================ */
 :root {
     --whatsapp-bg: #0b141a;
@@ -81,66 +81,78 @@ header img {
     background-blend-mode: overlay;
 }
 
-/* --- BURBUJAS DE MENSAJE --- */
+/* --- BURBUJAS CON "COLITA" --- */
 .bubble {
     max-width: 85%;
     padding: 8px 12px;
-    border-radius: 12px;
+    border-radius: 10px;
     position: relative;
     font-size: 15px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
     word-wrap: break-word;
     color: white;
 }
-.bubble-mine { align-self: flex-end; background-color: var(--msg-mine); border-top-right-radius: 2px; }
-.bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); border-top-left-radius: 2px; }
 
-/* Colas de las burbujas */
-.bubble-mine::before {
-    content: ""; position: absolute; top: 0; right: -10px;
-    border: 10px solid transparent; border-top-color: var(--msg-mine); border-left-color: var(--msg-mine);
+.bubble-mine { 
+    align-self: flex-end; 
+    background-color: var(--msg-mine); 
+    border-top-right-radius: 0; /* Para que la colita salga de la esquina */
 }
-.bubble-theirs::before {
-    content: ""; position: absolute; top: 0; left: -10px;
-    border: 10px solid transparent; border-top-color: var(--msg-theirs); border-right-color: var(--msg-theirs);
+.bubble-mine::after {
+    content: ""; position: absolute; top: 0; right: -8px;
+    width: 0; height: 0;
+    border-left: 12px solid var(--msg-mine);
+    border-bottom: 12px solid transparent;
+}
+
+.bubble-theirs { 
+    align-self: flex-start; 
+    background-color: var(--msg-theirs); 
+    border-top-left-radius: 0;
+}
+.bubble-theirs::after {
+    content: ""; position: absolute; top: 0; left: -8px;
+    width: 0; height: 0;
+    border-right: 12px solid var(--msg-theirs);
+    border-bottom: 12px solid transparent;
 }
 
 .msg-time {
-    font-size: 10px;
+    font-size: 11px;
     opacity: 0.6;
     display: block;
     text-align: right;
     margin-top: 4px;
 }
 
-/* --- AUDIOS Y FOTOS --- */
+/* --- AUDIOS Y MULTIMEDIA --- */
 .audio-wrapper {
     width: 240px !important;
-    height: 54px !important;
+    height: 50px !important;
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
 }
-.audio-wrapper img { width: 45px !important; height: 45px !important; border-radius: 50% !important; }
+.audio-wrapper img { width: 42px !important; height: 42px !important; border-radius: 50% !important; }
 
 .img-frame {
-    width: 250px !important;
-    height: 300px !important;
-    border-radius: 10px;
+    max-width: 250px !important;
+    border-radius: 8px;
     overflow: hidden;
+    margin-bottom: 5px;
 }
-.img-frame img { width: 100%; height: 100%; object-fit: cover; }
+.img-frame img { width: 100%; height: auto; object-fit: cover; }
 
-/* --- PANEL DE EMOJIS (8 COLUMNAS) --- */
+/* --- PANEL DE EMOJIS (IGUAL A CAPTURA) --- */
 #emoji-panel {
     background-color: #232d36 !important;
     height: 250px !important;
     width: 100% !important;
     position: fixed !important;
-    bottom: 65px !important; 
+    bottom: 62px !important; 
     left: 0 !important;
     z-index: 3000 !important;
-    padding: 15px !important;
+    padding: 10px !important;
     overflow-y: auto !important;
     border-top: 1px solid #374045;
 }
@@ -148,16 +160,6 @@ header img {
 #emoji-panel:not(.hidden) { 
     display: grid !important; 
     grid-template-columns: repeat(8, 1fr) !important; 
-    gap: 10px !important; 
-}
-
-.emoji-item {
-    font-size: 28px !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    height: 45px !important;
-    cursor: pointer;
 }
 
 /* --- ÁREA DE ENTRADA --- */
@@ -169,66 +171,23 @@ header img {
     gap: 10px;
     z-index: 4000;
 }
-.input-card {
-    background: #2a3942;
-    border-radius: 25px;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    height: 45px;
-}
-#chat-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    flex: 1;
-    color: white;
-    font-size: 16px;
-    margin-left: 10px;
-}
-.action-btn {
-    background: #00a884;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
 
-/* --- OVERLAY GRABACIÓN --- */
-#rec-overlay {
+/* OVERLAY GRABANDO (TEXTO ROJO) */
+#rec-overlay:not(.hidden) {
+    display: flex !important;
     position: absolute;
-    inset: 0;
-    background-color: var(--whatsapp-bg);
-    display: none;
+    left: 50px;
+    color: #f15c5c;
+    font-weight: 500;
     align-items: center;
-    padding-left: 20px;
-    color: #ff5252;
-    font-weight: bold;
-    z-index: 4500;
+    gap: 8px;
 }
-#rec-overlay:not(.hidden) { display: flex !important; }
 
-/* --- VISOR DE IMAGEN --- */
+/* --- VISOR DE IMAGEN (SOLUCIÓN BARRA NEGRA) --- */
 #image-viewer {
-    background-color: rgba(0,0,0,0.95) !important;
+    background-color: black !important;
     z-index: 9999 !important;
+    height: 100vh !important;
+    width: 100vw !important;
 }
 #image-viewer:not(.hidden) { display: flex !important; }
-
-/* --- MENÚ DE ACCIÓN (BORRAR MENSAJES) --- */
-#action-header-menu {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 62px;
-    background-color: #202c33 !important;
-    z-index: 6000;
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-}
-#action-header-menu:not(.hidden) { display: flex !important; }
