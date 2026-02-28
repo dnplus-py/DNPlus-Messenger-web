@@ -4,54 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contactos DNPlus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Eliminamos márgenes para que encaje perfecto bajo CHATS/ESTADOS/LLAMADAS */
         body { margin: 0; font-family: sans-serif; background-color: #0b141a; color: white; overflow-x: hidden; }
         
-        /* Contenedor principal sin cabecera propia */
-        .contact-list-container { display: flex; flex-direction: column; padding-top: 2px; }
+        .contact-list-container { display: flex; flex-direction: column; }
 
+        /* Estilo para las opciones fijas (Nuevo grupo, etc) */
+        .action-row {
+            display: flex; align-items: center; padding: 12px 15px; gap: 15px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .action-row:active { background-color: #202c33; }
+        
+        .icon-circle {
+            width: 40px; height: 40px; border-radius: 50%; background-color: #00a884;
+            display: flex; align-items: center; justify-content: center; font-size: 18px; color: white;
+        }
+
+        .section-title {
+            padding: 15px 15px 5px 15px; font-size: 13px; color: #8696a0;
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;
+        }
+
+        /* Estilo de los contactos de la lista */
         .contact-row { 
             display: flex; align-items: center; padding: 12px 15px; gap: 15px; 
-            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); 
-            transition: background 0.2s;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            cursor: pointer; transition: background 0.2s;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
         .contact-row:active { background-color: #202c33; }
         .contact-row.selected { background-color: #2a3942; }
         
-        /* Estilo de imagen circular con borde verde DNPlus */
-        .img-perfil { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #232d36; border: 1px solid #176f47; }
+        .img-perfil { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; border: 1px solid #176f47; }
         
         .info { flex: 1; overflow: hidden; }
         .name { font-size: 16px; font-weight: 500; color: #e9edef; }
         .status { font-size: 13px; color: #8696a0; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .no-contacts { text-align: center; padding: 40px; color: #8696a0; font-size: 14px; }
 
-        /* Modal de Borrado con Z-Index muy alto para que aparezca sobre el ViewPager */
+        /* Modal de Borrado */
         #modal-borrar {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             z-index: 10000; align-items: center; justify-content: center; padding: 20px;
         }
         .modal-box {
             background: #232d36; padding: 22px; border-radius: 15px; width: 100%; max-width: 300px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
         .btn-modal { font-weight: bold; background: none; border: none; cursor: pointer; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="contact-list-container" id="lista-contactos-real">
-        <p style="text-align:center; padding:20px; color:#8696a0;">Cargando contactos...</p>
+    <div class="contact-list-container">
+        <div class="action-row">
+            <div class="icon-circle"><i class="fas fa-users"></i></div>
+            <div class="info"><div class="name">Nuevo grupo</div></div>
+        </div>
+        
+        <div class="action-row" onclick="window.location.href='cresr_new_contactos.html'">
+            <div class="icon-circle"><i class="fas fa-user-plus"></i></div>
+            <div class="info">
+                <div class="name">Nuevo contacto</div>
+            </div>
+            <i class="fas fa-qrcode" style="color: #8696a0;"></i>
+        </div>
+
+        <div class="section-title">Contactos en DNPlus</div>
+
+        <div id="lista-contactos-real">
+            <p style="text-align:center; padding:20px; color:#8696a0;">Cargando contactos...</p>
+        </div>
+
+        <div class="action-row" style="margin-top: 10px;">
+            <div style="font-size: 20px; width: 40px; text-align: center; color: #8696a0;"><i class="fas fa-share-alt"></i></div>
+            <div class="info"><div class="name">Compartir enlace de invitación</div></div>
+        </div>
+
+        <div class="action-row">
+            <div style="font-size: 20px; width: 40px; text-align: center; color: #8696a0;"><i class="fas fa-question-circle"></i></div>
+            <div class="info"><div class="name">Ayuda sobre los contactos</div></div>
+        </div>
     </div>
 
     <div id="modal-borrar" onclick="cerrarModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
             <h3 style="margin-top:0; color:white; font-size: 18px;">¿Eliminar contacto?</h3>
-            <p style="color:#8696a0; font-size:14px; line-height: 1.5;">Este usuario dejará de aparecer en tu lista de contactos de DNPlus.</p>
+            <p style="color:#8696a0; font-size:14px;">El contacto se eliminará de tu lista.</p>
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
                 <button class="btn-modal" onclick="cerrarModal()" style="color:#8696a0;">CANCELAR</button>
                 <button id="btn-borrar-ok" class="btn-modal" style="color:#ef4444;">ELIMINAR</button>
@@ -70,7 +108,6 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // Usamos tu ID de registro
         const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
         let timerPulsacion;
         let contactoSeleccionadoId = null;
@@ -83,7 +120,7 @@
                 container.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    container.innerHTML = "<p class='no-contacts'>No hay usuarios disponibles.</p>";
+                    container.innerHTML = "<p class='no-contacts'>No hay contactos aún.</p>";
                     return;
                 }
 
@@ -101,27 +138,20 @@
                                 <div class="status">${user.estado || 'Disponible'}</div>
                             </div>`;
 
-                        // --- Pulsación Corta: Iniciar Chat ---
                         row.onclick = () => {
                             if (!row.classList.contains('selected')) {
                                 iniciarChat(userId, user.nombre, user.foto);
                             }
                         };
 
-                        // --- Pulsación Larga: Borrar (2.5 segundos para evitar errores) ---
-                        const iniciarTemporizador = () => {
-                            timerPulsacion = setTimeout(() => {
-                                abrirConfirmacion(userId, row);
-                            }, 2500);
+                        // Pulsación larga de 2.5 segundos para borrar
+                        const startPress = () => {
+                            timerPulsacion = setTimeout(() => abrirConfirmacion(userId, row), 2500);
                         };
+                        const endPress = () => clearTimeout(timerPulsacion);
 
-                        const cancelarTemporizador = () => clearTimeout(timerPulsacion);
-
-                        row.onmousedown = iniciarTemporizador;
-                        row.ontouchstart = iniciarTemporizador;
-                        row.onmouseup = cancelarTemporizador;
-                        row.ontouchend = cancelarTemporizador;
-                        row.onmouseleave = cancelarTemporizador;
+                        row.onmousedown = row.ontouchstart = startPress;
+                        row.onmouseup = row.ontouchend = row.onmouseleave = endPress;
 
                         container.appendChild(row);
                     }
@@ -135,28 +165,21 @@
             document.getElementById("modal-borrar").style.display = "flex";
             
             document.getElementById("btn-borrar-ok").onclick = () => {
-                db.ref("usuarios_registrados/" + contactoSeleccionadoId).remove().then(() => {
-                    cerrarModal();
-                });
+                db.ref("usuarios_registrados/" + contactoSeleccionadoId).remove().then(() => cerrarModal());
             };
         }
 
         function cerrarModal() {
             document.getElementById("modal-borrar").style.display = "none";
             document.querySelectorAll(".contact-row").forEach(r => r.classList.remove("selected"));
-            contactoSeleccionadoId = null;
         }
 
         function iniciarChat(idOtro, nombre, foto) {
             const ids = [miId, idOtro].sort();
-            const salaId = ids[0] + "_" + ids[1];
-            
-            localStorage.setItem("chat_sala_id", salaId);
+            localStorage.setItem("chat_sala_id", ids[0] + "_" + ids[1]);
             localStorage.setItem("chat_destinatario_id", idOtro);
             localStorage.setItem("chat_destinatario_nombre", nombre);
             localStorage.setItem("chat_destinatario_foto", foto);
-            
-            // Navegamos al chat (usamos window.top para salir del ViewPager)
             window.top.location.href = "mensajes.html";
         }
 
