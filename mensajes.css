@@ -363,12 +363,18 @@ header, #action-header-menu {
     border-radius: 20px;
 }
 
-/* La foto redonda dentro del mensaje de voz */
+/* LA FOTO: Más grande y al lado del Play */
 .audio-user-photo {
-    width: 40px !important;
-    height: 40px !important;
+    width: 50px !important;  /* Tamaño aumentado */
+    height: 50px !important; /* Tamaño aumentado */
     border-radius: 50% !important;
     object-fit: cover !important;
-    border: 1.5px solid var(--msg-mine);
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    flex-shrink: 0 !important; /* Evita que la foto se aplaste */
 }
 
+/* Ajuste del icono play para que no quede pegado */
+.audio-wrapper i {
+    margin-left: 5px;
+    color: #8696a0; /* Color gris suave de WhatsApp */
+}
