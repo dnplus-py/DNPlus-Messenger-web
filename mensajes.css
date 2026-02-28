@@ -69,29 +69,6 @@ header, #action-header-menu {
 .bubble-mine { align-self: flex-end; background-color: var(--msg-mine); color: white; border-top-right-radius: 2px; }
 .bubble-theirs { align-self: flex-start; background-color: var(--msg-theirs); color: white; border-top-left-radius: 2px; }
 
-/* --- DISEÑO DE AUDIO (ESTILO RAMON AMIGO) --- */
-.audio-wrapper {
-    width: 280px !important;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.audio-wrapper img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%; /* Foto redonda */
-    object-fit: cover;
-}
-
-.audio-controls {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 13px;
-}
-
 /* --- MULTIMEDIA (FOTOS) --- */
 .img-frame {
     width: 190px !important;   
