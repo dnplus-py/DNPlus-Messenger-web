@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Llamada - DNPlus</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <style>
+        .pulse-bg {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body style="background-color: #0b141a; height: 100vh; color: white; overflow: hidden; font-family: sans-serif;">
+
+    <div class="flex flex-col items-center justify-between h-full py-20 relative">
+        
+        <div class="text-center z-10">
+            <div class="text-sm text-gray-400 mb-2 uppercase tracking-widest">Llamada de voz de DNPlus</div>
+            <h1 id="contacto-nombre" class="text-3xl font-bold mb-2">Cargando...</h1>
+            <div id="estado-llamada" class="text-lg text-green-500 animate-pulse">Llamando...</div>
+        </div>
+
+        <div class="relative flex items-center justify-center">
+            <div class="absolute w-64 h-64 bg-green-900 rounded-full pulse-bg"></div>
+            <img id="contacto-foto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+                 class="w-48 h-48 rounded-full object-cover border-4 border-[#0b141a] z-10 shadow-2xl">
+        </div>
+
+        <div class="flex gap-10 z-10">
+            <button class="w-14 h-14 bg-gray-700 rounded-full flex items-center justify-center text-xl">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            
+            <button onclick="colgarLlamada()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-lg active:scale-95 transition-transform">
+                <i class="fas fa-phone-slash rotate-[135deg]"></i>
+            </button>
+
+            <button class="w-14 h-14 bg-gray-700 rounded-full flex items-center justify-center text-xl">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. CONFIGURACIÓN FIREBASE (Usa la misma que tus otros archivos)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            projectId: "dnplus-messenger-pro",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 2. OBTENER EL ID DEL CONTACTO DESDE LA URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const contactoId = urlParams.get('id');
+
+        // 3. CARGAR DATOS DEL CONTACTO
+        if (contactoId) {
+            db.ref("usuarios_registrados/" + contactoId).once("value", (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById("contacto-nombre").innerText = data.nombre || "Usuario de DNPlus";
+                    if (data.foto_perfil) {
+                        document.getElementById("contacto-foto").src = data.foto_perfil;
+                    }
+                } else {
+                    document.getElementById("contacto-nombre").innerText = "Desconocido";
+                }
+            });
+        }
+
+        // 4. FUNCIÓN PARA COLGAR
+        function colgarLlamada() {
+            // Aquí podrías agregar un aviso a Firebase de que la llamada terminó
+            window.history.back(); // Regresa al chat
+        }
+
+        // Sonido de llamada (opcional)
+        // const ringtone = new Audio('ruta_al_archivo_tono.mp3');
+        // ringtone.loop = true;
+        // ringtone.play();
+    </script>
+
+</body>
+</html>
