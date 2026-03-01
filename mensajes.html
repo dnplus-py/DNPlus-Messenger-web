@@ -9,8 +9,11 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js"></script>
 </head>
 <body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
 
@@ -31,7 +34,8 @@
             </div>
         </div>
         <div class="flex gap-3 relative">
-            <i class="fas fa-phone p-2"></i>
+            <i class="fas fa-phone p-2 cursor-pointer" onclick="irALlamada()"></i>
+            
             <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
             
             <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none; position: absolute; background: #232d36; border-radius: 8px; flex-direction: column; z-index: 5000;">
@@ -48,7 +52,6 @@
     <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; position: relative;"></main>
 
     <div class="input-area" style="position: relative; background: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px;">
-        
         <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: calc(100% - 70px); height: 80%; left: 5px; top: 10%; align-items: center; padding-left: 20px; z-index: 50; border-radius: 25px;">
             <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> 
             <span style="color: #ff5252; font-weight: bold;">Grabando...</span>
@@ -66,20 +69,43 @@
         </button>
     </div>
 
-    <div id="emoji-panel" style="display: none;"></div>
-
     <div id="image-viewer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
         <span class="absolute top-5 right-5 text-white text-5xl cursor-pointer" style="z-index:100" onclick="cerrarVisor()">&times;</span>
         <img id="full-image" src="" style="max-width: 90%; max-height: 80%; object-fit: contain;">
-        <div class="flex gap-10 mt-5">
-            <i class="fas fa-search-plus text-white text-3xl cursor-pointer" onclick="zoomImg(1.2)"></i>
-            <i class="fas fa-search-minus text-white text-3xl cursor-pointer" onclick="zoomImg(0.8)"></i>
-        </div>
     </div>
 
     <input type="file" id="bg-input" hidden accept="image/*" onchange="aplicarNuevoFondo(this)">
 
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
+    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/dn_notificaciones.js"></script>
+
+    <script>
+        // Función simple para ir a la pantalla de llamada
+        function irALlamada() {
+            // Se asume que 'idReceptor' viene definido desde mensajes.js
+            const destino = typeof idReceptor !== 'undefined' ? idReceptor : '';
+            if (destino) {
+                // Enviamos aviso de llamada antes de saltar
+                enviarAvisoDN(destino, "Llamada entrante", "David Oviedo te está llamando...");
+                window.location.href = "llamada.html?id=" + destino;
+            } else {
+                window.location.href = "llamada.html";
+            }
+        }
+
+        // Lógica para enviar la notificación cuando se pulsa enviar mensaje
+        const btnAccion = document.getElementById("action-btn");
+        const inputChat = document.getElementById("chat-input");
+
+        btnAccion.addEventListener("click", () => {
+            const mensaje = inputChat.value.trim();
+            if(mensaje !== "") {
+                if(typeof idReceptor !== 'undefined') {
+                   enviarAvisoDN(idReceptor, "Nuevo mensaje de David", mensaje);
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>
