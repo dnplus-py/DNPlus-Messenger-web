@@ -12,81 +12,95 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
+        /* Fondo con el verde que te gusta para los mensajes */
+        body { background-color: #0b141a; overflow: hidden; }
+        
         .pulse-animation {
             animation: pulse-green 2s infinite;
         }
         @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { box-shadow: 0 0 0 30px rgba(34, 197, 94, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0.7); }
+            70% { box-shadow: 0 0 0 30px rgba(23, 111, 71, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0); }
         }
+        
+        /* Botones estilo WhatsApp */
+        .btn-call {
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 20px; transition: 0.2s;
+        }
+        .btn-call:active { transform: scale(0.9); }
     </style>
 </head>
-<body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 0; color: white; overflow: hidden;">
+<body class="h-screen flex flex-col items-center justify-between py-16 text-white">
 
     <div class="text-center">
-        <p class="text-xs text-gray-400 uppercase tracking-widest mb-2">Llamada de voz de DNPlus</p>
-        <h1 id="nombre-contacto" class="text-3xl font-bold">Cargando...</h1>
-        <p id="timer" class="text-green-500 mt-1">Llamando...</p>
+        <div class="flex items-center justify-center gap-2 mb-2">
+            <i class="fas fa-lock text-[10px] text-gray-500"></i>
+            <p class="text-[11px] text-gray-400 uppercase tracking-[2px]">Cifrado de extremo a extremo</p>
+        </div>
+        <h1 id="nombre-contacto" class="text-3xl font-medium mt-4">Cargando...</h1>
+        <p id="timer" class="text-gray-400 mt-2 text-lg">Llamando...</p>
     </div>
 
     <div class="relative">
         <img id="foto-contacto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
-             class="w-44 h-44 rounded-full object-cover border-4 border-[#176f47] pulse-animation">
+             class="w-48 h-48 rounded-full object-cover border-4 border-[#176f47] pulse-animation">
     </div>
 
-    <div class="flex gap-8 items-center">
-        <button class="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center text-xl">
-            <i class="fas fa-volume-up"></i>
-        </button>
-        
-        <button onclick="window.history.back()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-lg active:scale-90 transition-transform">
-            <i class="fas fa-phone-slash rotate-[135deg]"></i>
-        </button>
+    <div class="flex flex-col items-center gap-10 w-full px-10">
+        <div class="flex justify-around w-full max-w-sm">
+            <button class="btn-call bg-gray-800/60"><i class="fas fa-volume-up"></i></button>
+            <button class="btn-call bg-gray-800/60"><i class="fas fa-video-slash"></i></button>
+            <button class="btn-call bg-gray-800/60"><i class="fas fa-microphone"></i></button>
+        </div>
 
-        <button class="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center text-xl">
-            <i class="fas fa-microphone"></i>
+        <button onclick="window.history.back()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-2xl active:scale-95">
+            <i class="fas fa-phone-slash rotate-[135deg]"></i>
         </button>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE TU FIREBASE (Copiada de tus capturas)
+        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            projectId: "dnplus-messenger-pro",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // OBTENER ID DEL CONTACTO DE LA URL
-        const params = new URLSearchParams(window.location.search);
-        const idContacto = params.get('id');
+        // Obtener el ID del contacto (lo lee de localStorage o URL)
+        // He puesto ambos por si lo llamas desde el chat o desde la lista
+        const idContacto = new URLSearchParams(window.location.search).get('id') || localStorage.getItem("chat_destinatario_id");
 
         if (idContacto) {
-            // BUSCAR EN TU RAMA DE USUARIOS (Igual que en mis_contactos.html)
+            // Referencia exacta a tu rama de usuarios registrados
             db.ref("usuarios_registrados/" + idContacto).once("value", (snapshot) => {
                 const user = snapshot.val();
                 if (user) {
+                    // Ponemos el nombre y la foto real de Firebase
                     document.getElementById("nombre-contacto").innerText = user.nombre || "Usuario DNPlus";
-                    if (user.foto_perfil) {
-                        document.getElementById("foto-contacto").src = user.foto_perfil;
+                    if (user.foto) {
+                        document.getElementById("foto-contacto").src = user.foto;
                     }
                 }
             });
         }
 
-        // OPCIONAL: Iniciar cronómetro después de 3 segundos (simulando que contestan)
+        // LÓGICA DEL CRONÓMETRO (Inicia a los 3 segundos simulando conexión)
         setTimeout(() => {
             let segundos = 0;
-            document.getElementById("timer").classList.remove("animate-pulse");
+            const timerElement = document.getElementById("timer");
+            timerElement.style.color = "#00a884"; // Cambia a verde cuando "conecta"
+            
             setInterval(() => {
                 segundos++;
                 let min = Math.floor(segundos / 60);
                 let seg = segundos % 60;
-                document.getElementById("timer").innerText = `${min < 10 ? '0'+min : min}:${seg < 10 ? '0'+seg : seg}`;
+                timerElement.innerText = `${min < 10 ? '0'+min : min}:${seg < 10 ? '0'+seg : seg}`;
             }, 1000);
-        }, 4000);
+        }, 3500);
     </script>
 </body>
 </html>
