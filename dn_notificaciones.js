@@ -1,35 +1,46 @@
-// dn_notificaciones.js
 const messaging = firebase.messaging();
 
+// FUNCIÓN PARA ACTIVAR NOTIFICACIONES (Llamar en registro.html)
 function activarNotificacionesDN(idUsuario) {
-    // 1. Pedir permiso al navegador/celular
-    Notification.requestPermission().then((permiso) => {
-        if (permiso === 'granted') {
-            console.log('Permiso concedido para DNPlus');
-            
-            // 2. Obtener el Token único de este celular
-            // Reemplaza "TU_CLAVE_VAPID" por la que generas en la consola de Firebase
-            messaging.getToken({ vapidKey: 'TU_CLAVE_VAPID_AQUI' })
-                .then((tokenActual) => {
-                    if (tokenActual) {
-                        // 3. Guardar el Token en Firebase bajo el ID del usuario
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            // TU CLAVE VAPID GENERADA
+            messaging.getToken({ vapidKey: 'BN4OwsJeDrCxn6kWikOkM49z-npm3PD4b7b2sSAboRuCNJNBqo63U5zKg-LiOjV3CJnIXCN26_SQEo8ibJ7cGJQ' })
+                .then((currentToken) => {
+                    if (currentToken) {
+                        // Guardar token en el perfil del usuario en Firebase
                         firebase.database().ref("usuarios_registrados/" + idUsuario).update({
-                            fcm_token: tokenActual
+                            fcm_token: currentToken
                         });
-                        console.log("Token guardado con éxito");
+                        console.log("Token de DNPlus guardado con éxito");
                     }
-                }).catch((err) => console.log('Error al obtener token', err));
+                }).catch((err) => console.log('Error al obtener token:', err));
         }
     });
 }
 
-function enviarAviso(idDestinatario, textoMensaje) {
-    db.ref("usuarios_registrados/" + idDestinatario + "/fcm_token").once("value", (s) => {
-        const tokenDestino = s.val();
-        if (tokenDestino) {
-            // Aquí llamarías a la API de Firebase para enviar la notificación
-            console.log("Enviando notificación al token: " + tokenDestino);
-        }
-    });
-}
+// FUNCIÓN PARA ENVIAR AVISO (Llamar en mensajes.html o llamadas.html)
+async function enviarAvisoDN(idDestinatario, titulo, mensaje) {
+    const snapshot = await firebase.database().ref("usuarios_registrados/" + idDestinatario + "/fcm_token").once("value");
+    const tokenDestino = snapshot.val();
 
+    if (tokenDestino) {
+        // Petición a la API de Firebase (Legacy HTTP)
+        fetch('https://fcm.googleapis.com/fcm/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'key=TU_SERVER_KEY_AQUI' // Busca la "Server Key" en Cloud Messaging
+            },
+            body: JSON.stringify({
+                "to": tokenDestino,
+                "notification": {
+                    "title": titulo,
+                    "body": mensaje,
+                    "icon": "https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png",
+                    "click_action": "https://dnplus-py.github.io/DNPlus-Messenger-web/"
+                }
+            })
+        });
+    }
+}
