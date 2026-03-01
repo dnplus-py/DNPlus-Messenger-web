@@ -54,7 +54,7 @@
         <p style="text-align:center; padding:20px; color:#8696a0;">Cargando mensajes de DNPlus...</p>
     </div>
 
-    <div class="fab-chats" onclick="window.location.href='lista_contactos.html'">
+    <div class="fab-chats" onclick="window.top.location.href='mis_contactos.html'">
         <i class="fas fa-comment-dots"></i>
     </div>
 
@@ -80,7 +80,6 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // ID del usuario actual
         const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
         let salaParaBorrar = null;
         let timerPulsacion;
@@ -128,13 +127,12 @@
                                     </div>
                                 </div>`;
 
-                            // --- Lógica de Pulsación Corta y Larga ---
                             div.onclick = () => abrirChat(salaId, idOtro, user.nombre, user.foto);
                             
                             div.onmousedown = div.ontouchstart = (e) => {
                                 timerPulsacion = setTimeout(() => {
                                     confirmarBorrar(salaId, div);
-                                }, 800); // 800ms para detectar pulsación larga
+                                }, 800);
                             };
 
                             div.onmouseup = div.onmouseleave = div.ontouchend = () => {
@@ -153,6 +151,8 @@
             localStorage.setItem("chat_destinatario_id", id);
             localStorage.setItem("chat_destinatario_nombre", nom || "Usuario");
             localStorage.setItem("chat_destinatario_foto", foto || "");
+            
+            // CORRECCIÓN: También usamos window.top para que el chat cubra el TabLayout
             window.top.location.href = "mensajes.html";
         }
 
