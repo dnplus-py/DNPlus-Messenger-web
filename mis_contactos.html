@@ -14,69 +14,72 @@
             height: 100vh; width: 100vw;
             display: flex; flex-direction: column;
             overflow: hidden;
-            position: fixed; /* Esto asegura que se sobreponga al TabLayout */
+            position: fixed; 
             top: 0; left: 0;
-            z-index: 10000; /* Superior a cualquier TabLayout */
+            z-index: 999999; /* Máxima prioridad para tapar el TabLayout */
         }
 
         .barra-contactos-exclusiva { 
-            background-color: #008069; /* Verde oficial */
+            background-color: #008069; 
             height: 60px; min-height: 60px; width: 100%;
             display: flex; align-items: center; 
             padding: 0 15px; gap: 20px; color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .area-scroll-contactos { 
             flex: 1; overflow-y: auto; background-color: #0b141a;
+            padding-bottom: 20px;
         }
 
         .fila-dn-contacto { 
             display: flex; align-items: center; 
             padding: 12px 16px; gap: 15px; 
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: 0.2s;
         }
         .fila-dn-contacto:active { background-color: #202c33; }
 
-        .img-perfil-unica { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .img-perfil-unica { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #232d36; }
         .nombre-unico { font-size: 16px; color: #e9edef; margin: 0; }
         .estado-unico { font-size: 13px; color: #8696a0; margin: 0; }
 
-        /* --- ESTILOS DEL MODAL DE BORRADO --- */
+        /* MODAL MEJORADO */
         #modal-borrar {
             display: none; position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             align-items: center; justify-content: center;
-            z-index: 20000;
+            z-index: 1000000;
         }
         .modal-contenido {
             background: #232d36; color: white;
-            width: 80%; max-width: 300px;
-            padding: 20px; border-radius: 15px; text-align: center;
+            width: 85%; max-width: 320px;
+            padding: 25px; border-radius: 20px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         .btn-modal {
-            padding: 10px 20px; border: none; border-radius: 5px;
+            padding: 12px 25px; border: none; border-radius: 8px;
             cursor: pointer; font-weight: bold; margin: 10px 5px;
+            width: 100px;
         }
-        .btn-si { background: #d91e1e; color: white; }
-        .btn-no { background: transparent; color: #00a884; }
+        .btn-si { background: #e53935; color: white; }
+        .btn-no { background: transparent; color: #00a884; border: 1px solid #00a884; }
     </style>
 </head>
-<body>
+<body id="cuerpo-agenda">
 
     <div class="barra-contactos-exclusiva">
-        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <i class="fas fa-arrow-left" onclick="irAtras()"></i>
         <div>
             <h3 style="margin:0; font-size:18px;">Seleccionar contacto</h3>
-            <span id="txt-total-usuarios" style="font-size:12px; opacity:0.8;">Cargando...</span>
+            <span id="txt-total-usuarios" style="font-size:12px; opacity:0.8;">Cargando contactos...</span>
         </div>
     </div>
 
     <div class="area-scroll-contactos">
         <div class="fila-dn-contacto" onclick="window.location.href='cresr_new_contactos.html'">
             <div style="width:45px; height:45px; border-radius:50%; background:#00a884; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-user-plus" style="color:white;"></i>
+                <i class="fas fa-user-plus" style="color:white; font-size: 18px;"></i>
             </div>
             <p class="nombre-unico">Nuevo contacto</p>
         </div>
@@ -86,10 +89,13 @@
 
     <div id="modal-borrar">
         <div class="modal-contenido">
+            <i class="fas fa-trash-alt" style="font-size: 40px; color: #e53935; margin-bottom: 15px;"></i>
             <h3>¿Eliminar contacto?</h3>
-            <p>Se borrará este contacto de tu agenda DNPlus.</p>
-            <button class="btn-modal btn-no" onclick="cerrarModal()">CANCELAR</button>
-            <button class="btn-modal btn-si" id="btn-confirmar-borrado">ELIMINAR</button>
+            <p style="color: #8696a0;">Esta acción no se puede deshacer.</p>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                <button class="btn-modal btn-no" onclick="cerrarModal()">NO</button>
+                <button class="btn-modal btn-si" id="btn-confirmar-borrado">SÍ</button>
+            </div>
         </div>
     </div>
 
@@ -120,15 +126,18 @@
                     div.className = "fila-dn-contacto";
                     div.innerHTML = `
                         <img src="${datos.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="img-perfil-unica">
-                        <div>
+                        <div style="flex:1;">
                             <p class="nombre-unico">${datos.nombre}</p>
                             <p class="estado-unico">${datos.estado || 'Disponible'}</p>
                         </div>`;
 
-                    // CLICK NORMAL: Abrir Chat
-                    div.onclick = () => abrirChat(id, datos);
+                    div.onclick = () => {
+                        localStorage.setItem("chat_destinatario_id", id);
+                        localStorage.setItem("chat_destinatario_nombre", datos.nombre);
+                        window.location.href = "mensajes.html";
+                    };
 
-                    // PULSACIÓN LARGA: Abrir Modal de Borrado
+                    // Pulsación larga para borrar
                     let timer;
                     div.onmousedown = () => timer = setTimeout(() => abrirModal(id), 800);
                     div.onmouseup = () => clearTimeout(timer);
@@ -141,13 +150,6 @@
             });
         }
 
-        function abrirChat(id, datos) {
-            localStorage.setItem("chat_destinatario_id", id);
-            localStorage.setItem("chat_destinatario_nombre", datos.nombre);
-            window.location.href = "mensajes.html";
-        }
-
-        // --- LÓGICA DEL MODAL ---
         function abrirModal(id) {
             contactoSeleccionadoID = id;
             document.getElementById("modal-borrar").style.display = "flex";
@@ -161,11 +163,14 @@
             if (contactoSeleccionadoID) {
                 rtdbDN.ref("usuarios_registrados/" + contactoSeleccionadoID).remove()
                 .then(() => {
-                    alert("Contacto eliminado");
                     cerrarModal();
                 });
             }
         };
+
+        function irAtras() {
+            window.history.back();
+        }
 
         window.onload = renderizarContactosDN;
     </script>
