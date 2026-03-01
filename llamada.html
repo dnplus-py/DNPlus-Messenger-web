@@ -12,7 +12,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        /* Fondo con el verde que te gusta para los mensajes */
         body { background-color: #0b141a; overflow: hidden; }
         
         .pulse-animation {
@@ -24,7 +23,6 @@
             100% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0); }
         }
         
-        /* Botones estilo WhatsApp */
         .btn-call {
             width: 55px; height: 55px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -50,7 +48,7 @@
     </div>
 
     <div class="flex flex-col items-center gap-10 w-full px-10">
-        <div class="flex justify-around w-full max-w-sm">
+        <div class="flex justify-around w-full max-sm:max-w-sm">
             <button class="btn-call bg-gray-800/60"><i class="fas fa-volume-up"></i></button>
             <button class="btn-call bg-gray-800/60"><i class="fas fa-video-slash"></i></button>
             <button class="btn-call bg-gray-800/60"><i class="fas fa-microphone"></i></button>
@@ -70,29 +68,58 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // Obtener el ID del contacto (lo lee de localStorage o URL)
-        // He puesto ambos por si lo llamas desde el chat o desde la lista
+        // 1. COLOCA TU SERVER KEY AQUÍ
+        const SERVER_KEY = "TU_SERVER_KEY_AQUI"; 
+
         const idContacto = new URLSearchParams(window.location.search).get('id') || localStorage.getItem("chat_destinatario_id");
+        const miNombre = localStorage.getItem("user_name") || "Un usuario de DNPlus";
 
         if (idContacto) {
-            // Referencia exacta a tu rama de usuarios registrados
+            // Cargar datos visuales
             db.ref("usuarios_registrados/" + idContacto).once("value", (snapshot) => {
                 const user = snapshot.val();
                 if (user) {
-                    // Ponemos el nombre y la foto real de Firebase
                     document.getElementById("nombre-contacto").innerText = user.nombre || "Usuario DNPlus";
-                    if (user.foto) {
-                        document.getElementById("foto-contacto").src = user.foto;
+                    if (user.foto) document.getElementById("foto-contacto").src = user.foto;
+                    
+                    // 2. DISPARAR NOTIFICACIÓN AL OTRO TELÉFONO
+                    if (user.fcm_token) {
+                        enviarAvisoLlamada(user.fcm_token, miNombre);
                     }
                 }
             });
         }
 
-        // LÓGICA DEL CRONÓMETRO (Inicia a los 3 segundos simulando conexión)
+        async function enviarAvisoLlamada(tokenDestino, nombreEmisor) {
+            try {
+                await fetch('https://fcm.googleapis.com/fcm/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'key=' + SERVER_KEY
+                    },
+                    body: JSON.stringify({
+                        "to": tokenDestino,
+                        "notification": {
+                            "title": "📞 Llamada de voz entrante",
+                            "body": nombreEmisor + " te está llamando...",
+                            "icon": "https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png",
+                            "click_action": "https://dnplus-py.github.io/DNPlus-Messenger-web/llamada.html"
+                        },
+                        "priority": "high"
+                    })
+                });
+                console.log("Aviso de llamada enviado");
+            } catch (e) {
+                console.error("Error enviando aviso:", e);
+            }
+        }
+
+        // LÓGICA DEL CRONÓMETRO
         setTimeout(() => {
             let segundos = 0;
             const timerElement = document.getElementById("timer");
-            timerElement.style.color = "#00a884"; // Cambia a verde cuando "conecta"
+            timerElement.style.color = "#00a884"; 
             
             setInterval(() => {
                 segundos++;
