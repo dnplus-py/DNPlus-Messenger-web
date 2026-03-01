@@ -12,7 +12,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js"></script>
 </head>
 <body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
@@ -24,11 +23,11 @@
         <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
     </div>
 
-    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white;">
+    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white; z-index: 100;">
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
             <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full object-cover">
-            <div>
+            <div onclick="abrirPerfilContacto()" class="cursor-pointer">
                 <div id="header-name" class="font-bold text-sm">Cargando...</div>
                 <div id="header-status" class="text-[10px] text-green-400">en línea</div>
             </div>
@@ -38,18 +37,18 @@
             
             <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
             
-            <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none; position: absolute; background: #232d36; border-radius: 8px; flex-direction: column; z-index: 5000;">
-                <div class="menu-item" style="padding: 12px; cursor: pointer; color: white;" onclick="cambiarFondo()">
-                    <i class="fas fa-image mr-2"></i> Fondo de pantalla
+            <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none; position: absolute; background: #232d36; border-radius: 8px; flex-direction: column; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer text-white flex items-center" onclick="cambiarFondo()">
+                    <i class="fas fa-image mr-3"></i> Fondo de pantalla
                 </div>
-                <div class="menu-item" style="padding: 12px; cursor: pointer; color: white;" onclick="vaciarChat()">
-                    <i class="fas fa-broom mr-2"></i> Vaciar chat
+                <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer text-white flex items-center" onclick="vaciarChat()">
+                    <i class="fas fa-broom mr-3"></i> Vaciar chat
                 </div>
             </div>
         </div>
     </header>
 
-    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; position: relative;"></main>
+    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; position: relative; padding: 10px;"></main>
 
     <div class="input-area" style="position: relative; background: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px;">
         <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: calc(100% - 70px); height: 80%; left: 5px; top: 10%; align-items: center; padding-left: 20px; z-index: 50; border-radius: 25px;">
@@ -80,29 +79,58 @@
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/dn_notificaciones.js"></script>
 
     <script>
-        // Función simple para ir a la pantalla de llamada
+        // CONFIGURACIÓN DE FIREBASE (Asegúrate de que coincida con tus otros archivos)
+        const fbConfig = {
+            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+            projectId: "dnplus-messenger-pro",
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(fbConfig); }
+
+        const miNombre = localStorage.getItem("user_name") || "David Oviedo";
+
+        // Función para ir a la pantalla de llamada y enviar la notificación
         function irALlamada() {
-            // Se asume que 'idReceptor' viene definido desde mensajes.js
-            const destino = typeof idReceptor !== 'undefined' ? idReceptor : '';
-            if (destino) {
-                // Enviamos aviso de llamada antes de saltar
-                enviarAvisoDN(destino, "Llamada entrante", "David Oviedo te está llamando...");
-                window.location.href = "llamada.html?id=" + destino;
+            // El idReceptor se obtiene generalmente del localStorage o de la URL en mensajes.js
+            const receptorId = localStorage.getItem("chat_destinatario_id");
+            
+            if (receptorId) {
+                // Disparamos la notificación de llamada entrante
+                enviarAvisoDN(receptorId, "📞 Llamada de DNPlus", miNombre + " te está llamando...");
+                // Saltamos a la pantalla de llamada
+                window.location.href = "llamada.html?id=" + receptorId;
             } else {
-                window.location.href = "llamada.html";
+                console.error("No se encontró ID de receptor");
             }
         }
 
-        // Lógica para enviar la notificación cuando se pulsa enviar mensaje
-        const btnAccion = document.getElementById("action-btn");
-        const inputChat = document.getElementById("chat-input");
+        // Lógica para enviar notificación al enviar un mensaje de texto
+        const actionBtn = document.getElementById("action-btn");
+        const chatInput = document.getElementById("chat-input");
 
-        btnAccion.addEventListener("click", () => {
-            const mensaje = inputChat.value.trim();
-            if(mensaje !== "") {
-                if(typeof idReceptor !== 'undefined') {
-                   enviarAvisoDN(idReceptor, "Nuevo mensaje de David", mensaje);
-                }
+        actionBtn.addEventListener("click", () => {
+            const msgText = chatInput.value.trim();
+            const receptorId = localStorage.getItem("chat_destinatario_id");
+            
+            // Si hay texto y tenemos a quién enviárselo
+            if (msgText !== "" && receptorId) {
+                // Enviamos el aviso de nuevo mensaje
+                enviarAvisoDN(receptorId, "Nuevo mensaje de " + miNombre, msgText);
+            }
+        });
+
+        // Función para abrir el menú de opciones (Fondo, Vaciar, etc)
+        function toggleHeaderMenu() {
+            const menu = document.getElementById("header-menu");
+            menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "flex" : "none";
+        }
+
+        // Cerrar menú si se hace clic fuera
+        document.addEventListener("click", (e) => {
+            const menu = document.getElementById("header-menu");
+            const btn = document.querySelector(".fa-ellipsis-v");
+            if (menu && !menu.contains(e.target) && e.target !== btn) {
+                menu.style.display = "none";
             }
         });
     </script>
