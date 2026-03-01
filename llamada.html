@@ -4,121 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Llamada DNPlus</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-
     <style>
-        body { background-color: #0b141a; overflow: hidden; color: white; }
-        .pulse-animation { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green {
+        body { background-color: #0b141a; color: white; overflow: hidden; font-family: sans-serif; }
+        .pulse { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border {
             0% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0.7); }
-            70% { box-shadow: 0 0 0 30px rgba(23, 111, 71, 0); }
+            70% { box-shadow: 0 0 0 20px rgba(23, 111, 71, 0); }
             100% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0); }
-        }
-        .btn-call {
-            width: 55px; height: 55px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background-color: rgba(31, 41, 55, 0.6); font-size: 20px;
         }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-between py-16">
+<body class="h-screen flex flex-col items-center justify-between py-20">
 
     <div class="text-center">
-        <div class="flex items-center justify-center gap-2 mb-2">
-            <i class="fas fa-lock text-[10px] text-gray-500"></i>
-            <p class="text-[11px] text-gray-400 uppercase tracking-[2px]">Cifrado de extremo a extremo</p>
-        </div>
-        <h1 id="nombre-contacto" class="text-3xl font-medium mt-4">Cargando...</h1>
-        <p id="timer" class="text-gray-400 mt-2 text-lg">Llamando...</p>
+        <h1 id="nombre-contacto" class="text-3xl font-medium">Cargando...</h1>
+        <p id="status-llamada" class="text-gray-400 mt-2 text-lg">Llamando...</p>
     </div>
 
-    <div class="relative">
-        <img id="foto-contacto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
-             class="w-48 h-48 rounded-full object-cover border-4 border-[#176f47] pulse-animation">
-    </div>
+    <img id="foto-contacto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+         class="w-44 h-44 rounded-full object-cover border-4 border-[#176f47] pulse">
 
-    <div class="flex flex-col items-center gap-10 w-full px-10">
-        <div class="flex justify-around w-full max-w-sm">
-            <button class="btn-call"><i class="fas fa-volume-up"></i></button>
-            <button class="btn-call"><i class="fas fa-video-slash"></i></button>
-            <button class="btn-call"><i class="fas fa-microphone"></i></button>
-        </div>
-
-        <button onclick="window.history.back()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-2xl">
+    <div class="flex flex-col items-center gap-10">
+        <button onclick="finalizarLlamada()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-xl">
             <i class="fas fa-phone-slash rotate-[135deg]"></i>
         </button>
     </div>
 
     <script>
-        // CONFIGURACIÓN OBTENIDA DE TUS CAPTURAS
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            projectId: "dnplus-messenger-pro",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // IMPORTANTE: Pon tu Server Key aquí para que el envío sea real
-        const SERVER_KEY = "TU_SERVER_KEY_AQUI"; 
-
         const idDestino = new URLSearchParams(window.location.search).get('id') || localStorage.getItem("chat_destinatario_id");
-        const miNombre = localStorage.getItem("user_name") || "Alguien";
+        const miId = localStorage.getItem("user_phone");
+        let cronometro;
+        
+        // Creamos una "sala de llamada" única entre los dos
+        const idSala = miId < idDestino ? miId + "_" + idDestino : idDestino + "_" + miId;
 
         if (idDestino) {
-            // Buscamos al usuario en la base de datos
-            db.ref("usuarios_registrados/" + idDestino).once("value", (snap) => {
-                const user = snap.val();
-                if (user) {
-                    document.getElementById("nombre-contacto").innerText = user.nombre || "Usuario";
-                    if (user.foto) document.getElementById("foto-contacto").src = user.foto;
-                    
-                    // Si el usuario tiene un token de notificación, le enviamos el aviso real
-                    if (user.fcm_token) {
-                        ejecutarLlamadaReal(user.fcm_token, miNombre);
-                    }
+            // 1. Cargar info visual
+            db.ref("usuarios_registrados/" + idDestino).once("value", snap => {
+                const u = snap.val();
+                if(u) {
+                    document.getElementById("nombre-contacto").innerText = u.nombre;
+                    if(u.foto) document.getElementById("foto-contacto").src = u.foto;
+                }
+            });
+
+            // 2. Notificar al otro (Tu función enviarAvisoDN aquí...)
+
+            // 3. Crear registro de llamada en "pendiente"
+            db.ref("llamadas_activas/" + idSala).set({
+                estado: "llamando",
+                emisor: miId,
+                receptor: idDestino
+            });
+
+            // 4. ESCUCHAR CUANDO EL OTRO CONTESTA
+            db.ref("llamadas_activas/" + idSala).on("value", (snap) => {
+                const data = snap.val();
+                if (!data) return;
+
+                if (data.estado === "conectado" && !cronometro) {
+                    iniciarContador();
+                }
+
+                if (data.estado === "finalizada") {
+                    window.history.back();
                 }
             });
         }
 
-        async function ejecutarLlamadaReal(token, emisor) {
-            const payload = {
-                "to": token,
-                "notification": {
-                    "title": "📞 Llamada de DNPlus",
-                    "body": emisor + " te está llamando...",
-                    "icon": "https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png",
-                    "click_action": "https://dnplus-py.github.io/DNPlus-Messenger-web/llamada.html"
-                },
-                "priority": "high"
-            };
-
-            await fetch('https://fcm.googleapis.com/fcm/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'key=' + SERVER_KEY
-                },
-                body: JSON.stringify(payload)
-            });
+        function iniciarContador() {
+            let seg = 0;
+            const txt = document.getElementById("status-llamada");
+            txt.style.color = "#00a884";
+            cronometro = setInterval(() => {
+                seg++;
+                let m = Math.floor(seg / 60);
+                let s = seg % 60;
+                txt.innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            }, 1000);
         }
 
-        // Simulación de cronómetro al "conectar"
-        setTimeout(() => {
-            let s = 0;
-            const t = document.getElementById("timer");
-            t.style.color = "#00a884";
-            setInterval(() => {
-                s++;
-                let m = Math.floor(s / 60);
-                t.innerText = `${m < 10 ? '0'+m : m}:${(s % 60) < 10 ? '0'+(s % 60) : (s % 60)}`;
-            }, 1000);
-        }, 3000);
+        function finalizarLlamada() {
+            db.ref("llamadas_activas/" + idSala).update({ estado: "finalizada" });
+            setTimeout(() => { window.history.back(); }, 500);
+        }
+
+        // Si cierras la ventana, se cancela la llamada
+        window.onbeforeunload = () => { finalizarLlamada(); };
     </script>
 </body>
 </html>
