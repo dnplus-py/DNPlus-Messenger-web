@@ -6,154 +6,167 @@
     <title>Agenda DNPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* RESET TOTAL PARA QUE NO HEREDE NADA DEL CHAT */
-        all: initial; 
-        * { box-sizing: border-box; font-family: sans-serif; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
         html, body { 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            background-color: #0b141a !important; 
-            height: 100vh !important; 
-            width: 100vw !important;
-            display: flex;
-            flex-direction: column;
+            margin: 0; padding: 0; 
+            background-color: #0b141a; 
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column;
             overflow: hidden;
-            position: fixed; /* Esto lo ancla para que no se mueva con el viewpager */
+            position: fixed; /* Esto asegura que se sobreponga al TabLayout */
             top: 0; left: 0;
+            z-index: 10000; /* Superior a cualquier TabLayout */
         }
 
-        /* BARRA VERDE TOTALMENTE INDEPENDIENTE */
         .barra-contactos-exclusiva { 
-            background-color: #085f56 !important; 
-            height: 60px;
-            width: 100%;
-            display: flex; 
-            align-items: center; 
-            padding: 0 15px; 
-            gap: 20px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            z-index: 99999;
+            background-color: #008069; /* Verde oficial */
+            height: 60px; min-height: 60px; width: 100%;
+            display: flex; align-items: center; 
+            padding: 0 15px; gap: 20px; color: white;
         }
-        .barra-contactos-exclusiva i { font-size: 20px; color: white; cursor: pointer; }
-        .textos-barra h3 { margin: 0; font-size: 18px; color: white; font-weight: 500; }
-        .textos-barra span { font-size: 12px; color: #cfd8dc; }
 
         .area-scroll-contactos { 
-            flex: 1; 
-            overflow-y: auto; 
-            background-color: #0b141a;
-            -webkit-overflow-scrolling: touch;
+            flex: 1; overflow-y: auto; background-color: #0b141a;
         }
 
-        /* IDs y Clases ÚNICAS para que no se mezclen con el chat */
         .fila-dn-contacto { 
-            display: flex; 
-            align-items: center; 
-            padding: 14px 16px; 
-            gap: 15px; 
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            cursor: pointer;
+            display: flex; align-items: center; 
+            padding: 12px 16px; gap: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: 0.2s;
         }
         .fila-dn-contacto:active { background-color: #202c33; }
 
-        .img-perfil-unica { 
-            width: 46px; height: 46px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            background: #232d36; 
-        }
+        .img-perfil-unica { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .nombre-unico { font-size: 16px; color: #e9edef; margin: 0; }
+        .estado-unico { font-size: 13px; color: #8696a0; margin: 0; }
 
-        .nombre-unico { font-size: 16px; color: #e9edef; font-weight: 500; margin: 0; }
-        .estado-unico { font-size: 14px; color: #8696a0; margin: 2px 0 0 0; }
-
-        .circulo-accion {
-            width: 40px; height: 40px; border-radius: 50%; 
-            background-color: #00a884; 
-            display: flex; align-items: center; justify-content: center; color: white;
+        /* --- ESTILOS DEL MODAL DE BORRADO --- */
+        #modal-borrar {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            align-items: center; justify-content: center;
+            z-index: 20000;
         }
+        .modal-contenido {
+            background: #232d36; color: white;
+            width: 80%; max-width: 300px;
+            padding: 20px; border-radius: 15px; text-align: center;
+        }
+        .btn-modal {
+            padding: 10px 20px; border: none; border-radius: 5px;
+            cursor: pointer; font-weight: bold; margin: 10px 5px;
+        }
+        .btn-si { background: #d91e1e; color: white; }
+        .btn-no { background: transparent; color: #00a884; }
     </style>
 </head>
-<body id="cuerpo-contactos-dn">
+<body>
 
     <div class="barra-contactos-exclusiva">
         <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-        <div class="textos-barra">
-            <h3>Seleccionar contacto</h3>
-            <span id="txt-total-usuarios">Cargando...</span>
+        <div>
+            <h3 style="margin:0; font-size:18px;">Seleccionar contacto</h3>
+            <span id="txt-total-usuarios" style="font-size:12px; opacity:0.8;">Cargando...</span>
         </div>
     </div>
 
     <div class="area-scroll-contactos">
         <div class="fila-dn-contacto" onclick="window.location.href='cresr_new_contactos.html'">
-            <div class="circulo-accion"><i class="fas fa-user-plus"></i></div>
-            <div><p class="nombre-unico">Nuevo contacto</p></div>
-        </div>
-
-        <div style="padding: 20px 16px 10px; font-size: 13px; color: #8696a0; font-weight: bold; text-transform: uppercase;">
-            Contactos en DNPlus
+            <div style="width:45px; height:45px; border-radius:50%; background:#00a884; display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-user-plus" style="color:white;"></i>
+            </div>
+            <p class="nombre-unico">Nuevo contacto</p>
         </div>
 
         <div id="lista-usuarios-dn-unica"></div>
+    </div>
+
+    <div id="modal-borrar">
+        <div class="modal-contenido">
+            <h3>¿Eliminar contacto?</h3>
+            <p>Se borrará este contacto de tu agenda DNPlus.</p>
+            <button class="btn-modal btn-no" onclick="cerrarModal()">CANCELAR</button>
+            <button class="btn-modal btn-si" id="btn-confirmar-borrado">ELIMINAR</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Configuración protegida
         const confDN = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
         };
-        
-        // Inicialización única
-        if (!firebase.apps.length) { firebase.initializeApp(confDN); }
+        if (!firebase.apps.length) firebase.initializeApp(confDN);
         const rtdbDN = firebase.database();
-        const miTelefonoDN = localStorage.getItem("user_phone");
+        let contactoSeleccionadoID = null;
 
-        // Función con nombre único para evitar conflictos
         function renderizarContactosDN() {
             rtdbDN.ref("usuarios_registrados").on("value", (snapshot) => {
-                const contenedorDN = document.getElementById("lista-usuarios-dn-unica");
-                const txtContadorDN = document.getElementById("txt-total-usuarios");
-                
-                // Limpiamos antes de cargar para que no se duplique
-                contenedorDN.innerHTML = "";
-                let contadorLocal = 0;
+                const contenedor = document.getElementById("lista-usuarios-dn-unica");
+                contenedor.innerHTML = "";
+                let count = 0;
 
                 snapshot.forEach((hijo) => {
-                    const idUsuario = hijo.key;
+                    const id = hijo.key;
                     const datos = hijo.val();
+                    count++;
 
-                    if (idUsuario !== miTelefonoDN) {
-                        contadorLocal++;
-                        const itemDN = document.createElement("div");
-                        itemDN.className = "fila-dn-contacto";
-                        
-                        itemDN.innerHTML = `
-                            <img src="${datos.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="img-perfil-unica">
-                            <div>
-                                <p class="nombre-unico">${datos.nombre || 'Usuario'}</p>
-                                <p class="estado-unico">${datos.estado || 'Disponible'}</p>
-                            </div>`;
-                        
-                        itemDN.onclick = () => {
-                            localStorage.setItem("chat_destinatario_id", idUsuario);
-                            localStorage.setItem("chat_destinatario_nombre", datos.nombre);
-                            localStorage.setItem("chat_destinatario_foto", datos.foto);
-                            // Redirigimos fuera para que limpie la cabecera
-                            window.location.href = "mensajes.html";
-                        };
+                    const div = document.createElement("div");
+                    div.className = "fila-dn-contacto";
+                    div.innerHTML = `
+                        <img src="${datos.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="img-perfil-unica">
+                        <div>
+                            <p class="nombre-unico">${datos.nombre}</p>
+                            <p class="estado-unico">${datos.estado || 'Disponible'}</p>
+                        </div>`;
 
-                        contenedorDN.appendChild(itemDN);
-                    }
+                    // CLICK NORMAL: Abrir Chat
+                    div.onclick = () => abrirChat(id, datos);
+
+                    // PULSACIÓN LARGA: Abrir Modal de Borrado
+                    let timer;
+                    div.onmousedown = () => timer = setTimeout(() => abrirModal(id), 800);
+                    div.onmouseup = () => clearTimeout(timer);
+                    div.ontouchstart = () => timer = setTimeout(() => abrirModal(id), 800);
+                    div.ontouchend = () => clearTimeout(timer);
+
+                    contenedor.appendChild(div);
                 });
-                txtContadorDN.innerText = contadorLocal + " contactos";
+                document.getElementById("txt-total-usuarios").innerText = count + " contactos";
             });
         }
 
-        // Ejecutar al cargar
+        function abrirChat(id, datos) {
+            localStorage.setItem("chat_destinatario_id", id);
+            localStorage.setItem("chat_destinatario_nombre", datos.nombre);
+            window.location.href = "mensajes.html";
+        }
+
+        // --- LÓGICA DEL MODAL ---
+        function abrirModal(id) {
+            contactoSeleccionadoID = id;
+            document.getElementById("modal-borrar").style.display = "flex";
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal-borrar").style.display = "none";
+        }
+
+        document.getElementById("btn-confirmar-borrado").onclick = () => {
+            if (contactoSeleccionadoID) {
+                rtdbDN.ref("usuarios_registrados/" + contactoSeleccionadoID).remove()
+                .then(() => {
+                    alert("Contacto eliminado");
+                    cerrarModal();
+                });
+            }
+        };
+
         window.onload = renderizarContactosDN;
     </script>
 </body>
