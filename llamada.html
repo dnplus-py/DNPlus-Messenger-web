@@ -12,26 +12,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        body { background-color: #0b141a; overflow: hidden; }
-        
-        .pulse-animation {
-            animation: pulse-green 2s infinite;
-        }
+        body { background-color: #0b141a; overflow: hidden; color: white; }
+        .pulse-animation { animation: pulse-green 2s infinite; }
         @keyframes pulse-green {
             0% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0.7); }
             70% { box-shadow: 0 0 0 30px rgba(23, 111, 71, 0); }
             100% { box-shadow: 0 0 0 0 rgba(23, 111, 71, 0); }
         }
-        
         .btn-call {
             width: 55px; height: 55px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px; transition: 0.2s;
+            background-color: rgba(31, 41, 55, 0.6); font-size: 20px;
         }
-        .btn-call:active { transform: scale(0.9); }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-between py-16 text-white">
+<body class="h-screen flex flex-col items-center justify-between py-16">
 
     <div class="text-center">
         <div class="flex items-center justify-center gap-2 mb-2">
@@ -48,86 +43,82 @@
     </div>
 
     <div class="flex flex-col items-center gap-10 w-full px-10">
-        <div class="flex justify-around w-full max-sm:max-w-sm">
-            <button class="btn-call bg-gray-800/60"><i class="fas fa-volume-up"></i></button>
-            <button class="btn-call bg-gray-800/60"><i class="fas fa-video-slash"></i></button>
-            <button class="btn-call bg-gray-800/60"><i class="fas fa-microphone"></i></button>
+        <div class="flex justify-around w-full max-w-sm">
+            <button class="btn-call"><i class="fas fa-volume-up"></i></button>
+            <button class="btn-call"><i class="fas fa-video-slash"></i></button>
+            <button class="btn-call"><i class="fas fa-microphone"></i></button>
         </div>
 
-        <button onclick="window.history.back()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-2xl active:scale-95">
+        <button onclick="window.history.back()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-2xl">
             <i class="fas fa-phone-slash rotate-[135deg]"></i>
         </button>
     </div>
 
     <script>
-        // CONFIGURACIÓN FIREBASE
+        // CONFIGURACIÓN OBTENIDA DE TUS CAPTURAS
         const firebaseConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+            projectId: "dnplus-messenger-pro",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
         };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. COLOCA TU SERVER KEY AQUÍ
+        // IMPORTANTE: Pon tu Server Key aquí para que el envío sea real
         const SERVER_KEY = "TU_SERVER_KEY_AQUI"; 
 
-        const idContacto = new URLSearchParams(window.location.search).get('id') || localStorage.getItem("chat_destinatario_id");
-        const miNombre = localStorage.getItem("user_name") || "Un usuario de DNPlus";
+        const idDestino = new URLSearchParams(window.location.search).get('id') || localStorage.getItem("chat_destinatario_id");
+        const miNombre = localStorage.getItem("user_name") || "Alguien";
 
-        if (idContacto) {
-            // Cargar datos visuales
-            db.ref("usuarios_registrados/" + idContacto).once("value", (snapshot) => {
-                const user = snapshot.val();
+        if (idDestino) {
+            // Buscamos al usuario en la base de datos
+            db.ref("usuarios_registrados/" + idDestino).once("value", (snap) => {
+                const user = snap.val();
                 if (user) {
-                    document.getElementById("nombre-contacto").innerText = user.nombre || "Usuario DNPlus";
+                    document.getElementById("nombre-contacto").innerText = user.nombre || "Usuario";
                     if (user.foto) document.getElementById("foto-contacto").src = user.foto;
                     
-                    // 2. DISPARAR NOTIFICACIÓN AL OTRO TELÉFONO
+                    // Si el usuario tiene un token de notificación, le enviamos el aviso real
                     if (user.fcm_token) {
-                        enviarAvisoLlamada(user.fcm_token, miNombre);
+                        ejecutarLlamadaReal(user.fcm_token, miNombre);
                     }
                 }
             });
         }
 
-        async function enviarAvisoLlamada(tokenDestino, nombreEmisor) {
-            try {
-                await fetch('https://fcm.googleapis.com/fcm/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'key=' + SERVER_KEY
-                    },
-                    body: JSON.stringify({
-                        "to": tokenDestino,
-                        "notification": {
-                            "title": "📞 Llamada de voz entrante",
-                            "body": nombreEmisor + " te está llamando...",
-                            "icon": "https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png",
-                            "click_action": "https://dnplus-py.github.io/DNPlus-Messenger-web/llamada.html"
-                        },
-                        "priority": "high"
-                    })
-                });
-                console.log("Aviso de llamada enviado");
-            } catch (e) {
-                console.error("Error enviando aviso:", e);
-            }
+        async function ejecutarLlamadaReal(token, emisor) {
+            const payload = {
+                "to": token,
+                "notification": {
+                    "title": "📞 Llamada de DNPlus",
+                    "body": emisor + " te está llamando...",
+                    "icon": "https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png",
+                    "click_action": "https://dnplus-py.github.io/DNPlus-Messenger-web/llamada.html"
+                },
+                "priority": "high"
+            };
+
+            await fetch('https://fcm.googleapis.com/fcm/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'key=' + SERVER_KEY
+                },
+                body: JSON.stringify(payload)
+            });
         }
 
-        // LÓGICA DEL CRONÓMETRO
+        // Simulación de cronómetro al "conectar"
         setTimeout(() => {
-            let segundos = 0;
-            const timerElement = document.getElementById("timer");
-            timerElement.style.color = "#00a884"; 
-            
+            let s = 0;
+            const t = document.getElementById("timer");
+            t.style.color = "#00a884";
             setInterval(() => {
-                segundos++;
-                let min = Math.floor(segundos / 60);
-                let seg = segundos % 60;
-                timerElement.innerText = `${min < 10 ? '0'+min : min}:${seg < 10 ? '0'+seg : seg}`;
+                s++;
+                let m = Math.floor(s / 60);
+                t.innerText = `${m < 10 ? '0'+m : m}:${(s % 60) < 10 ? '0'+(s % 60) : (s % 60)}`;
             }, 1000);
-        }, 3500);
+        }, 3000);
     </script>
 </body>
 </html>
