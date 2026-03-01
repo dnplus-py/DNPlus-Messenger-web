@@ -1,20 +1,22 @@
 importScripts('https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js');
 
+// Configuración de tu proyecto DNPlus
 firebase.initializeApp({
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     projectId: "dnplus-messenger-pro",
-    messagingSenderId: "TU_SENDER_ID" // Lo encuentras en la consola de Firebase -> Configuración del proyecto
+    messagingSenderId: "565345717315" 
 });
 
 const messaging = firebase.messaging();
 
-// Manejar notificaciones en segundo plano
+// Recibir notificaciones en segundo plano
 messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: '/icono-dnplus.png'
+        icon: 'https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png',
+        badge: 'https://dnplus-py.github.io/DNPlus-Messenger-web/icono.png'
     };
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
