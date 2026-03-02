@@ -59,4 +59,30 @@
         </button>
     </div>
 
-    <div id="image-viewer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify
+    <div id="image-viewer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;" onclick="cerrarVisor()">
+        <img id="full-image" src="" style="max-width: 95%; max-height: 85%; object-fit: contain;">
+    </div>
+
+    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
+
+    <script>
+        // Iniciar Picker de Emojis
+        const pickerOptions = { 
+            onEmojiSelect: (emoji) => {
+                const input = document.getElementById("chat-input");
+                input.value += emoji.native;
+                input.focus();
+                if(typeof actualizarIcono === 'function') actualizarIcono();
+            },
+            theme: "dark", locale: "es"
+        };
+        const picker = new EmojiMart.Picker(pickerOptions);
+        document.getElementById("emoji-picker-container").appendChild(picker);
+
+        function toggleEmojis() {
+            const container = document.getElementById("emoji-picker-container");
+            container.style.display = (container.style.display === "none" || container.style.display === "") ? "block" : "none";
+        }
+    </script>
+</body>
+</html>
