@@ -1,6 +1,7 @@
-u// mensajes.js - EL CEREBRO DE DNPLUS
-console.log("🚀 Sistema DNPlus iniciado por David Oviedo");
+// mensajes.js - UNIFICADO Y CORREGIDO POR DAVID OVIEDO
+console.log("✅ DNPlus Messenger: Cargando sistema unificado...");
 
+// 1. CONFIGURACIÓN FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
@@ -8,69 +9,150 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// 2. DATOS DE SESIÓN
 const miId = localStorage.getItem("user_phone") || "595992536184";
 const idOtro = localStorage.getItem("chat_destinatario_id");
 const salaId = localStorage.getItem("chat_sala_id");
 
-// Exportar variables para que button_audio.js las vea
-window.presenciRef = db.ref("usuarios_registrados/" + miId + "/estado");
-window.db = db; 
-
+// 3. ELEMENTOS DEL DOM
 const input = document.getElementById('chat-input');
 const actionIcon = document.getElementById('action-icon');
 const chatContainer = document.getElementById('chat-container');
 const actionBtn = document.getElementById('action-btn');
 
-// --- FUNCIÓN DE ENVÍO GLOBAL ---
-window.sendData = function(p) {
-    if(!salaId) return;
-    const ahora = new Date();
-    const hora = ahora.getHours() + ":" + ahora.getMinutes().toString().padStart(2, '0');
-    
-    db.ref("chats_privados/" + salaId).push({ 
-        ...p, 
-        emisor: miId, 
-        hora: hora 
-    }).then(() => {
-        console.log("✅ Mensaje enviado");
-    }).catch(e => console.error("❌ Error al enviar:", e));
-};
+let mediaRecorder, audioChunks = [], isRecording = false;
 
-// --- PRESENCIA Y CARGA ---
+// Referencias de Presencia
+const presenciRef = db.ref("usuarios_registrados/" + miId + "/estado");
+const ultimaVezRef = db.ref("usuarios_registrados/" + miId + "/ultimaVez");
+
+// --- INICIO DEL SISTEMA ---
 window.onload = () => {
     if(!idOtro || !salaId) return;
 
-    // Online / Offline
+    // Sistema de presencia Online/Offline
     db.ref(".info/connected").on("value", (snapshot) => {
         if (snapshot.val() === true) {
-            window.presenciRef.onDisconnect().set("offline");
-            db.ref("usuarios_registrados/" + miId + "/ultimaVez").onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
-            window.presenciRef.set("online");
+            presenciRef.onDisconnect().set("offline");
+            ultimaVezRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+            presenciRef.set("online");
         }
     });
 
-    // Escuchar mensajes
-    db.ref("chats_privados/" + salaId).on("child_added", s => dibujarBurbuja(s.val(), s.key));
-    
-    // Cargar info del otro
+    // Cargar datos del contacto y su estado
     db.ref("usuarios_registrados/" + idOtro).on("value", s => {
         const d = s.val();
         if(d) {
             document.getElementById('header-name').innerText = d.nombre || idOtro;
             document.getElementById('header-photo').src = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-            actualizarEstadoVisual(d.estado);
+            
+            const statusEl = document.getElementById('header-status');
+            if(d.estado === 'escribiendo...') {
+                statusEl.innerText = "escribiendo...";
+                statusEl.style.color = "#4ade80"; 
+            } else if(d.estado === 'grabando audio...') {
+                statusEl.innerText = "grabando audio...";
+                statusEl.style.color = "#f87171";
+            } else if(d.estado === 'online') {
+                statusEl.innerText = "en línea";
+                statusEl.style.color = "#4ade80";
+            } else {
+                statusEl.innerText = "últ. vez hoy";
+                statusEl.style.color = "#9ca3af";
+            }
         }
     });
+
+    // Cargar mensajes
+    db.ref("chats_privados/" + salaId).on("child_added", s => dibujarBurbuja(s.val(), s.key));
+
+    // Cargar fondo guardado
+    const bgSaved = localStorage.getItem("chat_bg_" + salaId);
+    if(bgSaved) {
+        chatContainer.style.backgroundImage = `url('${bgSaved}')`;
+        chatContainer.style.backgroundSize = "cover";
+        chatContainer.style.backgroundPosition = "center";
+    }
 };
 
-function actualizarEstadoVisual(estado) {
-    const el = document.getElementById('header-status');
-    if(!el) return;
-    el.innerText = estado || "offline";
-    el.style.color = (estado === "online" || estado === "escribiendo...") ? "#4ade80" : "#9ca3af";
+// --- LÓGICA DE GRABACIÓN DE AUDIO ---
+async function startRec() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        isRecording = true;
+        
+        document.getElementById('rec-overlay').style.display = 'flex';
+        presenciRef.set("grabando audio..."); 
+        
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.start();
+    } catch (err) {
+        alert("Por favor, permite el acceso al micrófono.");
+    }
 }
 
-// --- BURBUJAS ---
+function stopRec() {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        document.getElementById('rec-overlay').style.display = 'none';
+        presenciRef.set("online");
+        
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            if (audioBlob.size > 1000) {
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    sendData({ tipo: 'audio', url: reader.result });
+                };
+            }
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        };
+    }
+}
+
+// --- LÓGICA DE ENVÍO ---
+function sendData(p) {
+    const ahora = new Date();
+    const hora = ahora.getHours() + ":" + ahora.getMinutes().toString().padStart(2, '0');
+    db.ref("chats_privados/" + salaId).push({ ...p, emisor: miId, hora: hora });
+}
+
+// Eventos del botón de acción (Micrófono o Enviar)
+actionBtn.addEventListener('mousedown', () => { if(!input.value.trim()) startRec(); });
+actionBtn.addEventListener('mouseup', () => { if(isRecording) stopRec(); });
+actionBtn.addEventListener('touchstart', (e) => { 
+    if(!input.value.trim()) { e.preventDefault(); startRec(); } 
+});
+actionBtn.addEventListener('touchend', (e) => { 
+    if(isRecording) { e.preventDefault(); stopRec(); } 
+});
+
+actionBtn.onclick = () => {
+    if(input.value.trim()) {
+        sendData({ tipo: 'texto', mensaje: input.value });
+        input.value = "";
+        actualizarIcono();
+    }
+};
+
+function actualizarIcono() {
+    if(input.value.trim()) {
+        actionIcon.className = "fas fa-paper-plane";
+        presenciRef.set("escribiendo...");
+    } else {
+        actionIcon.className = "fas fa-microphone";
+        presenciRef.set("online");
+    }
+}
+input.oninput = actualizarIcono;
+
+// --- DIBUJAR MENSAJES ---
 function dibujarBurbuja(data, key) {
     if (document.getElementById(key)) return;
     const esMio = data.emisor === miId;
@@ -78,146 +160,90 @@ function dibujarBurbuja(data, key) {
     b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
-    if(esMio) b.style.backgroundColor = "#176f47"; // Tu verde favorito
+    // Color personalizado David Oviedo (#176f47)
+    if(esMio) b.style.backgroundColor = "#176f47";
 
-    let html = "";
+    let contenido = "";
     if (data.tipo === 'audio') {
-        html = `<div class="flex items-center gap-2"><i class="fas fa-play cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i> <span>Audio</span></div>`;
+        contenido = `
+            <div style="display:flex; align-items:center; gap:12px; min-width:160px; padding:5px;">
+                <button onclick="reproducirAudio('${data.url}', this)" style="background:none; border:none; color:white; cursor:pointer;">
+                    <i class="fas fa-play text-xl"></i>
+                </button>
+                <div style="flex:1; height:3px; background:rgba(255,255,255,0.2); border-radius:10px;">
+                    <div class="progress-bar" style="width:0%; height:100%; background:#34b7f1;"></div>
+                </div>
+                <span style="font-size:11px;">Audio</span>
+            </div>`;
     } else if (data.tipo === 'imagen') {
-        html = `<img src="${data.url}" class="rounded-lg max-w-[200px]" onclick="verImagen('${data.url}')">`;
+        contenido = `<img src="${data.url}" onclick="verImagen('${data.url}')" style="border-radius:10px; max-width:220px; cursor:pointer;">`;
     } else {
-        html = `<div>${data.mensaje}</div>`;
+        contenido = `<div>${data.mensaje}</div>`;
     }
-
-    b.innerHTML = `${html}<span class="text-[9px] opacity-50 block text-right">${data.hora}</span>`;
+    
+    b.innerHTML = `${contenido}<span style="font-size:9px; opacity:0.6; display:block; text-align:right; margin-top:4px;">${data.hora}</span>`;
     chatContainer.appendChild(b);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// --- MENÚ Y MODAL (BORRAR CHAT) ---
-window.toggleHeaderMenu = function() {
+window.reproducirAudio = function(url, btn) {
+    const audio = new Audio(url);
+    const icono = btn.querySelector('i');
+    const barra = btn.parentElement.querySelector('.progress-bar');
+    
+    icono.className = "fas fa-pause text-xl";
+    audio.play();
+
+    audio.ontimeupdate = () => {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        if(barra) barra.style.width = pct + "%";
+    };
+
+    audio.onended = () => {
+        icono.className = "fas fa-play text-xl";
+        if(barra) barra.style.width = "0%";
+    };
+};
+
+// --- FUNCIONES UI (Menús, Fondo, etc) ---
+window.toggleHeaderMenu = () => {
     const m = document.getElementById("header-menu");
     m.style.display = (m.style.display === "none" || m.style.display === "") ? "flex" : "none";
 };
 
-window.vaciarChat = function() {
-    if(confirm("¿David, estás seguro de borrar todo el chat?")) {
+window.vaciarChat = () => {
+    if(confirm("¿Seguro que quieres vaciar el chat?")) {
         db.ref("chats_privados/" + salaId).remove();
         chatContainer.innerHTML = "";
-        window.toggleHeaderMenu();
     }
 };
 
-// Lógica del botón enviar texto
-actionBtn.onclick = () => {
-    if(input.value.trim()) {
-        window.sendData({ tipo: 'texto', mensaje: input.value });
-        input.value = "";
-        window.presenciRef.set("online");
-    }
-};
+window.cambiarFondo = () => document.getElementById('bg-input').click();
 
-input.oninput = () => {
-    if(input.value.trim()) {
-        actionIcon.className = "fas fa-paper-plane";
-        window.presenciRef.set("escribiendo...");
-    } else {
-        actionIcon.className = "fas fa-microphone";
-        window.presenciRef.set("online");
-    }
-};
-
-
-    // button_audio.js - REPARADO PARA SONIDO REAL
-let mediaRecorder, audioChunks = [], isRecording = false;
-
-// Función para iniciar grabación
-async function startRec() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Usamos audio/webm;codecs=opus que es el más compatible
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        isRecording = true;
-
-        if(document.getElementById('rec-overlay')) document.getElementById('rec-overlay').style.display = 'flex';
-        
-        // Avisamos a Firebase que David está grabando
-        if(typeof presenciRef !== 'undefined') presenciRef.set("grabando audio...");
-
-        mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) audioChunks.push(e.data);
+window.aplicarNuevoFondo = (el) => {
+    const file = el.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            chatContainer.style.backgroundImage = `url('${e.target.result}')`;
+            localStorage.setItem("chat_bg_" + salaId, e.target.result);
         };
-
-        // button_audio.js
-mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = () => {
-        // AQUÍ LLAMAMOS AL CEREBRO
-        window.sendData({ tipo: 'audio', url: reader.result });
-    };
+        reader.readAsDataURL(file);
+    }
 };
 
-// Función para detener y enviar
-function stopRec() {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        
-        if(document.getElementById('rec-overlay')) document.getElementById('rec-overlay').style.display = 'none';
-        if(typeof presenciRef !== 'undefined') presenciRef.set("online");
+window.verImagen = (url) => {
+    document.getElementById('full-image').src = url;
+    document.getElementById('image-viewer').style.display = 'flex';
+};
 
-        mediaRecorder.onstop = () => {
-            // Creamos el Blob con los trozos de audio capturados
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            
-            // Verificamos si hay sonido antes de enviar
-            if (audioBlob.size > 1000) { 
-                const reader = new FileReader();
-                reader.readAsDataURL(audioBlob);
-                reader.onloadend = () => {
-                    const base64data = reader.result;
-                    // Enviamos a la función global de mensajes.js
-                    if(typeof sendData === 'function') {
-                        sendData({ tipo: 'audio', url: base64data });
-                    }
-                };
-            } else {
-                console.warn("Audio demasiado corto o vacío.");
-            }
+window.cerrarVisor = () => document.getElementById('image-viewer').style.display = 'none';
 
-            // Liberamos el micrófono
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        };
+window.manejarAdjunto = (el) => {
+    const file = el.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result });
+        reader.readAsDataURL(file);
     }
-}
-
-// EVENTOS DE BOTÓN (Soporte total David Oviedo Edition)
-const btnAccion = document.getElementById('action-btn');
-const inputMsj = document.getElementById('chat-input');
-
-if(btnAccion) {
-    // Para PC
-    btnAccion.addEventListener('mousedown', (e) => {
-        if(!inputMsj.value.trim()) startRec();
-    });
-    btnAccion.addEventListener('mouseup', () => {
-        if(isRecording) stopRec();
-    });
-
-    // Para Celular (Touch)
-    btnAccion.addEventListener('touchstart', (e) => {
-        if(!inputMsj.value.trim()) {
-            e.preventDefault();
-            startRec();
-        }
-    });
-    btnAccion.addEventListener('touchend', (e) => {
-        if(isRecording) {
-            e.preventDefault();
-            stopRec();
-        }
-    });
-}           
+};
