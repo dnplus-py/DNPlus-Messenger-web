@@ -329,41 +329,41 @@ header, #action-header-menu {
     align-items: center;
 }
 
-/* --- CORRECCIÓN: ESTILO DE GRABACIÓN DNPlus --- */
+/* --- CORRECCIÓN FINAL: CRONÓMETRO VISIBLE DNPlus --- */
 #rec-overlay {
     position: absolute;
-    /* En lugar de inset: 0, lo limitamos a la barra de entrada */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     background-color: #111b21;
-    display: none; /* Se activa con style.display = 'flex' por JS */
+    display: none; /* Se activa con .style.display = 'flex' */
     align-items: center;
     padding: 0 15px;
-    z-index: 5000; /* Asegura que tape el input mientras grabás */
-    border-radius: 25px; /* Para que coincida con la forma de la input-card */
-    overflow: hidden; /* Evita que crezca si el texto es largo */
+    z-index: 5000;
+    border-radius: 25px;
+    overflow: hidden;
+    box-sizing: border-box; /* Asegura que el padding no agrande la barra */
 }
 
 #rec-overlay i {
     color: #ff5252;
-    margin-right: 12px;
-    font-size: 1.1rem;
-    animation: blink 1s infinite; /* Animación de parpadeo */
+    margin-right: 10px;
+    font-size: 1.2rem;
+    animation: blink 1s infinite;
 }
 
 #rec-overlay span {
     color: #ff5252;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px; /* Un poquito más grande para que se note */
     font-family: 'Segoe UI', sans-serif;
-    white-space: nowrap; /* Evita que el cronómetro salte de línea */
+    display: inline-block;
+    min-width: 50px; /* Espacio reservado para el tiempo 0:00 */
 }
 
-/* Animación para el icono del micrófono rojo */
 @keyframes blink {
     0% { opacity: 1; }
-    50% { opacity: 0.4; }
+    50% { opacity: 0.3; }
     100% { opacity: 1; }
 }
