@@ -27,7 +27,6 @@
             max-width: 90vw;
             height: 350px;
         }
-        /* Estilo para el menú de 3 puntos */
         .header-menu-dropdown {
             display: none;
             position: absolute;
@@ -49,15 +48,17 @@
         <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
     </div>
 
-    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white; position: relative;">
+    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white; position: relative; z-index: 100;">
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
             <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full object-cover">
-            <div>
-                <div id="header-name" class="font-bold text-sm">Cargando...</div>
-                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
+            
+            <div onclick="abrirPerfilContacto()" class="cursor-pointer">
+                <div id="header-name" class="font-bold text-sm leading-tight">Cargando...</div>
+                <div id="header-status" class="text-[10px] text-gray-400">cargando estado...</div>
             </div>
         </div>
+
         <div class="flex items-center gap-1">
             <i class="fas fa-phone p-2 cursor-pointer" onclick="irALlamada()"></i>
             <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
@@ -73,7 +74,7 @@
         </div>
     </header>
 
-    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; padding: 10px;"></main>
+    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; padding: 10px; position: relative;"></main>
 
     <div id="emoji-picker-container"></div>
 
@@ -89,7 +90,8 @@
             <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
             <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
         </div>
-        <button id="action-btn" style="background: #00a884; width: 45px; height: 45px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;">
+        
+        <button id="action-btn" style="background: #00a884; width: 45px; height: 45px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; border: none;">
             <i id="action-icon" class="fas fa-microphone"></i>
         </button>
     </div>
