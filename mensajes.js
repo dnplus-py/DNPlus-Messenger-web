@@ -1,4 +1,4 @@
-// mensajes.js - Versión Final DNPlus Pro - Corregida para David Oviedo
+// mensajes.js - Versión Final DNPlus Pro - CORREGIDA para David Oviedo
 console.log("✅ DNPlus Messenger: Sistema de Mensajería Optimizado");
 
 const firebaseConfig = {
@@ -37,7 +37,7 @@ window.onload = () => {
         if(d && d.foto) miFotoGlobal = d.foto;
     });
 
-    // 2. Cargar datos del DESTINATARIO (Nombre, Foto, Estado)
+    // 2. Cargar datos del DESTINATARIO
     db.ref("usuarios_registrados/" + idOtro).on("value", s => {
         const d = s.val();
         if(d) {
@@ -63,21 +63,17 @@ window.onload = () => {
         chatContainer.style.backgroundImage = `url('${bgSaved}')`;
         chatContainer.style.backgroundSize = "cover";
     }
-
-    // Inicializar panel de emojis si existe en el HTML
-    if(document.getElementById('emoji-panel')) cargarEmojis();
 };
 
 // --- DIBUJAR MENSAJES ---
 function dibujarBurbuja(data, key) {
-    if (document.getElementById(key)) return; // Evitar duplicados
+    if (document.getElementById(key)) return;
 
     const esMio = data.emisor === miId;
     const b = document.createElement('div');
     b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
-    // Menu contextual (Click derecho o toque largo)
     b.oncontextmenu = (e) => { 
         e.preventDefault(); 
         showMsgMenu(key); 
@@ -98,7 +94,7 @@ function dibujarBurbuja(data, key) {
         </div>`;
     } 
     else if (data.tipo === 'imagen') {
-        // CORRECCIÓN: El onclick ahora pasa la URL correctamente para el visor
+        // CORRECCIÓN: Se añadió img-frame para que sea consistente con el visor
         contenido = `
         <div class="img-frame" onclick="verImagen('${data.url}')" style="cursor:pointer">
             <img src="${data.url}" style="border-radius: 10px; max-width: 100%; display: block;">
@@ -111,6 +107,21 @@ function dibujarBurbuja(data, key) {
     b.innerHTML = `${contenido}<span class="msg-time" style="font-size: 10px; float: right; margin-top: 5px; opacity: 0.6;">${data.hora}</span>`;
     chatContainer.appendChild(b);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// --- VISOR DE IMÁGENES ---
+function verImagen(url) {
+    const v = document.getElementById('image-viewer');
+    const img = document.getElementById('full-image');
+    if(v && img) {
+        img.src = url;
+        v.style.display = 'flex';
+    }
+}
+
+function cerrarVisor() {
+    const v = document.getElementById('image-viewer');
+    if(v) v.style.display = 'none';
 }
 
 // --- FUNCIONES DE AUDIO ---
@@ -134,7 +145,8 @@ async function startRec() {
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         isRecording = true;
-        document.getElementById('rec-overlay').style.display = 'flex';
+        const overlay = document.getElementById('rec-overlay');
+        if(overlay) overlay.style.display = 'flex';
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.start();
     } catch (err) { alert("Activa el permiso de micrófono, bro."); }
@@ -144,7 +156,8 @@ function stopRec() {
     if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         isRecording = false;
-        document.getElementById('rec-overlay').style.display = 'none';
+        const overlay = document.getElementById('rec-overlay');
+        if(overlay) overlay.style.display = 'none';
         mediaRecorder.onstop = () => {
             const reader = new FileReader();
             reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
@@ -152,19 +165,6 @@ function stopRec() {
         };
         mediaRecorder.stream.getTracks().forEach(t => t.stop());
     }
-}
-
-// --- VISOR DE IMÁGENES (Corregido) ---
-function verImagen(url) {
-    const v = document.getElementById('image-viewer');
-    const img = document.getElementById('full-image');
-    if(!v || !img) return;
-    img.src = url;
-    v.style.display = 'flex';
-}
-
-function cerrarVisor() {
-    document.getElementById('image-viewer').style.display = 'none';
 }
 
 // --- ENVÍO DE DATOS ---
@@ -177,24 +177,20 @@ function sendData(obj) {
         hora: horaStr,
         timestamp: Date.now()
     });
-    
-    // Si tenemos la función de notificaciones conectada:
-    if(typeof enviarAvisoDN === 'function') {
-        const resumen = obj.tipo === 'texto' ? obj.mensaje : "📷 Imagen / 🎤 Audio";
-        enviarAvisoDN(idOtro, "Nuevo mensaje de " + miNombre, resumen);
-    }
 }
 
-// Evento del botón de acción (Enviar o Grabar)
+// Botón de acción (Enviar / Grabar)
 actionBtn.onclick = () => {
     if(input.value.trim()) {
         sendData({ tipo: 'texto', mensaje: input.value });
         input.value = "";
         actualizarIcono();
+        // Cerrar emojis si están abiertos al enviar
+        const emoContainer = document.getElementById('emoji-picker-container');
+        if(emoContainer) emoContainer.style.display = 'none';
     }
 };
 
-// Lógica de grabación (Mantener presionado)
 actionBtn.onmousedown = actionBtn.ontouchstart = (e) => {
     if(!input.value.trim()) {
         e.preventDefault();
@@ -205,42 +201,24 @@ actionBtn.onmouseup = actionBtn.ontouchend = () => {
     if(isRecording) stopRec();
 };
 
+// --- ESTA FUNCIÓN ES LA QUE HACÍA FALTA PARA LOS EMOJIS ---
 function actualizarIcono() {
-    actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
+    if(input.value.trim()) {
+        actionIcon.className = "fas fa-paper-plane";
+    } else {
+        actionIcon.className = "fas fa-microphone";
+    }
 }
 input.oninput = actualizarIcono;
 
 // --- ADJUNTOS ---
 function manejarAdjunto(el) {
     const file = el.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result });
-    reader.readAsDataURL(file);
-}
-
-// --- EMOJIS ---
-function toggleEmojis() {
-    const p = document.getElementById('emoji-panel');
-    if(p) p.style.display = (p.style.display === 'grid') ? 'none' : 'grid';
-}
-
-function cargarEmojis() {
-    const panel = document.getElementById('emoji-panel');
-    const lista = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺","👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"];
-    panel.innerHTML = "";
-    lista.forEach(e => {
-        const s = document.createElement('span');
-        s.className = 'emoji-item';
-        s.innerText = e;
-        s.style.cursor = "pointer";
-        s.onclick = () => { 
-            input.value += e; 
-            actualizarIcono();
-            input.focus();
-        };
-        panel.appendChild(s);
-    });
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result });
+        reader.readAsDataURL(file);
+    }
 }
 
 // --- MENÚS Y ELIMINACIÓN ---
@@ -263,8 +241,8 @@ function borrarMensaje() {
 
 // Cerrar todo al hacer clic fuera
 document.addEventListener('click', (e) => {
-    if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) {
-        const ep = document.getElementById('emoji-panel');
+    if(!e.target.closest('.input-area') && !e.target.closest('#emoji-picker-container')) {
+        const ep = document.getElementById('emoji-picker-container');
         if(ep) ep.style.display = 'none';
     }
     if(!e.target.closest('.bubble') && !e.target.closest('#action-header-menu')) cerrarMenuAcciones();
