@@ -1,4 +1,4 @@
-// mensajes.js - COMPLEMENTO PARA EL CSS MAESTRO DNPlus
+// mensajes.js - EL MAESTRO FINAL POR DAVID OVIEDO
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com"
@@ -10,65 +10,133 @@ const miId = localStorage.getItem("user_phone") || "595992536184";
 const idOtro = localStorage.getItem("chat_destinatario_id");
 const salaId = localStorage.getItem("chat_sala_id");
 
+let miFoto = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+let fotoOtro = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+const input = document.getElementById('chat-input');
+const actionBtn = document.getElementById('action-btn');
+const actionIcon = document.getElementById('action-icon');
+const chatContainer = document.getElementById('chat-container');
+
+let mediaRecorder, audioChunks = [], isRecording = false;
 let mensajeSeleccionado = null;
 let touchTimer;
 
-// --- FUNCIÓN DE BORRADO (MODAL ARRIBA) ---
-function iniciarTimerBorrado(id) {
-    touchTimer = setTimeout(() => {
-        mensajeSeleccionado = id;
-        // Marcamos la burbuja visualmente
-        document.querySelectorAll('.bubble').forEach(b => b.style.filter = "none");
-        document.getElementById(id).style.filter = "brightness(0.8)";
-        
-        // Mostramos el menú de arriba (ID del HTML: action-header-menu)
-        const menuAcciones = document.getElementById('action-header-menu');
-        if(menuAcciones) menuAcciones.style.display = 'flex';
-        
-        if (navigator.vibrate) navigator.vibrate(50);
-    }, 800); // 800ms para que sea rápido pero seguro
-}
+// --- 1. CARGA INICIAL Y PRESENCIA ---
+window.onload = async () => {
+    if(!idOtro || !salaId) return;
 
-function cancelarTimerBorrado() { clearTimeout(touchTimer); }
+    // Obtener fotos de perfil para los audios
+    db.ref("usuarios_registrados/" + miId).once("value", s => { if(s.val()?.foto) miFoto = s.val().foto; });
+    db.ref("usuarios_registrados/" + idOtro).on("value", s => {
+        const d = s.val();
+        if(d) {
+            fotoOtro = d.foto || fotoOtro;
+            document.getElementById('header-name').innerText = d.nombre || idOtro;
+            document.getElementById('header-photo').src = fotoOtro;
+            const st = document.getElementById('header-status');
+            st.innerText = d.estado || "offline";
+            st.style.color = (d.estado === 'online' || d.estado === 'escribiendo...') ? '#00e676' : '#9ca3af';
+        }
+    });
 
-window.cerrarMenuAcciones = () => {
-    if(mensajeSeleccionado) document.getElementById(mensajeSeleccionado).style.filter = "none";
-    mensajeSeleccionado = null;
-    document.getElementById('action-header-menu').style.display = 'none';
+    // Presencia
+    const presRef = db.ref("usuarios_registrados/" + miId + "/estado");
+    db.ref(".info/connected").on("value", s => {
+        if(s.val()) { presRef.onDisconnect().set("offline"); presRef.set("online"); }
+    });
+
+    // Cargar mensajes
+    db.ref("chats_privados/" + salaId).on("child_added", s => dibujarBurbuja(s.val(), s.key));
 };
 
-window.borrarMensaje = () => {
-    if(mensajeSeleccionado && confirm("¿David, quieres eliminar este mensaje?")) {
-        db.ref("chats_privados/" + salaId + "/" + mensajeSeleccionado).remove();
-        document.getElementById(mensajeSeleccionado).remove();
-        cerrarMenuAcciones();
+// --- 2. GRABACIÓN DE AUDIO ---
+async function startRec() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        isRecording = true;
+        document.getElementById('rec-overlay').style.display = 'flex';
+        db.ref("usuarios_registrados/" + miId + "/estado").set("grabando audio...");
+        
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.start();
+    } catch (e) { alert("Activa el micro, bro"); }
+}
+
+function stopRec() {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        document.getElementById('rec-overlay').style.display = 'none';
+        db.ref("usuarios_registrados/" + miId + "/estado").set("online");
+        
+        mediaRecorder.onstop = () => {
+            const reader = new FileReader();
+            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
+            reader.onloadend = () => enviarDatos({ tipo: 'audio', url: reader.result });
+            mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        };
+    }
+}
+
+// --- 3. ENVÍO DE DATOS ---
+function enviarDatos(data) {
+    const ahora = new Date();
+    const hora = ahora.getHours() + ":" + ahora.getMinutes().toString().padStart(2, '0');
+    db.ref("chats_privados/" + salaId).push({ ...data, emisor: miId, hora: hora });
+}
+
+// Lógica de botones (Texto o Micrófono)
+actionBtn.onclick = () => {
+    if(input.value.trim()) {
+        enviarDatos({ tipo: 'texto', mensaje: input.value });
+        input.value = "";
+        actualizarIcono();
     }
 };
 
-// --- DIBUJAR BURBUJA (CON TU CSS DE AUDIO) ---
+function actualizarIcono() {
+    if(input.value.trim()) {
+        actionIcon.className = "fas fa-paper-plane";
+        db.ref("usuarios_registrados/" + miId + "/estado").set("escribiendo...");
+    } else {
+        actionIcon.className = "fas fa-microphone";
+        db.ref("usuarios_registrados/" + miId + "/estado").set("online");
+    }
+}
+input.oninput = actualizarIcono;
+
+// Eventos de pulsación para audio
+actionBtn.addEventListener('mousedown', () => { if(!input.value.trim()) startRec(); });
+actionBtn.addEventListener('mouseup', stopRec);
+actionBtn.addEventListener('touchstart', (e) => { if(!input.value.trim()) { e.preventDefault(); startRec(); }});
+actionBtn.addEventListener('touchend', (e) => { if(isRecording) { e.preventDefault(); stopRec(); }});
+
+// --- 4. DIBUJAR BURBUJAS (CON TU CSS MAESTRO) ---
 function dibujarBurbuja(data, key) {
     if (document.getElementById(key)) return;
     const esMio = data.emisor === miId;
-    const chatContainer = document.getElementById('chat-container');
-    
     const b = document.createElement('div');
     b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
+    if(esMio) b.style.backgroundColor = "#176f47"; 
 
-    // Eventos de borrado
-    b.onmousedown = () => iniciarTimerBorrado(key);
-    b.onmouseup = cancelarTimerBorrado;
-    b.ontouchstart = () => iniciarTimerBorrado(key);
-    b.ontouchend = cancelarTimerBorrado;
+    // Pulsación larga para borrar
+    b.onmousedown = () => { touchTimer = setTimeout(() => activarMenuBorrar(key), 800); };
+    b.onmouseup = () => clearTimeout(touchTimer);
+    b.ontouchstart = () => { touchTimer = setTimeout(() => activarMenuBorrar(key), 800); };
+    b.ontouchend = () => clearTimeout(touchTimer);
 
     let html = "";
     if (data.tipo === 'audio') {
         html = `
             <div class="audio-wrapper">
                 <div class="audio-photo-container">
-                    <img src="${esMio ? 'https://tu-foto.jpg' : 'https://foto-otro.jpg'}" class="audio-user-photo">
+                    <img src="${esMio ? miFoto : fotoOtro}" class="audio-user-photo">
                 </div>
-                <i class="fas fa-play cursor-pointer" onclick="reproducirAudio(this, '${data.url}')"></i>
+                <i class="fas fa-play cursor-pointer" style="color:#8696a0; font-size:1.4rem" onclick="reproducirAudio(this, '${data.url}')"></i>
                 <div class="audio-info-container">
                     <div style="width:100%; height:3px; background:rgba(255,255,255,0.2); border-radius:5px; position:relative;">
                         <div class="p-bar" style="width:0%; height:100%; background:#34b7f1; border-radius:5px;"></div>
@@ -87,7 +155,28 @@ function dibujarBurbuja(data, key) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Reproductor de Audio
+// --- 5. FUNCIONES DE UI (Borrar, Reproducir, Imagen) ---
+function activarMenuBorrar(id) {
+    mensajeSeleccionado = id;
+    document.getElementById(id).style.filter = "brightness(0.7)";
+    document.getElementById('action-header-menu').style.display = 'flex';
+    if(navigator.vibrate) navigator.vibrate(50);
+}
+
+window.cerrarMenuAcciones = () => {
+    if(mensajeSeleccionado) document.getElementById(mensajeSeleccionado).style.filter = "none";
+    mensajeSeleccionado = null;
+    document.getElementById('action-header-menu').style.display = 'none';
+};
+
+window.borrarMensaje = () => {
+    if(mensajeSeleccionado && confirm("¿Borrar mensaje?")) {
+        db.ref("chats_privados/" + salaId + "/" + mensajeSeleccionado).remove();
+        document.getElementById(mensajeSeleccionado).remove();
+        cerrarMenuAcciones();
+    }
+};
+
 window.reproducirAudio = (el, url) => {
     const a = new Audio(url);
     const bar = el.parentElement.querySelector('.p-bar');
@@ -97,5 +186,15 @@ window.reproducirAudio = (el, url) => {
     a.onended = () => { el.className = "fas fa-play"; if(bar) bar.style.width = "0%"; };
 };
 
-// Carga inicial
-db.ref("chats_privados/" + salaId).on("child_added", s => dibujarBurbuja(s.val(), s.key));
+window.verImagen = (u) => { document.getElementById('full-image').src = u; document.getElementById('image-viewer').style.display = 'flex'; };
+window.cerrarVisor = () => document.getElementById('image-viewer').style.display = 'none';
+
+window.toggleEmojis = () => {
+    const p = document.getElementById('emoji-picker-container');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+};
+
+window.toggleHeaderMenu = () => {
+    const m = document.getElementById('header-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+};
