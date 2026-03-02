@@ -198,3 +198,27 @@ window.toggleHeaderMenu = () => {
     const m = document.getElementById('header-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
 };
+
+
+// Función para mostrar/ocultar emojis
+function toggleEmojis() {
+    const panel = document.getElementById("emoji-panel");
+    if (panel.style.display === "none") {
+        panel.style.display = "grid";
+        panel.innerHTML = ""; // Limpiar
+        const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕","🤑","🤠","😈","👿","👹","👺","🤡","👻","💀","☠️","👽","👾","🤖","🎃","😺","😸","😹","😻","😼","😽","🙀","😿","😾"];
+        
+        emojis.forEach(emoji => {
+            const span = document.createElement("span");
+            span.innerText = emoji;
+            span.style.cursor = "pointer";
+            span.style.fontSize = "24px";
+            span.onclick = () => {
+                document.getElementById("chat-input").value += emoji;
+            };
+            panel.appendChild(span);
+        });
+    } else {
+        panel.style.display = "none";
+    }
+}
