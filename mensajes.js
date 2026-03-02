@@ -1,5 +1,5 @@
-// mensajes.js - Versión DNPlus FULL FINAL
-console.log("✅ DNPlus Messenger: Cargando sistema completo...");
+// mensajes.js - Versión DNPlus SIN AUDIO (Manejado externamente)
+console.log("✅ DNPlus Messenger: Cargando sistema...");
 
 // 1. CONFIGURACIÓN FIREBASE
 const firebaseConfig = {
@@ -20,7 +20,6 @@ const actionIcon = document.getElementById('action-icon');
 const chatContainer = document.getElementById('chat-container');
 const actionBtn = document.getElementById('action-btn');
 
-let mediaRecorder, audioChunks = [], isRecording = false;
 let fotoOtroGlobal = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
 let miFotoGlobal = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
 
@@ -99,40 +98,6 @@ window.onload = () => {
     }
 };
 
-// --- LÓGICA DE GRABACIÓN (MICRÓFONO) ---
-function startRec() {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        isRecording = true;
-        document.getElementById('rec-overlay').style.display = 'flex';
-        presenciRef.set("grabando audio...");
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.start();
-    }).catch(err => alert("Por favor, permite el acceso al micrófono."));
-}
-
-function stopRec() {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        document.getElementById('rec-overlay').style.display = 'none';
-        presenciRef.set("online");
-        mediaRecorder.onstop = () => {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
-            reader.onloadend = () => sendData({ tipo: 'audio', url: reader.result });
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        };
-    }
-}
-
-// Eventos de presión para el Micrófono (Computadora y Celular)
-actionBtn.addEventListener('mousedown', (e) => { if(!input.value.trim()) startRec(); });
-actionBtn.addEventListener('mouseup', () => { if(isRecording) stopRec(); });
-actionBtn.addEventListener('touchstart', (e) => { if(!input.value.trim()) { e.preventDefault(); startRec(); } });
-actionBtn.addEventListener('touchend', (e) => { if(isRecording) { e.preventDefault(); stopRec(); } });
-
 // --- LÓGICA DE ENVÍO ---
 function sendData(p) {
     const ahora = new Date();
@@ -168,12 +133,19 @@ function dibujarBurbuja(data, key) {
     b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
-    // Color personalizado David Oviedo (Saved Info)
+    // Color personalizado David Oviedo (Favorito: #176f47)
     if(esMio) b.style.backgroundColor = "#176f47";
 
     let contenido = "";
     if (data.tipo === 'audio') {
-        contenido = `<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-play cursor-pointer" onclick="new Audio('${data.url}').play()"></i><span style="font-size:12px;">Nota de voz</span></div>`;
+        contenido = `
+            <div style="display:flex; align-items:center; gap:10px; min-width:150px;">
+                <i class="fas fa-play cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
+                <div style="flex:1; height:3px; background:rgba(255,255,255,0.2); border-radius:5px;">
+                    <div class="progress-bar" style="width:0%; height:100%; background:#34b7f1;"></div>
+                </div>
+                <span style="font-size:11px;">Audio</span>
+            </div>`;
     } else if (data.tipo === 'imagen') {
         contenido = `<img src="${data.url}" onclick="verImagen('${data.url}')" style="border-radius:10px; max-width:220px; cursor:pointer;">`;
     } else {
@@ -183,6 +155,15 @@ function dibujarBurbuja(data, key) {
     b.innerHTML = `${contenido}<span style="font-size:9px; opacity:0.6; display:block; text-align:right; margin-top:4px;">${data.hora}</span>`;
     chatContainer.appendChild(b);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Función para reproducir audios recibidos
+function reproducirAudio(url, btn) {
+    const audio = new Audio(url);
+    const icono = btn;
+    icono.className = "fas fa-pause cursor-pointer";
+    audio.play();
+    audio.onended = () => icono.className = "fas fa-play cursor-pointer";
 }
 
 // --- FUNCIONES DE INTERFAZ ---
