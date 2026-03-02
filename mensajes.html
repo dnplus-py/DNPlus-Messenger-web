@@ -6,107 +6,86 @@
     <title>DNpPlus Messenger</title>
     
     <link rel="stylesheet" href="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.css">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        /* Forzamos que la cabecera respete los extremos */
         header {
-            height: 62px;
-            background-color: #085f56 !important;
             display: flex !important;
-            justify-content: space-between !important;
             align-items: center !important;
-            padding: 0 15px !important;
-            color: white;
-            position: relative;
+            justify-content: flex-start !important; /* Empezamos desde la izquierda */
+            padding: 0 10px !important;
         }
 
-        /* Contenedor derecho para iconos */
-        .header-right-icons {
+        /* Este contenedor tiene el nombre y la foto */
+        .info-contacto {
             display: flex;
             align-items: center;
-            gap: 8px; /* Espacio entre el teléfono y los 3 puntos */
+            gap: 8px;
         }
 
-        /* Arreglo del cronómetro para que no se agigante */
-        #rec-overlay {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #111b21;
-            display: none; /* Se activa con flex */
+        /* ESTE ES EL TRUCO: Empuja todo lo que sigue a la derecha */
+        .iconos-derecha {
+            margin-left: auto !important; 
+            display: flex;
             align-items: center;
-            padding: 0 20px;
-            z-index: 5000;
-            border-radius: 25px;
+            gap: 10px;
         }
-        
-        #rec-overlay span {
-            color: #ff5252;
-            font-weight: bold;
-            margin-left: 10px;
+
+        #header-menu {
+            right: 5px !important; /* Para que el menú no se salga de la pantalla */
+            top: 50px !important;
+            z-index: 9999 !important;
         }
     </style>
 </head>
-<body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
+<body>
 
-    <div id="action-header-menu" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 62px; background: #085f56; z-index: 7000; align-items: center; justify-content: flex-end; gap: 20px; padding: 0 20px; color: white;">
+    <div id="action-header-menu">
+        <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
+        <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
         <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
         <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
     </div>
 
     <header>
-        <div class="flex items-center gap-2">
+        <div class="info-contacto">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
-            <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full object-cover">
-            <div class="cursor-pointer">
-                <div id="header-name" class="font-bold text-sm leading-tight">Cargando...</div>
-                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
+            <img id="header-photo" src="" class="w-10 h-10 rounded-full object-cover">
+            <div>
+                <div id="header-name" class="font-bold text-sm">Cargando...</div>
+                <div class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
 
-        <div class="header-right-icons">
-            <i class="fas fa-phone p-2 cursor-pointer" onclick="alert('Llamando...')"></i>
-            <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
-            
-            <div id="header-menu" class="msg-menu" style="display: none; position: absolute; right: 10px; top: 55px; width: 180px; z-index: 8000;">
-                <div class="menu-item" onclick="cambiarFondo()">
-                    <i class="fas fa-image mr-2"></i> Fondo de pantalla
-                </div>
-                <div class="menu-item" onclick="vaciarChat()">
-                    <i class="fas fa-broom mr-2"></i> Vaciar chat
+        <div class="iconos-derecha">
+            <i class="fas fa-phone p-2 cursor-pointer" onclick="irALlamada()"></i>
+            <div class="relative">
+                <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
+                
+                <div id="header-menu" class="msg-menu" style="display: none; position: absolute; background: #232d36; border-radius: 8px; width: 180px;">
+                    <div class="menu-item" style="padding: 12px; color: white; cursor: pointer;" onclick="cambiarFondo()">
+                        <i class="fas fa-image mr-2"></i> Fondo de pantalla
+                    </div>
+                    <div class="menu-item" style="padding: 12px; color: white; cursor: pointer;" onclick="vaciarChat()">
+                        <i class="fas fa-broom mr-2"></i> Vaciar chat
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <main id="chat-container" style="flex: 1; overflow-y: auto; padding: 10px;"></main>
+    <main id="chat-container"></main>
 
-    <div class="input-area" style="background: #111b21; padding: 10px; position: relative; display: flex; align-items: center; gap: 8px;">
-        
-        <div class="input-card" style="background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; position: relative;">
-            
-            <div id="rec-overlay">
-                <i class="fas fa-microphone text-red-500 animate-pulse"></i> 
-                <span>0:00</span>
-            </div>
-
-            <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
-            <input type="text" id="chat-input" style="background: transparent; border: none; outline: none; flex: 1; color: white; padding: 0 10px;" placeholder="Mensaje" autocomplete="off">
-            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
-            <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
-        </div>
-        
-        <button id="action-btn" class="action-btn" style="background: #176f47; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
-            <i id="action-icon" class="fas fa-microphone"></i>
-        </button>
-    </div>
-
+    <script>
+        function irALlamada() {
+            const destino = typeof idReceptor !== 'undefined' ? idReceptor : '';
+            window.location.href = "llamada.html?id=" + destino;
+        }
+    </script>
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
 
 </body>
