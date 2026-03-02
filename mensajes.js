@@ -1,5 +1,5 @@
-// mensajes.js - Versión Final DNPlus para David Oviedo (Corregida)
-console.log("✅ DNPlus Messenger: Sistema Activado");
+// mensajes.js - Versión Final DNPlus Pro - Corregida para David Oviedo
+console.log("✅ DNPlus Messenger: Sistema de Mensajería Optimizado");
 
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
@@ -8,30 +8,36 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// Datos de sesión
 const miId = localStorage.getItem("user_phone") || "595992536184";
 const idOtro = localStorage.getItem("chat_destinatario_id");
 const salaId = localStorage.getItem("chat_sala_id");
+
+// Elementos del DOM
 const input = document.getElementById('chat-input');
 const actionIcon = document.getElementById('action-icon');
 const chatContainer = document.getElementById('chat-container');
+const actionBtn = document.getElementById('action-btn');
 
 let msgSeleccionado = null;
 let mediaRecorder, audioChunks = [], isRecording = false;
-let currentZoom = 1;
-let fotoOtroGlobal = ""; 
-let miFotoGlobal = ""; // Variable para tu foto real
+let fotoOtroGlobal = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
+let miFotoGlobal = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
 
-// --- ÚNICO WINDOW.ONLOAD ---
+// --- INICIO DEL SISTEMA ---
 window.onload = () => {
-    if(!idOtro || !salaId) return;
+    if(!idOtro || !salaId) {
+        console.error("Faltan datos de la sala o el contacto");
+        return;
+    }
 
-    // 1. Cargar MI FOTO (David Oviedo)
+    // 1. Cargar MI FOTO real desde la DB
     db.ref("usuarios_registrados/" + miId).on("value", s => {
         const d = s.val();
-        miFotoGlobal = (d && d.foto) ? d.foto : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        if(d && d.foto) miFotoGlobal = d.foto;
     });
 
-    // 2. Cargar datos del DESTINATARIO
+    // 2. Cargar datos del DESTINATARIO (Nombre, Foto, Estado)
     db.ref("usuarios_registrados/" + idOtro).on("value", s => {
         const d = s.val();
         if(d) {
@@ -41,7 +47,7 @@ window.onload = () => {
         }
     });
 
-    // 3. Escuchar mensajes
+    // 3. Escuchar mensajes en tiempo real
     db.ref("chats_privados/" + salaId).on("child_added", s => {
         dibujarBurbuja(s.val(), s.key);
     });
@@ -51,64 +57,63 @@ window.onload = () => {
         if(el) el.remove();
     });
 
-    // 4. Cargar fondo guardado
+    // 4. Cargar fondo personalizado
     const bgSaved = localStorage.getItem("chat_bg_" + salaId);
     if(bgSaved) {
         chatContainer.style.backgroundImage = `url('${bgSaved}')`;
         chatContainer.style.backgroundSize = "cover";
     }
 
-    cargarEmojis();
+    // Inicializar panel de emojis si existe en el HTML
+    if(document.getElementById('emoji-panel')) cargarEmojis();
 };
 
+// --- DIBUJAR MENSAJES ---
 function dibujarBurbuja(data, key) {
+    if (document.getElementById(key)) return; // Evitar duplicados
+
     const esMio = data.emisor === miId;
     const b = document.createElement('div');
     b.id = key;
     b.className = `bubble ${esMio ? 'bubble-mine' : 'bubble-theirs'}`;
     
+    // Menu contextual (Click derecho o toque largo)
     b.oncontextmenu = (e) => { 
         e.preventDefault(); 
         showMsgMenu(key); 
     };
 
-    if (data.tipo === 'audio') {
-        // CORRECCIÓN: Usar miFotoGlobal para mis mensajes
-        const fotoParaAudio = esMio ? miFotoGlobal : fotoOtroGlobal;
-        
-        b.innerHTML = `
-        <div class="audio-wrapper" style="display: flex; align-items: center; gap: 10px; padding: 5px;">
-            <div class="audio-photo-container">
-                <img src="${fotoParaAudio}" class="audio-user-photo" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
-            </div>
+    let contenido = "";
 
+    if (data.tipo === 'audio') {
+        const fotoAudio = esMio ? miFotoGlobal : fotoOtroGlobal;
+        contenido = `
+        <div class="audio-wrapper" style="display: flex; align-items: center; gap: 10px; padding: 5px;">
+            <img src="${fotoAudio}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #00a884;">
             <i class="fas fa-play text-2xl cursor-pointer" onclick="reproducirAudio('${data.url}', this)"></i>
-            
-            <div class="flex-1" style="display: flex; flex-direction: column; justify-content: center;">
-                <div class="h-[3px] bg-gray-600 w-full rounded-full relative">
-                    <div class="h-full bg-white w-0 rounded-full"></div>
-                </div>
-                <div class="text-[10px] mt-1 opacity-70" style="margin-top: 4px;">Voz (${data.duracion || '0:05'})</div>
+            <div class="flex-1">
+                <div class="h-[3px] bg-gray-600 w-full rounded-full"><div class="h-full bg-white w-0"></div></div>
+                <div class="text-[10px] mt-1 opacity-70">Nota de voz</div>
             </div>
-        </div>
-        <span class="msg-time">${data.hora}</span>`;
+        </div>`;
     } 
     else if (data.tipo === 'imagen') {
-        b.innerHTML = `
-        <div class="img-frame" onclick="verImagen('${data.url}')">
-            <img src="${data.url}">
-        </div>
-        <span class="msg-time">${data.hora}</span>`;
+        // CORRECCIÓN: El onclick ahora pasa la URL correctamente para el visor
+        contenido = `
+        <div class="img-frame" onclick="verImagen('${data.url}')" style="cursor:pointer">
+            <img src="${data.url}" style="border-radius: 10px; max-width: 100%; display: block;">
+        </div>`;
     } 
     else {
-        b.innerHTML = `<div class="text-content">${data.mensaje}</div><span class="msg-time">${data.hora}</span>`;
+        contenido = `<div class="text-content">${data.mensaje}</div>`;
     }
 
+    b.innerHTML = `${contenido}<span class="msg-time" style="font-size: 10px; float: right; margin-top: 5px; opacity: 0.6;">${data.hora}</span>`;
     chatContainer.appendChild(b);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// --- AUDIO ---
+// --- FUNCIONES DE AUDIO ---
 let audioActual = null, iconoActual = null;
 function reproducirAudio(url, icono) {
     if (audioActual && !audioActual.paused) {
@@ -129,65 +134,122 @@ async function startRec() {
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         isRecording = true;
-        const overlay = document.getElementById('rec-overlay');
-        if(overlay) overlay.style.display = 'flex';
-        
+        document.getElementById('rec-overlay').style.display = 'flex';
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.start();
-    } catch (err) { alert("Permiso de micrófono denegado"); }
+    } catch (err) { alert("Activa el permiso de micrófono, bro."); }
 }
 
 function stopRec() {
     if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         isRecording = false;
-        const overlay = document.getElementById('rec-overlay');
-        if(overlay) overlay.style.display = 'none';
-        
+        document.getElementById('rec-overlay').style.display = 'none';
         mediaRecorder.onstop = () => {
             const reader = new FileReader();
             reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
-            reader.onloadend = () => {
-                sendData({ tipo: 'audio', url: reader.result, duracion: "Voz" });
-            };
+            reader.onloadend = () => sendData({ tipo: 'audio', url: reader.result });
         };
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
     }
 }
 
-// --- VISOR DE IMAGEN ---
+// --- VISOR DE IMÁGENES (Corregido) ---
 function verImagen(url) {
     const v = document.getElementById('image-viewer');
     const img = document.getElementById('full-image');
+    if(!v || !img) return;
     img.src = url;
-    currentZoom = 1;
-    img.style.transform = `scale(${currentZoom})`;
     v.style.display = 'flex';
-}
-
-function zoomImg(scale) {
-    currentZoom *= scale;
-    document.getElementById('full-image').style.transform = `scale(${currentZoom})`;
 }
 
 function cerrarVisor() {
     document.getElementById('image-viewer').style.display = 'none';
 }
 
-// --- MENÚ DE ACCIONES ---
+// --- ENVÍO DE DATOS ---
+function sendData(obj) {
+    const ahora = new Date();
+    const horaStr = ahora.getHours() + ":" + ahora.getMinutes().toString().padStart(2, '0');
+    db.ref("chats_privados/" + salaId).push({
+        ...obj,
+        emisor: miId,
+        hora: horaStr,
+        timestamp: Date.now()
+    });
+    
+    // Si tenemos la función de notificaciones conectada:
+    if(typeof enviarAvisoDN === 'function') {
+        const resumen = obj.tipo === 'texto' ? obj.mensaje : "📷 Imagen / 🎤 Audio";
+        enviarAvisoDN(idOtro, "Nuevo mensaje de " + miNombre, resumen);
+    }
+}
+
+// Evento del botón de acción (Enviar o Grabar)
+actionBtn.onclick = () => {
+    if(input.value.trim()) {
+        sendData({ tipo: 'texto', mensaje: input.value });
+        input.value = "";
+        actualizarIcono();
+    }
+};
+
+// Lógica de grabación (Mantener presionado)
+actionBtn.onmousedown = actionBtn.ontouchstart = (e) => {
+    if(!input.value.trim()) {
+        e.preventDefault();
+        startRec();
+    }
+};
+actionBtn.onmouseup = actionBtn.ontouchend = () => {
+    if(isRecording) stopRec();
+};
+
+function actualizarIcono() {
+    actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
+}
+input.oninput = actualizarIcono;
+
+// --- ADJUNTOS ---
+function manejarAdjunto(el) {
+    const file = el.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result });
+    reader.readAsDataURL(file);
+}
+
+// --- EMOJIS ---
+function toggleEmojis() {
+    const p = document.getElementById('emoji-panel');
+    if(p) p.style.display = (p.style.display === 'grid') ? 'none' : 'grid';
+}
+
+function cargarEmojis() {
+    const panel = document.getElementById('emoji-panel');
+    const lista = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺","👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"];
+    panel.innerHTML = "";
+    lista.forEach(e => {
+        const s = document.createElement('span');
+        s.className = 'emoji-item';
+        s.innerText = e;
+        s.style.cursor = "pointer";
+        s.onclick = () => { 
+            input.value += e; 
+            actualizarIcono();
+            input.focus();
+        };
+        panel.appendChild(s);
+    });
+}
+
+// --- MENÚS Y ELIMINACIÓN ---
 function showMsgMenu(key) {
     msgSeleccionado = key;
-    document.querySelectorAll('.bubble').forEach(el => el.style.filter = "none");
-    const el = document.getElementById(key);
-    if(el) el.style.filter = "brightness(0.8)";
     document.getElementById('action-header-menu').style.display = 'flex';
 }
 
 function cerrarMenuAcciones() {
-    if (msgSeleccionado) {
-        const el = document.getElementById(msgSeleccionado);
-        if (el) el.style.filter = "none";
-    }
     document.getElementById('action-header-menu').style.display = 'none';
     msgSeleccionado = null;
 }
@@ -199,90 +261,11 @@ function borrarMensaje() {
     }
 }
 
-function vaciarChat() {
-    if(confirm("¿Vaciar todos los mensajes?")) {
-        db.ref("chats_privados/" + salaId).remove();
-        toggleHeaderMenu();
-    }
-}
-
-// --- EMOJIS ---
-function toggleEmojis() {
-    const p = document.getElementById('emoji-panel');
-    p.style.display = (p.style.display === 'grid') ? 'none' : 'grid';
-}
-
-function cargarEmojis() {
-    const panel = document.getElementById('emoji-panel');
-    const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😋","😎","🤩","🥳","😏","😢","😭","😡","🥺","👋","👍","👎","👊","🤞","🤟","🤘","👏","🙌","👐","🤲","🙏","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","🇵🇾","🇦🇷","🇧🇷","🇺🇾","🇨🇱","🇧🇴","🇨🇴","🇲🇽","🇪🇸","🇺🇸"];
-    panel.innerHTML = "";
-    emojis.forEach(e => {
-        const s = document.createElement('span');
-        s.className = 'emoji-item';
-        s.innerText = e;
-        s.onclick = () => { input.value += e; input.focus(); input.oninput(); };
-        panel.appendChild(s);
-    });
-}
-
-// --- OTROS ---
-function toggleHeaderMenu() {
-    const menu = document.getElementById('header-menu');
-    menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
-}
-
-function cambiarFondo() { document.getElementById('bg-input').click(); }
-
-function aplicarNuevoFondo(el) {
-    const file = el.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            chatContainer.style.backgroundImage = `url('${e.target.result}')`;
-            chatContainer.style.backgroundSize = "cover";
-            localStorage.setItem("chat_bg_" + salaId, e.target.result);
-        };
-        reader.readAsDataURL(file);
-        toggleHeaderMenu();
-    }
-}
-
-function manejarAdjunto(el) {
-    const file = el.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (e) => sendData({ tipo: 'imagen', url: e.target.result });
-}
-
-function sendData(p) {
-    const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    db.ref("chats_privados/" + salaId).push({ ...p, emisor: miId, hora: hora });
-}
-
-input.oninput = () => actionIcon.className = input.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
-
-const btn = document.getElementById('action-btn');
-btn.onclick = () => {
-    if(input.value.trim()) {
-        sendData({ tipo: 'texto', mensaje: input.value });
-        input.value = ""; input.oninput();
-    }
-};
-
-btn.onmousedown = btn.ontouchstart = (e) => { 
-    if(!input.value.trim()) {
-        e.preventDefault();
-        startRec(); 
-    }
-};
-btn.onmouseup = btn.ontouchend = () => { if(isRecording) stopRec(); };
-
+// Cerrar todo al hacer clic fuera
 document.addEventListener('click', (e) => {
-    if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) document.getElementById('emoji-panel').style.display = 'none';
-    if(!e.target.closest('.bubble') && !e.target.closest('#action-header-menu')) cerrarMenuAcciones();
-    if(!e.target.closest('.relative')) {
-        const hm = document.getElementById('header-menu');
-        if(hm) hm.style.display = 'none';
+    if(!e.target.closest('.input-area') && !e.target.closest('#emoji-panel')) {
+        const ep = document.getElementById('emoji-panel');
+        if(ep) ep.style.display = 'none';
     }
+    if(!e.target.closest('.bubble') && !e.target.closest('#action-header-menu')) cerrarMenuAcciones();
 });
