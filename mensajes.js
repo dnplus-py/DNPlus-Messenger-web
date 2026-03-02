@@ -247,3 +247,70 @@ document.addEventListener('click', (e) => {
     }
     if(!e.target.closest('.bubble') && !e.target.closest('#action-header-menu')) cerrarMenuAcciones();
 });
+
+
+// --- NUEVO: SISTEMA DE PRESENCIA Y ESTADOS ---
+
+// 1. Detectar si ESTOY EN LÍNEA
+const presenciRef = db.ref("usuarios_registrados/" + miId + "/estado");
+const ultimaVezRef = db.ref("usuarios_registrados/" + miId + "/ultimaVez");
+
+// Cuando me conecto a Firebase
+db.ref(".info/connected").on("value", (snapshot) => {
+    if (snapshot.val() === true) {
+        // Si me desconecto (cierro la app), Firebase pone "offline" y la hora automáticamente
+        presenciRef.onDisconnect().set("offline");
+        ultimaVezRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+        
+        // Mientras estoy dentro, estoy "online"
+        presenciRef.set("online");
+    }
+});
+
+// 2. MOSTRAR ESTADO DEL OTRO (En el Header)
+db.ref("usuarios_registrados/" + idOtro).on("value", s => {
+    const d = s.val();
+    const statusEl = document.getElementById('header-status');
+    if(d && statusEl) {
+        if(d.estado === 'escribiendo...') {
+            statusEl.innerText = "escribiendo...";
+            statusEl.className = "text-[10px] text-green-400 italic";
+        } else if(d.estado === 'grabando audio...') {
+            statusEl.innerText = "grabando audio...";
+            statusEl.className = "text-[10px] text-red-400 italic";
+        } else if(d.estado === 'online') {
+            statusEl.innerText = "en línea";
+            statusEl.className = "text-[10px] text-green-400";
+        } else {
+            // Calcular última vez
+            const fecha = new Date(d.ultimaVez);
+            const hora = fecha.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            statusEl.innerText = "últ. vez hoy a las " + hora;
+            statusEl.className = "text-[10px] text-gray-400";
+        }
+    }
+});
+
+// 3. DETECTAR CUANDO ESCRIBO O GRABO
+input.oninput = () => {
+    actualizarIcono(); // Tu función actual
+    if(input.value.length > 0) {
+        presenciRef.set("escribiendo...");
+    } else {
+        presenciRef.set("online");
+    }
+};
+
+// Modifica tus funciones de Audio existentes para que activen el estado
+async function startRec() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // ... (tu código de grabación actual) ...
+        presenciRef.set("grabando audio..."); // <--- AGREGAR ESTO
+    } catch (err) { alert("Permiso denegado"); }
+}
+
+function stopRec() {
+    // ... (tu código de stop actual) ...
+    presenciRef.set("online"); // <--- AGREGAR ESTO
+}
