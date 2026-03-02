@@ -199,29 +199,6 @@ header, #action-header-menu {
     border-bottom: 12px solid transparent;
 }
 
-/* --- ESTILO DE GRABACIÓN (EL TEXTO ROJO DE TU CAPTURA) --- */
-#rec-overlay {
-    position: absolute;
-    inset: 0;
-    background-color: #111b21;
-    display: none; /* Se activa con .flex por JS */
-    align-items: center;
-    padding-left: 20px;
-    z-index: 20;
-}
-
-#rec-overlay i {
-    color: #ff5252;
-    margin-right: 10px;
-    font-size: 1.2rem;
-}
-
-#rec-overlay span {
-    color: #ff5252;
-    font-weight: 500;
-    font-size: 15px;
-}
-
 /* --- VISOR DE IMÁGENES (PANTALLA COMPLETA) --- */
 #image-viewer {
     position: fixed;
@@ -350,4 +327,43 @@ header, #action-header-menu {
     font-size: 1.4rem !important;
     display: flex;
     align-items: center;
+}
+
+/* --- CORRECCIÓN: ESTILO DE GRABACIÓN DNPlus --- */
+#rec-overlay {
+    position: absolute;
+    /* En lugar de inset: 0, lo limitamos a la barra de entrada */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111b21;
+    display: none; /* Se activa con style.display = 'flex' por JS */
+    align-items: center;
+    padding: 0 15px;
+    z-index: 5000; /* Asegura que tape el input mientras grabás */
+    border-radius: 25px; /* Para que coincida con la forma de la input-card */
+    overflow: hidden; /* Evita que crezca si el texto es largo */
+}
+
+#rec-overlay i {
+    color: #ff5252;
+    margin-right: 12px;
+    font-size: 1.1rem;
+    animation: blink 1s infinite; /* Animación de parpadeo */
+}
+
+#rec-overlay span {
+    color: #ff5252;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    white-space: nowrap; /* Evita que el cronómetro salte de línea */
+}
+
+/* Animación para el icono del micrófono rojo */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
 }
