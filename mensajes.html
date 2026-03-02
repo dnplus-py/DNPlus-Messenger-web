@@ -12,40 +12,102 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        /* Ajuste manual para asegurar que los iconos no se muevan */
+        /* Forzamos que la cabecera respete los extremos */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             height: 62px;
-            background-color: #085f56;
-            padding: 0 15px;
+            background-color: #085f56 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0 15px !important;
             color: white;
             position: relative;
-            z-index: 1000;
-        }
-        
-        /* Contenedor de iconos derecha */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
-        /* Corrección del overlay de grabación */
+        /* Contenedor derecho para iconos */
+        .header-right-icons {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Espacio entre el teléfono y los 3 puntos */
+        }
+
+        /* Arreglo del cronómetro para que no se agigante */
         #rec-overlay {
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background: #111b21;
+            background-color: #111b21;
             display: none; /* Se activa con flex */
             align-items: center;
             padding: 0 20px;
-            z-index: 50;
+            z-index: 5000;
             border-radius: 25px;
+        }
+        
+        #rec-overlay span {
+            color: #ff5252;
+            font-weight: bold;
+            margin-left: 10px;
         }
     </style>
 </head>
-<body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow
+<body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
+
+    <div id="action-header-menu" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 62px; background: #085f56; z-index: 7000; align-items: center; justify-content: flex-end; gap: 20px; padding: 0 20px; color: white;">
+        <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
+        <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
+    </div>
+
+    <header>
+        <div class="flex items-center gap-2">
+            <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
+            <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full object-cover">
+            <div class="cursor-pointer">
+                <div id="header-name" class="font-bold text-sm leading-tight">Cargando...</div>
+                <div id="header-status" class="text-[10px] text-green-400">en línea</div>
+            </div>
+        </div>
+
+        <div class="header-right-icons">
+            <i class="fas fa-phone p-2 cursor-pointer" onclick="alert('Llamando...')"></i>
+            <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
+            
+            <div id="header-menu" class="msg-menu" style="display: none; position: absolute; right: 10px; top: 55px; width: 180px; z-index: 8000;">
+                <div class="menu-item" onclick="cambiarFondo()">
+                    <i class="fas fa-image mr-2"></i> Fondo de pantalla
+                </div>
+                <div class="menu-item" onclick="vaciarChat()">
+                    <i class="fas fa-broom mr-2"></i> Vaciar chat
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="chat-container" style="flex: 1; overflow-y: auto; padding: 10px;"></main>
+
+    <div class="input-area" style="background: #111b21; padding: 10px; position: relative; display: flex; align-items: center; gap: 8px;">
+        
+        <div class="input-card" style="background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 48px; position: relative;">
+            
+            <div id="rec-overlay">
+                <i class="fas fa-microphone text-red-500 animate-pulse"></i> 
+                <span>0:00</span>
+            </div>
+
+            <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
+            <input type="text" id="chat-input" style="background: transparent; border: none; outline: none; flex: 1; color: white; padding: 0 10px;" placeholder="Mensaje" autocomplete="off">
+            <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
+            <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
+        </div>
+        
+        <button id="action-btn" class="action-btn" style="background: #176f47; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+            <i id="action-icon" class="fas fa-microphone"></i>
+        </button>
+    </div>
+
+    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
+
+</body>
+</html>
