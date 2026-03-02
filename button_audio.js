@@ -19,13 +19,16 @@ async function startRec() {
             if (e.data.size > 0) audioChunks.push(e.data);
         };
 
-        mediaRecorder.start();
-        console.log("Grabando...");
-    } catch (err) {
-        console.error("Error al acceder al mic:", err);
-        alert("No se pudo activar el micrófono.");
-    }
-}
+        // button_audio.js
+mediaRecorder.onstop = () => {
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = () => {
+        // AQUÍ LLAMAMOS AL CEREBRO
+        window.sendData({ tipo: 'audio', url: reader.result });
+    };
+};
 
 // Función para detener y enviar
 function stopRec() {
