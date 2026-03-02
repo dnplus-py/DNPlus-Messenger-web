@@ -222,3 +222,29 @@ function toggleEmojis() {
         panel.style.display = "none";
     }
 }
+
+async function manejarAdjunto(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const storageRef = firebase.storage().ref("chats/" + Date.now() + "_" + file.name);
+    
+    // 1. Subir imagen
+    const snapshot = await storageRef.put(file);
+    const urlImagen = await snapshot.ref.getDownloadURL();
+
+    // 2. Enviar como mensaje
+    const miId = localStorage.getItem("user_phone");
+    const idAmigo = typeof idReceptor !== 'undefined' ? idReceptor : '';
+
+    db.ref("chats").push({
+        emisor: miId,
+        receptor: idAmigo,
+        mensaje: "📷 Imagen",
+        imagenUrl: urlImagen,
+        timestamp: Date.now()
+    });
+
+    // 3. Avisar al otro por notificación
+    enviarAvisoDN(idAmigo, "DNPlus", "📷 Te envió una imagen");
+}
