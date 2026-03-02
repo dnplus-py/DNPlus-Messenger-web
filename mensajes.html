@@ -6,13 +6,31 @@
     <title>DNpPlus Messenger</title>
     
     <link rel="stylesheet" href="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.css">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js"></script>
+
+    <style>
+        /* Estilo para el contenedor de emojis */
+        #emoji-picker-container {
+            position: absolute;
+            bottom: 70px;
+            left: 10px;
+            z-index: 5000;
+            display: none; /* Se oculta por defecto */
+        }
+        /* Ajuste para que el picker se vea bien en móvil */
+        em-emoji-picker {
+            --padding: 0px;
+            max-width: 90vw;
+            height: 350px;
+        }
+    </style>
 </head>
 <body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
 
@@ -34,9 +52,7 @@
         </div>
         <div class="flex gap-3 relative">
             <i class="fas fa-phone p-2 cursor-pointer" onclick="irALlamada()"></i>
-            
             <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
-            
             <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none; position: absolute; background: #232d36; border-radius: 8px; flex-direction: column; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
                 <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer text-white flex items-center" onclick="cambiarFondo()">
                     <i class="fas fa-image mr-3"></i> Fondo de pantalla
@@ -49,6 +65,8 @@
     </header>
 
     <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; position: relative; padding: 10px;"></main>
+
+    <div id="emoji-picker-container"></div>
 
     <div class="input-area" style="position: relative; background: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px;">
         <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: calc(100% - 70px); height: 80%; left: 5px; top: 10%; align-items: center; padding-left: 20px; z-index: 50; border-radius: 25px;">
@@ -79,7 +97,7 @@
     <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/dn_notificaciones.js"></script>
 
     <script>
-        // CONFIGURACIÓN DE FIREBASE (Asegúrate de que coincida con tus otros archivos)
+        // CONFIGURACIÓN DE FIREBASE
         const fbConfig = {
             apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
             databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
@@ -89,51 +107,65 @@
 
         const miNombre = localStorage.getItem("user_name") || "David Oviedo";
 
-        // Función para ir a la pantalla de llamada y enviar la notificación
+        // --- LÓGICA DE EMOJIS ---
+        const pickerOptions = { 
+            onEmojiSelect: (emoji) => {
+                const input = document.getElementById("chat-input");
+                input.value += emoji.native;
+                input.focus();
+            },
+            theme: "dark",
+            locale: "es",
+            set: "native"
+        };
+        const picker = new EmojiMart.Picker(pickerOptions);
+        document.getElementById("emoji-picker-container").appendChild(picker);
+
+        function toggleEmojis() {
+            const container = document.getElementById("emoji-picker-container");
+            container.style.display = (container.style.display === "none" || container.style.display === "") ? "block" : "none";
+        }
+
+        // --- RESTO DE FUNCIONES ---
         function irALlamada() {
-            // El idReceptor se obtiene generalmente del localStorage o de la URL en mensajes.js
             const receptorId = localStorage.getItem("chat_destinatario_id");
-            
             if (receptorId) {
-                // Disparamos la notificación de llamada entrante
                 enviarAvisoDN(receptorId, "📞 Llamada de DNPlus", miNombre + " te está llamando...");
-                // Saltamos a la pantalla de llamada
                 window.location.href = "llamada.html?id=" + receptorId;
-            } else {
-                console.error("No se encontró ID de receptor");
             }
         }
 
-        // Lógica para enviar notificación al enviar un mensaje de texto
         const actionBtn = document.getElementById("action-btn");
         const chatInput = document.getElementById("chat-input");
 
         actionBtn.addEventListener("click", () => {
             const msgText = chatInput.value.trim();
             const receptorId = localStorage.getItem("chat_destinatario_id");
-            
-            // Si hay texto y tenemos a quién enviárselo
             if (msgText !== "" && receptorId) {
-                // Enviamos el aviso de nuevo mensaje
                 enviarAvisoDN(receptorId, "Nuevo mensaje de " + miNombre, msgText);
+                document.getElementById("emoji-picker-container").style.display = "none";
             }
         });
 
-        // Función para abrir el menú de opciones (Fondo, Vaciar, etc)
         function toggleHeaderMenu() {
             const menu = document.getElementById("header-menu");
             menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "flex" : "none";
         }
 
-        // Cerrar menú si se hace clic fuera
         document.addEventListener("click", (e) => {
             const menu = document.getElementById("header-menu");
-            const btn = document.querySelector(".fa-ellipsis-v");
-            if (menu && !menu.contains(e.target) && e.target !== btn) {
+            const emoContainer = document.getElementById("emoji-picker-container");
+            const emoBtn = document.querySelector(".fa-smile");
+            
+            // Cerrar menú si clic fuera
+            if (menu && menu.style.display === "flex" && !menu.contains(e.target) && !e.target.classList.contains('fa-ellipsis-v')) {
                 menu.style.display = "none";
+            }
+            // Cerrar emojis si clic en el chat
+            if (e.target.closest('#chat-container')) {
+                emoContainer.style.display = "none";
             }
         });
     </script>
-
 </body>
 </html>
