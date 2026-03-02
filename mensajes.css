@@ -279,25 +279,20 @@ header, #action-header-menu {
 
 /* --- CORRECCIÓN: OVERLAY DE GRABACIÓN (SOLO EN LA BARRA DE ENTRADA) --- */
 #rec-overlay {
-    position: absolute;
-    /* En lugar de inset: 0, le damos la posición exacta de la barra de texto */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #111b21;
-    display: none; /* Se activa con .flex por JS */
+    height: 100% !important; /* Para que no crezca más que la barra */
+    max-height: 48px; 
+    overflow: hidden;
+    display: none; 
     align-items: center;
-    padding-left: 20px;
-    z-index: 5000; /* Asegura que tape solo el input */
-    border-radius: 25px; /* Para que mantenga la forma redondeada */
+    background: #111b21;
+    border-radius: 25px;
+    padding: 0 15px;
 }
 
-#rec-overlay i {
-    color: #ff5252;
-    margin-right: 10px;
-    font-size: 1.2rem;
-    animation: blink 1s infinite;
+/* Evita que el texto de grabación empuje los elementos */
+#rec-overlay span {
+    white-space: nowrap;
+    font-size: 14px;
 }
 
 #rec-overlay span {
