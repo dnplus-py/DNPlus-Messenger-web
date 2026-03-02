@@ -16,17 +16,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js"></script>
 
     <style>
-        /* Estilo para el contenedor de emojis */
         #emoji-picker-container {
             position: absolute;
             bottom: 70px;
             left: 10px;
             z-index: 5000;
-            display: none; /* Se oculta por defecto */
+            display: none;
         }
-        /* Ajuste para que el picker se vea bien en móvil */
         em-emoji-picker {
-            --padding: 0px;
             max-width: 90vw;
             height: 350px;
         }
@@ -34,138 +31,32 @@
 </head>
 <body style="background-color: #0b141a; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
 
-    <div id="action-header-menu" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 62px; background: #202c33; z-index: 6000; align-items: center; justify-content: flex-end; gap: 25px; padding: 0 20px;">
-        <i class="fas fa-reply text-xl cursor-pointer" onclick="alert('Respondiendo...')"></i>
-        <i class="fas fa-share text-xl cursor-pointer" onclick="alert('Reenviando...')"></i>
-        <i class="fas fa-trash text-xl cursor-pointer" onclick="borrarMensaje()"></i>
-        <i class="fas fa-times text-xl cursor-pointer ml-4" onclick="cerrarMenuAcciones()"></i>
-    </div>
-
-    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white; z-index: 100;">
+    <header style="height: 62px; background: #202c33; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: white;">
         <div class="flex items-center gap-2">
             <i class="fas fa-arrow-left p-2 cursor-pointer" onclick="history.back()"></i>
             <img id="header-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-10 h-10 rounded-full object-cover">
-            <div onclick="abrirPerfilContacto()" class="cursor-pointer">
+            <div>
                 <div id="header-name" class="font-bold text-sm">Cargando...</div>
                 <div id="header-status" class="text-[10px] text-green-400">en línea</div>
             </div>
         </div>
-        <div class="flex gap-3 relative">
-            <i class="fas fa-phone p-2 cursor-pointer" onclick="irALlamada()"></i>
-            <i class="fas fa-ellipsis-v p-2 cursor-pointer" onclick="toggleHeaderMenu()"></i>
-            <div id="header-menu" class="msg-menu" style="right: 10px; top: 45px; width: 180px; display: none; position: absolute; background: #232d36; border-radius: 8px; flex-direction: column; z-index: 5000; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-                <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer text-white flex items-center" onclick="cambiarFondo()">
-                    <i class="fas fa-image mr-3"></i> Fondo de pantalla
-                </div>
-                <div class="menu-item p-3 hover:bg-[#2a3942] cursor-pointer text-white flex items-center" onclick="vaciarChat()">
-                    <i class="fas fa-broom mr-3"></i> Vaciar chat
-                </div>
-            </div>
-        </div>
+        <i class="fas fa-phone p-2 cursor-pointer" onclick="irALlamada()"></i>
     </header>
 
-    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; position: relative; padding: 10px;"></main>
+    <main id="chat-container" style="flex: 1; overflow-y: auto; background-color: #0b141a; padding: 10px;"></main>
 
     <div id="emoji-picker-container"></div>
 
-    <div class="input-area" style="position: relative; background: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px;">
-        <div id="rec-overlay" style="display: none; position: absolute; background: #111b21; width: calc(100% - 70px); height: 80%; left: 5px; top: 10%; align-items: center; padding-left: 20px; z-index: 50; border-radius: 25px;">
-            <i class="fas fa-microphone text-red-500 animate-pulse mr-2"></i> 
-            <span style="color: #ff5252; font-weight: bold;">Grabando...</span>
-        </div>
-
+    <div class="input-area" style="background: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px;">
         <div class="input-card" style="background: #2a3942; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 15px; height: 45px;">
             <i class="far fa-smile text-[#8696a0] text-xl cursor-pointer" onclick="toggleEmojis()"></i>
-            <input type="text" id="chat-input" style="background: transparent; border: none; outline: none; flex: 1; color: white; padding-left: 10px;" placeholder="Mensaje" autocomplete="off">
+            <input type="text" id="chat-input" style="background: transparent; border: none; outline: none; flex: 1; color: white; padding-left: 10px;" placeholder="Mensaje">
             <label for="file-input"><i class="fas fa-paperclip text-[#8696a0] text-xl mx-2 cursor-pointer"></i></label>
             <input type="file" id="file-input" hidden onchange="manejarAdjunto(this)">
         </div>
-        
-        <button id="action-btn" class="action-btn" style="background: #00a884; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none;">
+        <button id="action-btn" style="background: #00a884; width: 45px; height: 45px; border-radius: 50%; color: white;">
             <i id="action-icon" class="fas fa-microphone"></i>
         </button>
     </div>
 
-    <div id="image-viewer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
-        <span class="absolute top-5 right-5 text-white text-5xl cursor-pointer" style="z-index:100" onclick="cerrarVisor()">&times;</span>
-        <img id="full-image" src="" style="max-width: 90%; max-height: 80%; object-fit: contain;">
-    </div>
-
-    <input type="file" id="bg-input" hidden accept="image/*" onchange="aplicarNuevoFondo(this)">
-
-    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/mensajes.js"></script>
-    <script src="https://dnplus-py.github.io/DNPlus-Messenger-web/dn_notificaciones.js"></script>
-
-    <script>
-        // CONFIGURACIÓN DE FIREBASE
-        const fbConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-            projectId: "dnplus-messenger-pro",
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(fbConfig); }
-
-        const miNombre = localStorage.getItem("user_name") || "David Oviedo";
-
-        // --- LÓGICA DE EMOJIS ---
-        const pickerOptions = { 
-            onEmojiSelect: (emoji) => {
-                const input = document.getElementById("chat-input");
-                input.value += emoji.native;
-                input.focus();
-            },
-            theme: "dark",
-            locale: "es",
-            set: "native"
-        };
-        const picker = new EmojiMart.Picker(pickerOptions);
-        document.getElementById("emoji-picker-container").appendChild(picker);
-
-        function toggleEmojis() {
-            const container = document.getElementById("emoji-picker-container");
-            container.style.display = (container.style.display === "none" || container.style.display === "") ? "block" : "none";
-        }
-
-        // --- RESTO DE FUNCIONES ---
-        function irALlamada() {
-            const receptorId = localStorage.getItem("chat_destinatario_id");
-            if (receptorId) {
-                enviarAvisoDN(receptorId, "📞 Llamada de DNPlus", miNombre + " te está llamando...");
-                window.location.href = "llamada.html?id=" + receptorId;
-            }
-        }
-
-        const actionBtn = document.getElementById("action-btn");
-        const chatInput = document.getElementById("chat-input");
-
-        actionBtn.addEventListener("click", () => {
-            const msgText = chatInput.value.trim();
-            const receptorId = localStorage.getItem("chat_destinatario_id");
-            if (msgText !== "" && receptorId) {
-                enviarAvisoDN(receptorId, "Nuevo mensaje de " + miNombre, msgText);
-                document.getElementById("emoji-picker-container").style.display = "none";
-            }
-        });
-
-        function toggleHeaderMenu() {
-            const menu = document.getElementById("header-menu");
-            menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "flex" : "none";
-        }
-
-        document.addEventListener("click", (e) => {
-            const menu = document.getElementById("header-menu");
-            const emoContainer = document.getElementById("emoji-picker-container");
-            const emoBtn = document.querySelector(".fa-smile");
-            
-            // Cerrar menú si clic fuera
-            if (menu && menu.style.display === "flex" && !menu.contains(e.target) && !e.target.classList.contains('fa-ellipsis-v')) {
-                menu.style.display = "none";
-            }
-            // Cerrar emojis si clic en el chat
-            if (e.target.closest('#chat-container')) {
-                emoContainer.style.display = "none";
-            }
-        });
-    </script>
-</body>
-</html>
+    <div id="image-viewer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify
