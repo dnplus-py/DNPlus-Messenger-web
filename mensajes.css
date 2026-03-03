@@ -100,25 +100,52 @@ header .flex.gap-3 {
     display: block;
 }
 
-/* --- PANEL DE EMOJIS (CORREGIDO) --- */
+/* --- PANEL DE EMOJIS (CORREGIDO Y PRO) --- */
 #emoji-panel {
-    display: none;
+    display: none; /* Se activa con JS */
     background: #232d36;
     width: 100%;
     height: 250px;
     padding: 10px;
     overflow-y: auto;
-    display: grid; /* ESTO FALTABA */
-    grid-template-columns: repeat(6, 1fr); 
-    gap: 10px;
+    /* Usamos grid pero lo manejamos desde JS para que no rompa el diseño inicial */
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 5px;
     border-top: 1px solid #374045;
+    position: relative; /* Para que fluya debajo del chat */
 }
 
+/* Estilo para cada emoji */
 .emoji-item {
-    font-size: 24px;
+    font-size: 26px;
     text-align: center;
     cursor: pointer;
+    padding: 8px;
+    transition: background 0.2s;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.emoji-item:hover {
+    background-color: #3b4a54;
+}
+
+/* Estilo para los títulos de las categorías que agregamos en el JS */
+.emoji-category-title {
+    grid-column: 1 / -1; /* Ocupa todo el ancho */
+    color: #8696a0;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 10px 0 5px 5px;
+    text-transform: uppercase;
+    background: #232d36;
+    position: sticky; /* Se queda arriba mientras haces scroll */
+    top: -10px;
+    z-index: 10;
+}
+
 
 /* --- MENÚS --- */
 .msg-menu {
