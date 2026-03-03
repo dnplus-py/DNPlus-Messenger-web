@@ -100,63 +100,25 @@ header .flex.gap-3 {
     display: block;
 }
 
-/* --- PANEL DE EMOJIS (VERSIÓN ESTABLE DNPLUS) --- */
+/* --- PANEL DE EMOJIS (CORREGIDO) --- */
 #emoji-panel {
-    display: none; /* JS lo cambiará a 'grid' cuando sea necesario */
-    background-color: #232d36;
+    display: none;
+    background: #232d36;
     width: 100%;
     height: 250px;
     padding: 10px;
     overflow-y: auto;
-    grid-template-columns: repeat(8, 1fr); /* 8 por fila para que quepan bien */
-    gap: 4px;
+    display: grid; /* ESTO FALTABA */
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 10px;
     border-top: 1px solid #374045;
-    box-sizing: border-box;
 }
 
-/* Estilo para cada emoji */
 .emoji-item {
     font-size: 24px;
     text-align: center;
     cursor: pointer;
-    padding: 5px;
-    transition: transform 0.1s;
-    user-select: none; /* Evita que se seleccione el texto al tocar */
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
-
-.emoji-item:active {
-    transform: scale(1.2); /* Efecto de pulsación */
-    background-color: #3b4a54;
-    border-radius: 50%;
-}
-
-/* Categorías (Sticky para que no se pierdan al hacer scroll) */
-.emoji-category-title {
-    grid-column: span 8; /* Debe coincidir con el número de columnas del panel */
-    color: #00a884; /* El verde de tu app */
-    font-size: 11px;
-    font-weight: 700;
-    padding: 10px 0 5px 5px;
-    text-transform: uppercase;
-    background: #232d36;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
-
-/* Scrollbar personalizado para el panel de emojis */
-#emoji-panel::-webkit-scrollbar {
-    width: 6px;
-}
-#emoji-panel::-webkit-scrollbar-thumb {
-    background: #374045;
-    border-radius: 10px;
-}
-
-
 
 /* --- MENÚS --- */
 .msg-menu {
@@ -355,7 +317,29 @@ header .flex.gap-3 {
     border: 1.5px solid rgba(255,255,255,0.1) !important;
 }
 
+/* CONTENEDOR DE BARRA Y TIEMPO: Para centrar y bajar el cronómetro */
+.audio-info-container {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; /* Centra la barra y el texto verticalmente */
+}
 
+/* Ajuste del cronómetro "Voz" para que baje un poco */
+.audio-time-text {
+    font-size: 11px !important;
+    color: #8696a0 !important;
+    margin-top: 5px !important; /* Esto baja el cronómetro de la barra */
+    opacity: 0.8;
+}
+
+/* Icono Play centrado */
+.audio-wrapper i.fa-play, .audio-wrapper i.fa-pause {
+    color: #8696a0 !important;
+    font-size: 1.4rem !important;
+    display: flex;
+    align-items: center;
+}
 
 /* --- CORRECCIÓN FINAL: CRONÓMETRO VISIBLE DNPlus --- */
 #rec-overlay {
@@ -394,67 +378,4 @@ header .flex.gap-3 {
     0% { opacity: 1; }
     50% { opacity: 0.3; }
     100% { opacity: 1; }
-}
-
-/* --- CONTENEDOR DE AUDIO CORREGIDO --- */
-.audio-wrapper {
-    width: 280px !important;
-    min-height: 60px !important; /* Aumentamos el alto para que quepa la foto de 50px y el texto abajo */
-    display: flex !important;
-    align-items: center !important; 
-    gap: 12px !important;
-    padding: 8px 12px !important;
-    box-sizing: border-box !important;
-}
-
-/* LA FOTO: Centrada verticalmente con el play */
-.audio-photo-container {
-    width: 50px !important;
-    height: 50px !important;
-    flex-shrink: 0 !important;
-}
-
-.audio-user-photo {
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-}
-
-/* CONTENEDOR DE BARRA Y TIEMPO */
-.audio-info-container {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    height: 100% !important;
-}
-
-/* LA BARRA AZUL */
-.p-bar-bg {
-    width: 100%;
-    height: 4px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 5px;
-    margin-top: 5px; /* Un pequeño ajuste para alinear con el centro de la foto */
-}
-
-/* EL CRONÓMETRO: Ahora con espacio suficiente */
-.audio-time-text {
-    font-size: 11px !important;
-    color: #8696a0 !important;
-    margin-top: 6px !important; /* Espacio entre barra y texto */
-    display: block !important;
-    opacity: 0.9;
-    line-height: 1; /* Evita que el interlineado lo empuje fuera */
-}
-
-/* Iconos Play/Pause */
-.audio-wrapper i.fa-play, 
-.audio-wrapper i.fa-pause {
-    color: #8696a0 !important;
-    font-size: 1.5rem !important;
-    cursor: pointer;
-    width: 25px;
-    text-align: center;
 }
