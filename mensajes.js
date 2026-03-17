@@ -304,6 +304,7 @@ function escucharEstadoDestinatario(idDestino) {
 
     if (!idDestino) return;
 
+    // Escuchamos una sola vez el nodo del usuario para nombre, foto y presencia
     db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
         
@@ -315,32 +316,34 @@ function escucharEstadoDestinatario(idDestino) {
         // 1. CARGAR NOMBRE Y FOTO (Saca el "Cargando...")
         if (nameTxt) nameTxt.innerText = u.nombre || "Usuario DNPlus";
         
-        // Buscamos foto o foto_perfil (compatibilidad total)
-        const fotoReal = u.foto || u.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        // Buscamos foto o foto_perfil para que no falle
+        const fotoReal = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if (photoImg) photoImg.src = fotoReal;
 
-        // 2. LÓGICA DE PRIORIDAD DE ESTADOS (Usando tu nodo 'presencia')
-        db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
-    const u = snap.val(); // Aquí se crea la 'u'
-    const statusTxt = document.getElementById("header-status");
+        // 2. LÓGICA DE ESTADOS (Usando tu nodo 'presencia')
+        if (!statusTxt) return;
 
-    if (!u || !statusTxt) return;
-
-    // Correcto: usamos u.presencia porque 'u' contiene los datos de Firebase
-    if (u.presencia === "grabando audio...") {
-        statusTxt.innerText = "grabando audio...";
-        statusTxt.style.color = "#ef4444";
-    } 
-    else if (u.presencia === "escribiendo...") {
-        statusTxt.innerText = "escribiendo...";
-        statusTxt.style.color = "#00a884";
-    } 
-    else if (u.presencia === "online") {
-        statusTxt.innerText = "en línea";
-        statusTxt.style.color = "#00a884";
-    } 
-    else {
-        statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
-        statusTxt.style.color = "#8696a0";
-    }
-});
+        // PRIORIDAD: Grabando > Escribiendo > Online > Última Vez
+        if (u.presencia === "grabando audio...") {
+            statusTxt.innerText = "grabando audio...";
+            statusTxt.style.color = "#ef4444"; // Rojo
+            statusTxt.classList.add("animate-pulse"); // Efecto palpitar si usas Tailwind
+        } 
+        else if (u.presencia === "escribiendo...") {
+            statusTxt.innerText = "escribiendo...";
+            statusTxt.style.color = "#00a884"; // Verde brillante
+            statusTxt.classList.remove("animate-pulse");
+        } 
+        else if (u.presencia === "online") {
+            statusTxt.innerText = "en línea";
+            statusTxt.style.color = "#00a884"; // Verde
+            statusTxt.classList.remove("animate-pulse");
+        } 
+        else {
+            // Si está offline o no hay dato, muestra última vez
+            statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
+            statusTxt.style.color = "#8696a0"; // Gris
+            statusTxt.classList.remove("animate-pulse");
+        }
+    });
+}
