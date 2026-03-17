@@ -297,50 +297,58 @@ document.addEventListener('click', (e) => {
     }
 });
 
-function escucharEstadoDestinatario(idDestino) {
+// --- 1. RECUPERAR DATOS DEL ALMACENAMIENTO ---
+const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
+const idDestino = localStorage.getItem("chat_destinatario_id");
+
+// Verificación en consola (puedes borrarlo después)
+console.log("Mi ID:", miId);
+console.log("ID Destino:", idDestino);
+
+// --- 2. FUNCIÓN DE ESTADO (CORREGIDA) ---
+function escucharEstadoDestinatario(id) {
     const statusTxt = document.getElementById("header-status"); 
-    const nameTxt = document.getElementById("header-name");
+    const nameTxt = document.getElementById("header-nombre"); // Revisa si tu HTML es header-nombre o header-name
     const photoImg = document.getElementById("header-photo");
 
-    if (!idDestino) return;
+    if (!id || !statusTxt) return;
 
-    // Escuchamos una sola vez el nodo del usuario para nombre, foto y presencia
-    db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
+    // Escuchamos el nodo del usuario en Firebase
+    db.ref("usuarios_registrados/" + id).on("value", (snap) => {
         const u = snap.val();
         
         if (!u) {
-            if (nameTxt) nameTxt.innerText = "Usuario no encontrado";
+            if (statusTxt) statusTxt.innerText = "offline";
             return;
         }
 
-        // 1. CARGAR NOMBRE Y FOTO (Saca el "Cargando...")
-        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario DNPlus";
+        // CARGAR NOMBRE Y FOTO
+        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
         
-        // Buscamos foto o foto_perfil para que no falle
         const fotoReal = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if (photoImg) photoImg.src = fotoReal;
 
-        // 2. LÓGICA DE ESTADOS (Usando tu nodo 'presencia')
-        if (!statusTxt) return;
+        // LÓGICA DE PRIORIDAD DE ESTADOS
+        // Usamos u.presencia que es lo que envía Sketchware
+        const presencia = u.presencia || u.estado || "offline";
 
-        // PRIORIDAD: Grabando > Escribiendo > Online > Última Vez
-        if (u.presencia === "grabando audio...") {
+        if (presencia === "grabando audio...") {
             statusTxt.innerText = "grabando audio...";
             statusTxt.style.color = "#ef4444"; // Rojo
-            statusTxt.classList.add("animate-pulse"); // Efecto palpitar si usas Tailwind
+            statusTxt.classList.add("animate-pulse");
         } 
-        else if (u.presencia === "escribiendo...") {
+        else if (presencia === "escribiendo...") {
             statusTxt.innerText = "escribiendo...";
-            statusTxt.style.color = "#00a884"; // Verde brillante
-            statusTxt.classList.remove("animate-pulse");
-        } 
-        else if (u.presencia === "online") {
-            statusTxt.innerText = "en línea";
             statusTxt.style.color = "#00a884"; // Verde
             statusTxt.classList.remove("animate-pulse");
         } 
+        else if (presencia === "online" || presencia === "en línea") {
+            statusTxt.innerText = "en línea";
+            statusTxt.style.color = "#00a884"; 
+            statusTxt.classList.remove("animate-pulse");
+        } 
         else {
-            // Si está offline o no hay dato, muestra última vez
+            // Si está offline, muestra última vez
             statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
             statusTxt.style.color = "#8696a0"; // Gris
             statusTxt.classList.remove("animate-pulse");
@@ -348,6 +356,28 @@ function escucharEstadoDestinatario(idDestino) {
     });
 }
 
-// Prueba agregando esto en tu script para verificar
-console.log("Mi ID:", localStorage.getItem("user_phone"));
-console.log("ID Destino:", localStorage.getItem("chat_destinatario_id"));
+// --- 3. ACTUALIZAR MI PROPIA PRESENCIA ---
+function actualizarMiPresencia(estado) {
+    if (!miId) return;
+    const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    db.ref("usuarios_registrados/" + miId).update({
+        presencia: estado,
+        ultima_vez: ahora
+    });
+}
+
+// --- 4. EJECUCIÓN (MUY IMPORTANTE) ---
+// Sin esto, la función no arranca y verás la rayita
+if (idDestino) {
+    escucharEstadoDestinatario(idDestino);
+}
+
+// Eventos para que tú también aparezcas online/offline
+window.addEventListener("focus", () => actualizarMiPresencia("online"));
+window.addEventListener("blur", () => actualizarMiEstadoOffline());
+
+function actualizarMiEstadoOffline() {
+    // Solo marcamos offline si realmente salimos de la ventana
+    actualizarMiPresencia("offline");
+}
