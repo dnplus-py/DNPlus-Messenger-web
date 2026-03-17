@@ -320,35 +320,27 @@ function escucharEstadoDestinatario(idDestino) {
         if (photoImg) photoImg.src = fotoReal;
 
         // 2. LÓGICA DE PRIORIDAD DE ESTADOS (Usando tu nodo 'presencia')
-        if (!statusTxt) return;
+        db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
+    const u = snap.val(); // Aquí se crea la 'u'
+    const statusTxt = document.getElementById("header-status");
 
-        // Prioridad 1: Grabando Audio
-        if (u.presencia === "grabando audio...") {
-            statusTxt.innerText = "grabando audio...";
-            statusTxt.style.color = "#ef4444"; // Rojo
-            statusTxt.classList.add("animate-pulse"); // Hace que parpadee
-        } 
-        // Prioridad 2: Escribiendo
-        else if (u.presencia === "escribiendo...") {
-            statusTxt.innerText = "escribiendo...";
-            statusTxt.style.color = "#00a884"; // Verde WhatsApp
-            statusTxt.classList.remove("animate-pulse");
-        } 
-        // Prioridad 3: En línea
-        else if (u.presencia === "online" || u.presencia === "en línea") {
-            statusTxt.innerText = "en línea";
-            statusTxt.style.color = "#00a884";
-            statusTxt.classList.remove("animate-pulse");
-        } 
-        // Prioridad 4: Última vez / Offline
-        else {
-            statusTxt.classList.remove("animate-pulse");
-            statusTxt.style.color = "#8696a0"; // Gris
-            if (u.ultima_vez) {
-                statusTxt.innerText = "últ. vez hoy a las " + u.ultima_vez;
-            } else {
-                statusTxt.innerText = "offline";
-            }
-        }
-    });
-}
+    if (!u || !statusTxt) return;
+
+    // Correcto: usamos u.presencia porque 'u' contiene los datos de Firebase
+    if (u.presencia === "grabando audio...") {
+        statusTxt.innerText = "grabando audio...";
+        statusTxt.style.color = "#ef4444";
+    } 
+    else if (u.presencia === "escribiendo...") {
+        statusTxt.innerText = "escribiendo...";
+        statusTxt.style.color = "#00a884";
+    } 
+    else if (u.presencia === "online") {
+        statusTxt.innerText = "en línea";
+        statusTxt.style.color = "#00a884";
+    } 
+    else {
+        statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
+        statusTxt.style.color = "#8696a0";
+    }
+});
