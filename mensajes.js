@@ -297,107 +297,28 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- VARIABLES GLOBALES ---
-let timerEscribiendo;
-
-// Puente de IDs: Buscamos en todas las opciones posibles para no fallar
-const miId = localStorage.getItem("mi_id_firebase") || localStorage.getItem("user_phone"); 
-const idDestino = new URLSearchParams(window.location.search).get("id") || localStorage.getItem("chat_destinatario_id");
-
-// --- 1. ESCUCHAR DATOS Y ESTADO DEL DESTINATARIO ---
 function escucharEstadoDestinatario(idDestino) {
-    const statusTxt = document.getElementById("header-status"); 
-    const nameTxt = document.getElementById("header-name");
-    const photoImg = document.getElementById("header-photo");
-
+    console.log("Intentando cargar datos para:", idDestino); // PRUEBA 1
+    
     if (!idDestino) {
-        if (nameTxt) nameTxt.innerText = "Chat Privado"; 
+        console.error("ERROR: No hay ID de destino");
+        document.getElementById("header-name").innerText = "Error de ID";
         return;
     }
 
     db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
-        
-        if (!u) {
-            if (nameTxt) nameTxt.innerText = "Usuario DNPlus";
-            return;
+        console.log("Datos recibidos de Firebase:", u); // PRUEBA 2
+
+        if (u) {
+            document.getElementById("header-name").innerText = u.nombre || "Usuario";
+            const foto = u.foto || u.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            document.getElementById("header-photo").src = foto;
+            document.getElementById("header-status").innerText = u.estado || "online";
+        } else {
+            document.getElementById("header-name").innerText = "No encontrado";
         }
-
-        // CARGAR INFO BÁSICA
-        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
-        
-        // Probamos con 'foto' o 'foto_perfil' según lo tengas en Firebase
-        const imagen = u.foto || u.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        if (photoImg) photoImg.src = imagen;
-
-        // --- LÓGICA DE PRIORIDAD DE ESTADOS ---
-        if (!statusTxt) return;
-
-        if (u.estado === "grabando audio...") {
-            statusTxt.innerText = "grabando audio...";
-            statusTxt.className = "text-[10px] text-red-500 animate-pulse font-bold";
-        } 
-        else if (u.estado === "escribiendo...") {
-            statusTxt.innerText = "escribiendo...";
-            statusTxt.className = "text-[10px] text-green-400 font-bold";
-        } 
-        else if (u.estado === "online" || u.estado === "en línea") {
-            statusTxt.innerText = "en línea";
-            statusTxt.className = "text-[10px] text-green-400";
-        } 
-        else {
-            statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
-            statusTxt.className = "text-[10px] text-gray-400";
-        }
-    });
-}
-
-// --- 2. NOTIFICAR MI ESTADO (ESCRIBIENDO) ---
-function actualizarEstadoEscribiendo() {
-    if (!miId) return;
-    db.ref("usuarios_registrados/" + miId).update({ estado: "escribiendo..." });
-
-    clearTimeout(timerEscribiendo);
-    timerEscribiendo = setTimeout(() => {
-        actualizarMiPresencia("online");
-    }, 2000);
-}
-
-// --- 3. NOTIFICAR MI ESTADO (GRABANDO) ---
-function actualizarEstadoGrabando(estaGrabando) {
-    if (!miId) return;
-    let estadoActual = estaGrabando ? "grabando audio..." : "online";
-    db.ref("usuarios_registrados/" + miId).update({ estado: estadoActual });
-}
-
-// --- 4. FUNCIÓN GENERAL DE PRESENCIA (ONLINE/OFFLINE) ---
-function actualizarMiPresencia(estado) {
-    if (!miId) return;
-    const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    let datos = { estado: estado };
-    if (estado === "offline") {
-        datos.ultima_vez = ahora;
-    }
-    
-    db.ref("usuarios_registrados/" + miId).update(datos).catch(e => console.error("Error presencia:", e));
-}
-
-// --- 5. INICIALIZACIÓN ---
-
-// Cargar info del contacto al entrar
-if (idDestino) {
-    escucharEstadoDestinatario(idDestino);
-}
-
-// Control de presencia del usuario actual
-window.addEventListener("focus", () => actualizarMiPresencia("online"));
-window.addEventListener("blur", () => actualizarMiPresencia("offline"));
-
-// Si se cierra la pestaña, marcar como offline automáticamente
-if (miId) {
-    db.ref("usuarios_registrados/" + miId).onDisconnect().update({
-        estado: "offline",
-        ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }, (error) => {
+        console.error("Error de Firebase:", error);
     });
 }
