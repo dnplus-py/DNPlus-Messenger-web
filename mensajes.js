@@ -297,117 +297,104 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// 1. CONFIGURACIÓN COMPLETA DE FIREBASE
-const firebaseConfig = {
-    apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-    databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-};
+Podes cabiarle y enviame corregido
 
-// Inicialización vital para que Firebase funcione
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.database();
+// --- VARIABLES GLOBALES ---
+let timerEscribiendo;
+// Obtenemos los IDs de la URL o del almacenamiento local
+const miId = localStorage.getItem("mi_id_firebase"); // Asegúrate de guardar tu ID al iniciar sesión
+const idDestino = new URLSearchParams(window.location.search).get("id");
 
-// 2. RECUPERAR LOS DATOS DE CONEXIÓN
-// Estos IDs deben coincidir con los que guardas en lista_chats.html
-const idDestino = localStorage.getItem("chat_destinatario_id");
-const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
-const salaId = localStorage.getItem("chat_sala_id");
+// --- 1. ESCUCHAR ESTADO DEL OTRO USUARIO ---
+function escucharEstadoDestinatario(idDestino) {
+    const statusTxt = document.getElementById("header-status"); 
+    if (!statusTxt) return;
 
-// 3. FUNCIÓN PARA CARGAR EL ENCABEZADO (Nombre, Foto y Estado)
-function cargarEncabezado() {
-    const nameTxt = document.getElementById("header-nombre");
-    const statusTxt = document.getElementById("header-status");
-    const photoImg = document.getElementById("header-photo");
-
-    if (!idDestino) {
-        console.error("No se encontró idDestino en localStorage");
-        return;
-    }
-
-    // Escuchar el nodo 'usuarios_registrados' en tiempo real
     db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
         
+        // Si el usuario no existe o no tiene datos
         if (!u) {
-            if (nameTxt) nameTxt.innerText = "Usuario";
+            statusTxt.innerText = "offline";
+            statusTxt.className = "text-[10px] text-gray-400";
             return;
         }
 
-        // Cargar Nombre y Foto
-        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario DNPlus";
-        if (photoImg) photoImg.src = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-
-        // Lógica de Presencia/Estado
-        if (statusTxt) {
-            const presencia = u.presencia || u.estado || "offline";
-            const ultima = u.ultima_vez || "";
-
-            if (presencia === "online" || presencia === "en línea") {
-                statusTxt.innerText = "en línea";
-                statusTxt.style.color = "#4ade80";
-            } else if (presencia === "escribiendo...") {
-                statusTxt.innerText = "escribiendo...";
-                statusTxt.style.color = "#4ade80";
-            } else if (presencia === "grabando audio...") {
-                statusTxt.innerText = "grabando audio...";
-                statusTxt.style.color = "#ef4444";
-            } else {
-                statusTxt.innerText = ultima ? "últ. vez hoy a las " + ultima : "offline";
-                statusTxt.style.color = "#8696a0";
-            }
+        // LÓGICA DE PRIORIDAD DE ESTADOS
+        if (u.estado === "grabando audio...") {
+            statusTxt.innerText = "grabando audio...";
+            statusTxt.className = "text-[10px] text-red-500 animate-pulse font-bold";
+        } 
+        else if (u.estado === "escribiendo...") {
+            statusTxt.innerText = "escribiendo...";
+            statusTxt.className = "text-[10px] text-green-400 font-bold";
+        } 
+        else if (u.estado === "online") {
+            statusTxt.innerText = "en línea";
+            statusTxt.className = "text-[10px] text-green-400";
+        } 
+        else {
+            // Si no está haciendo nada, mostramos la última vez o su estado por defecto
+            statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "fuera de línea";
+            statusTxt.className = "text-[10px] text-gray-400";
         }
     });
 }
 
-// 4. FUNCIÓN PARA RECIBIR Y MOSTRAR MENSAJES
-function escucharMensajes() {
-    const contenedor = document.getElementById("chat-messages");
-    if (!salaId || !contenedor) return;
+// --- 2. NOTIFICAR MI ESTADO (ESCRIBIENDO) ---
+function actualizarEstadoEscribiendo() {
+    if (!miId) return;
+    
+    // Solo actualizamos si no estábamos ya en ese estado (para ahorrar datos)
+    db.ref("usuarios_registrados/" + miId).update({ estado: "escribiendo..." });
 
-    db.ref("chats_privados/" + salaId).on("value", (snapshot) => {
-        contenedor.innerHTML = ""; // Limpiar antes de cargar
-        
-        snapshot.forEach((child) => {
-            const msg = child.val();
-            const esMio = msg.remitente === miId;
-            
-            const div = document.createElement("div");
-            div.className = esMio ? "flex justify-end mb-2" : "flex justify-start mb-2";
-            
-            // Color verde para mis mensajes (#176f47) y oscuro para los recibidos
-            const bgColor = esMio ? "#176f47" : "#202c33"; 
-            
-            div.innerHTML = `
-                <div style="background-color: ${bgColor}; padding: 8px 12px; border-radius: 12px; max-width: 80%; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">
-                    <p style="font-size: 14.5px; margin: 0;">${msg.mensaje}</p>
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px;">${msg.hora}</div>
-                </div>
-            `;
-            contenedor.appendChild(div);
-        });
-        
-        // Desplazar al último mensaje
-        window.scrollTo(0, document.body.scrollHeight);
-    });
+    clearTimeout(timerEscribiendo);
+
+    // Volver a online después de 2 segundos de inactividad
+    timerEscribiendo = setTimeout(() => {
+        actualizarMiPresencia("online");
+    }, 2000);
 }
 
-// 5. INICIALIZACIÓN DE TODO EL CHAT
-function iniciarChat() {
-    cargarEncabezado();
-    escucharMensajes();
+// --- 3. NOTIFICAR MI ESTADO (GRABANDO) ---
+function actualizarEstadoGrabando(estaGrabando) {
+    if (!miId) return;
     
-    // Actualizar mi propia presencia al entrar
-    if (miId) {
-        const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        db.ref("usuarios_registrados/" + miId).update({ presencia: "online", ultima_vez: ahora });
+    if (estaGrabando) {
+        db.ref("usuarios_registrados/" + miId).update({ estado: "grabando audio..." });
+    } else {
+        actualizarMiPresencia("online");
     }
 }
 
-// Ejecutar cuando la página esté lista
-window.onload = iniciarChat;
+// --- 4. FUNCIÓN GENERAL DE PRESENCIA (ONLINE/OFFLINE) ---
+function actualizarMiPresencia(estado) {
+    if (!miId) return;
+    const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    let datos = { estado: estado };
+    if (estado === "offline") {
+        datos.ultima_vez = ahora;
+    }
+    
+    db.ref("usuarios_registrados/" + miId).update(datos).catch(e => console.error("Error presencia:", e));
+}
 
-// Control de presencia automático
-window.onfocus = () => { if(miId) db.ref("usuarios_registrados/" + miId).update({ presencia: "online" }); };
-window.onblur = () => { if(miId) db.ref("usuarios_registrados/" + miId).update({ presencia: "offline" }); };
+// --- 5. INICIALIZACIÓN Y EVENTOS ---
+
+// Ejecutar cuando se carga el chat
+if (idDestino) {
+    escucharEstadoDestinatario(idDestino);
+}
+
+// Detectar si el usuario está viendo la app o no
+window.addEventListener("focus", () => actualizarMiPresencia("online"));
+window.addEventListener("blur", () => actualizarMiPresencia("offline"));
+
+// Manejo de desconexión forzada (al cerrar la pestaña)
+if (miId) {
+    db.ref("usuarios_registrados/" + miId).onDisconnect().update({
+        estado: "offline",
+        ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+}
