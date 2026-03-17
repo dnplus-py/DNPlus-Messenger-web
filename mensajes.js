@@ -297,111 +297,125 @@ document.addEventListener('click', (e) => {
     }
 });
 
-  // --- 1. CONFIGURACIÓN E INICIALIZACIÓN ---
+// 1. CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
 };
 
-// Inicializar Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
 
-// --- 2. RECUPERAR DATOS DE ALMACENAMIENTO ---
-// Asegúrate de que estos nombres sean los mismos que usaste en lista_chats.html
+// 2. RECUPERAR IDENTIFICADORES
 const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
 const idDestino = localStorage.getItem("chat_destinatario_id");
+const salaId = localStorage.getItem("chat_sala_id");
 
-// Esto aparecerá en la consola del navegador/inspeccionador para revisar
-console.log("Sistema: Iniciando carga de chat...");
-console.log("Mi ID:", miId);
-console.log("ID Destino:", idDestino);
+// 3. FUNCIÓN: ESCUCHAR ENCABEZADO (Nombre, Foto, Estado)
+function cargarEncabezado() {
+    if (!idDestino) return;
 
-// --- 3. FUNCIÓN DE ESCUCHA ---
-function escucharEstadoDestinatario(id) {
-    const statusTxt = document.getElementById("header-status"); 
     const nameTxt = document.getElementById("header-nombre");
+    const statusTxt = document.getElementById("header-status");
     const photoImg = document.getElementById("header-photo");
 
-    if (!id) {
-        console.error("Error: idDestino está vacío");
-        return;
-    }
-
-    // Escuchamos los datos del contacto
-    db.ref("usuarios_registrados/" + id).on("value", (snap) => {
+    db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
-        
-        if (!u) {
-            console.error("Error: No se encontró el usuario en la ruta usuarios_registrados/" + id);
-            if (nameTxt) nameTxt.innerText = "Usuario";
-            if (statusTxt) statusTxt.innerText = "offline";
-            return;
-        }
+        if (!u) return;
 
-        console.log("Datos recibidos de Firebase:", u);
-
-        // Actualizar Nombre
         if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
-        
-        // Actualizar Foto
-        const fotoReal = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        if (photoImg) photoImg.src = fotoReal;
+        if (photoImg) photoImg.src = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-        // Actualizar Estado (Presencia)
         if (statusTxt) {
-            const presencia = u.presencia || u.estado || "offline";
-            const ultima = u.ultima_vez || "";
-
-            if (presencia === "grabando audio...") {
-                statusTxt.innerText = "grabando audio...";
-                statusTxt.style.color = "#ef4444";
-            } 
-            else if (presencia === "escribiendo...") {
-                statusTxt.innerText = "escribiendo...";
-                statusTxt.style.color = "#4ade80";
-            } 
-            else if (presencia === "online" || presencia === "en línea") {
+            const pres = u.presencia || u.estado || "offline";
+            const ult = u.ultima_vez || "";
+            
+            if (pres === "online" || pres === "en línea") {
                 statusTxt.innerText = "en línea";
                 statusTxt.style.color = "#4ade80";
-            } 
-            else {
-                statusTxt.innerText = ultima ? "últ. vez hoy a las " + ultima : "offline";
+            } else if (pres === "escribiendo...") {
+                statusTxt.innerText = "escribiendo...";
+                statusTxt.style.color = "#4ade80";
+            } else if (pres === "grabando audio...") {
+                statusTxt.innerText = "grabando audio...";
+                statusTxt.style.color = "#ef4444";
+            } else {
+                statusTxt.innerText = ult ? "últ. vez hoy a las " + ult : "offline";
                 statusTxt.style.color = "#8696a0";
             }
         }
-    }, (error) => {
-        console.error("Error en Firebase:", error);
     });
 }
 
-// --- 4. MI PROPIA PRESENCIA ---
-function actualizarMiPresencia(estado) {
+// 4. FUNCIÓN: RECIBIR MENSAJES (Lo que faltaba para que "reciba")
+function escucharMensajes() {
+    const contenedor = document.getElementById("chat-messages"); // Asegúrate que este ID exista en tu HTML
+    if (!salaId || !contenedor) return;
+
+    db.ref("chats_privados/" + salaId).on("value", (snapshot) => {
+        contenedor.innerHTML = ""; // Limpiamos para recargar
+        
+        snapshot.forEach((child) => {
+            const msg = child.val();
+            const esMio = msg.remitente === miId;
+            
+            const div = document.createElement("div");
+            div.className = esMio ? "flex justify-end mb-2" : "flex justify-start mb-2";
+            
+            // Estilo de la burbuja (puedes ajustar los colores aquí)
+            const bgColor = esMio ? "#176f47" : "#202c33"; 
+            
+            div.innerHTML = `
+                <div style="background-color: ${bgColor}; padding: 8px 12px; border-radius: 10px; max-width: 70%; color: white; position: relative;">
+                    <p style="font-size: 14px; margin-bottom: 4px;">${msg.mensaje}</p>
+                    <span style="font-size: 10px; color: rgba(255,255,255,0.6); display: block; text-align: right;">${msg.hora}</span>
+                </div>
+            `;
+            contenedor.appendChild(div);
+        });
+        
+        // Auto-scroll al final al recibir mensaje
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+}
+
+// 5. FUNCIÓN: ENVIAR MENSAJE
+function enviarMensaje() {
+    const input = document.getElementById("message-input");
+    if (!input || !input.value.trim() || !salaId) return;
+
+    const nuevoMsg = {
+        mensaje: input.value.trim(),
+        remitente: miId,
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    db.ref("chats_privados/" + salaId).push(nuevoMsg);
+    input.value = ""; // Limpiar input
+}
+
+// 6. MI PRESENCIA (Online/Offline)
+function actualizarMiPresencia(st) {
     if (!miId) return;
-    const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     db.ref("usuarios_registrados/" + miId).update({
-        presencia: estado,
-        ultima_vez: ahora
-    });
-}
-
-// --- 5. ARRANQUE DEL SCRIPT ---
-if (idDestino) {
-    escucharEstadoDestinatario(idDestino);
-} else {
-    console.error("No se puede iniciar la escucha: idDestino es null");
-}
-
-// Eventos de Online/Offline
-window.addEventListener("focus", () => actualizarMiPresencia("online"));
-window.addEventListener("blur", () => actualizarMiPresencia("offline"));
-
-// Desconexión automática
-if (miId) {
-    db.ref("usuarios_registrados/" + miId).onDisconnect().update({
-        presencia: "offline",
+        presencia: st,
         ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
 }
+
+// --- INICIALIZACIÓN ---
+window.onload = () => {
+    cargarEncabezado();
+    escucharMensajes();
+    actualizarMiPresencia("online");
+};
+
+window.onfocus = () => actualizarMiPresencia("online");
+window.onblur = () => actualizarMiPresencia("offline");
+
+// Vincular el botón de enviar si existe
+const btnEnviar = document.getElementById("send-btn");
+if (btnEnviar) btnEnviar.onclick = enviarMensaje;
