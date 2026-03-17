@@ -347,3 +347,7 @@ function escucharEstadoDestinatario(idDestino) {
         }
     });
 }
+
+// Prueba agregando esto en tu script para verificar
+console.log("Mi ID:", localStorage.getItem("user_phone"));
+console.log("ID Destino:", localStorage.getItem("chat_destinatario_id"));
