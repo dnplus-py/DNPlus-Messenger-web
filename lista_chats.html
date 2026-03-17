@@ -73,109 +73,137 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
-            databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.database();
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+        databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.database();
 
-        const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
-        let salaParaBorrar = null;
-        let timerPulsacion;
+    // Recuperamos tu ID de forma segura
+    const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId") || localStorage.getItem("user_temp_id");
+    let salaParaBorrar = null;
+    let timerPulsacion;
 
-        function cargarChats() {
-            if (!miId) {
-                document.getElementById("contenedor-chats-real").innerHTML = "<p style='text-align:center; padding:20px;'>Sesión no iniciada.</p>";
+    function cargarChats() {
+        const container = document.getElementById("contenedor-chats-real");
+        if (!miId) {
+            container.innerHTML = "<p style='text-align:center; padding:20px;'>Sesión no iniciada.</p>";
+            return;
+        }
+
+        // Escuchar cambios en los chats en tiempo real
+        db.ref("chats_privados").on("value", (snapshot) => {
+            container.innerHTML = "";
+            
+            if (!snapshot.exists()) {
+                container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats todavía.</p>";
                 return;
             }
 
-            db.ref("chats_privados").on("value", (snapshot) => {
-                const container = document.getElementById("contenedor-chats-real");
-                container.innerHTML = "";
+            snapshot.forEach((child) => {
+                const salaId = child.key;
                 
-                if (!snapshot.exists()) {
-                    container.innerHTML = "<p style='text-align:center; padding:40px; color:#8696a0;'>No tienes chats todavía.</p>";
-                    return;
-                }
-
-                snapshot.forEach((child) => {
-                    const salaId = child.key;
-                    if (salaId.includes(miId)) {
-                        const idOtro = salaId.replace(miId, "").replace("_", "");
+                // Si la sala pertenece al usuario actual
+                if (salaId.includes(miId)) {
+                    const idOtro = salaId.replace(miId, "").replace("_", "");
+                    
+                    // Buscamos los datos del destinatario (Nombre, Foto, Presencia)
+                    db.ref("usuarios_registrados/" + idOtro).on("value", (uSnap) => {
+                        const user = uSnap.val() || {};
+                        const mensajesSala = child.val();
+                        const llaves = Object.keys(mensajesSala);
+                        const ultimoMsg = mensajesSala[llaves[llaves.length - 1]];
                         
-                        db.ref("usuarios_registrados/" + idOtro).once("value", (uSnap) => {
-                            const user = uSnap.val() || {};
-                            const mensajesSala = child.val();
-                            const llaves = Object.keys(mensajesSala);
-                            const ultimoMsg = mensajesSala[llaves[llaves.length - 1]];
-                            
-                            let texto = ultimoMsg.mensaje || (ultimoMsg.tipo === 'audio' ? '🎵 Audio' : '📷 Imagen');
-                            let hora = ultimoMsg.hora || "";
+                        let texto = ultimoMsg.mensaje || (ultimoMsg.tipo === 'audio' ? '🎵 Audio' : '📷 Imagen');
+                        let hora = ultimoMsg.hora || "";
+                        
+                        // LÓGICA DE PRESENCIA Y ÚLTIMA VEZ
+                        const estadoActual = user.presencia || "offline";
+                        let subTexto = texto;
+                        let subColor = "#8696a0"; // Gris por defecto
 
-                            const div = document.createElement("div");
+                        if (estadoActual === "escribiendo...") {
+                            subTexto = "escribiendo...";
+                            subColor = "#00a884";
+                        } else if (estadoActual === "online" || estadoActual === "en línea") {
+                            // En la lista de chats, si está online, puedes mostrar el texto en verde 
+                            // o dejar el último mensaje. Aquí lo ponemos en verde si está online:
+                            subColor = "#00a884"; 
+                        }
+
+                        // Crear o actualizar la fila del chat
+                        // Buscamos si ya existe el div para no duplicar (Firebase .on() puede repetir)
+                        let div = document.getElementById("chat-" + salaId);
+                        if (!div) {
+                            div = document.createElement("div");
+                            div.id = "chat-" + salaId;
                             div.className = "chat-row";
-                            div.innerHTML = `
-                                <img src="${user.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
-                                <div class="chat-details">
-                                    <div class="chat-header">
-                                        <span class="name">${user.nombre || idOtro}</span>
-                                        <span class="time">${hora}</span>
-                                    </div>
-                                    <div class="last-msg-container">
-                                        <span class="message">${texto}</span>
-                                    </div>
-                                </div>`;
-
-                            div.onclick = () => abrirChat(salaId, idOtro, user.nombre, user.foto);
-                            
-                            div.onmousedown = div.ontouchstart = (e) => {
-                                timerPulsacion = setTimeout(() => {
-                                    confirmarBorrar(salaId, div);
-                                }, 800);
-                            };
-
-                            div.onmouseup = div.onmouseleave = div.ontouchend = () => {
-                                clearTimeout(timerPulsacion);
-                            };
-
                             container.appendChild(div);
-                        });
-                    }
-                });
+                        }
+
+                        div.innerHTML = `
+                            <div style="position:relative;">
+                                <img src="${user.foto || user.foto_perfil || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-img">
+                                ${estadoActual === 'online' ? '<div style="position:absolute; bottom:2px; right:2px; width:12px; height:12px; background:#00a884; border:2px solid #0b141a; border-radius:50%;"></div>' : ''}
+                            </div>
+                            <div class="chat-details">
+                                <div class="chat-header">
+                                    <span class="name">${user.nombre || idOtro}</span>
+                                    <span class="time">${hora}</span>
+                                </div>
+                                <div class="last-msg-container">
+                                    <span class="message" style="color: ${subColor}">${subTexto}</span>
+                                </div>
+                            </div>`;
+
+                        div.onclick = () => abrirChat(salaId, idOtro, user.nombre, user.foto);
+                        
+                        // Eventos para borrar chat (Long Press)
+                        div.onmousedown = div.ontouchstart = (e) => {
+                            timerPulsacion = setTimeout(() => {
+                                confirmarBorrar(salaId, div);
+                            }, 800);
+                        };
+                        div.onmouseup = div.onmouseleave = div.ontouchend = () => {
+                            clearTimeout(timerPulsacion);
+                        };
+                    });
+                }
             });
-        }
+        });
+    }
 
-        function abrirChat(sala, id, nom, foto) {
-            localStorage.setItem("chat_sala_id", sala);
-            localStorage.setItem("chat_destinatario_id", id);
-            localStorage.setItem("chat_destinatario_nombre", nom || "Usuario");
-            localStorage.setItem("chat_destinatario_foto", foto || "");
-            
-            // CORRECCIÓN: También usamos window.top para que el chat cubra el TabLayout
-            window.top.location.href = "mensajes.html";
-        }
+    function abrirChat(sala, id, nom, foto) {
+        localStorage.setItem("chat_sala_id", sala);
+        localStorage.setItem("chat_destinatario_id", id);
+        localStorage.setItem("chat_destinatario_nombre", nom || "Usuario");
+        localStorage.setItem("chat_destinatario_foto", foto || "");
+        window.top.location.href = "mensajes.html";
+    }
 
-        function confirmarBorrar(salaId, elemento) {
-            salaParaBorrar = salaId;
-            elemento.classList.add("selected");
-            document.getElementById("delete-modal").style.display = "flex";
-            
-            document.getElementById("btn-eliminar-confirmar").onclick = () => {
-                db.ref("chats_privados/" + salaParaBorrar).remove()
-                .then(() => {
-                    cerrarModal();
-                });
-            };
-        }
+    function confirmarBorrar(salaId, elemento) {
+        salaParaBorrar = salaId;
+        elemento.classList.add("selected");
+        document.getElementById("delete-modal").style.display = "flex";
+        
+        document.getElementById("btn-eliminar-confirmar").onclick = () => {
+            db.ref("chats_privados/" + salaParaBorrar).remove()
+            .then(() => {
+                cerrarModal();
+            });
+        };
+    }
 
-        function cerrarModal() {
-            document.getElementById("delete-modal").style.display = "none";
-            document.querySelectorAll(".chat-row").forEach(el => el.classList.remove("selected"));
-            salaParaBorrar = null;
-        }
+    function cerrarModal() {
+        document.getElementById("delete-modal").style.display = "none";
+        document.querySelectorAll(".chat-row").forEach(el => el.classList.remove("selected"));
+        salaParaBorrar = null;
+    }
 
-        window.onload = cargarChats;
-    </script>
+    window.onload = cargarChats;
+</script>
+
+                            
 </body>
 </html>
