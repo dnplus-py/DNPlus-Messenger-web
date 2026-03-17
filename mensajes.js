@@ -297,54 +297,71 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- 1. RECUPERAR DATOS DEL ALMACENAMIENTO ---
+  // --- 1. CONFIGURACIÓN DE FIREBASE (Sacada de tu captura) ---
+const firebaseConfig = {
+    apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+    databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+};
+
+// Inicializar Firebase si no está inicializado
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+// --- 2. RECUPERAR DATOS DEL ALMACENAMIENTO ---
+// Estos IDs son los que guardamos en lista_chats.html
 const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
 const idDestino = localStorage.getItem("chat_destinatario_id");
 
-// Verificación en consola (puedes borrarlo después)
-console.log("Mi ID:", miId);
-console.log("ID Destino:", idDestino);
+// Verificación en consola para que tú mismo veas si los IDs están llegando
+console.log("Mi ID logueado:", miId);
+console.log("ID del contacto con el que hablo:", idDestino);
 
-// --- 2. FUNCIÓN DE ESTADO (CORREGIDA) ---
+// --- 3. FUNCIÓN PARA ACTUALIZAR EL ENCABEZADO (Nombre, Foto y Estado) ---
 function escucharEstadoDestinatario(id) {
     const statusTxt = document.getElementById("header-status"); 
-    const nameTxt = document.getElementById("header-nombre"); // Revisa si tu HTML es header-nombre o header-name
+    const nameTxt = document.getElementById("header-nombre");
     const photoImg = document.getElementById("header-photo");
 
-    if (!id || !statusTxt) return;
+    if (!id || !statusTxt) {
+        console.error("No se encontró el ID de destino o el elemento header-status");
+        return;
+    }
 
-    // Escuchamos el nodo del usuario en Firebase
+    // Escuchamos el nodo del usuario en Firebase en tiempo real
     db.ref("usuarios_registrados/" + id).on("value", (snap) => {
         const u = snap.val();
         
         if (!u) {
+            console.warn("Usuario no encontrado en Firebase");
             if (statusTxt) statusTxt.innerText = "offline";
             return;
         }
 
-        // CARGAR NOMBRE Y FOTO
+        // CARGAR NOMBRE Y FOTO EN EL HEADER
         if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
         
         const fotoReal = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if (photoImg) photoImg.src = fotoReal;
 
-        // LÓGICA DE PRIORIDAD DE ESTADOS
-        // Usamos u.presencia que es lo que envía Sketchware
+        // LÓGICA DE PRESENCIA (Dato que recibe el TextView)
+        // Buscamos 'presencia' que es el campo que usas en tu base de datos
         const presencia = u.presencia || u.estado || "offline";
 
         if (presencia === "grabando audio...") {
             statusTxt.innerText = "grabando audio...";
-            statusTxt.style.color = "#ef4444"; // Rojo
+            statusTxt.style.color = "#ef4444"; // Rojo (como en tu captura)
             statusTxt.classList.add("animate-pulse");
         } 
         else if (presencia === "escribiendo...") {
             statusTxt.innerText = "escribiendo...";
-            statusTxt.style.color = "#00a884"; // Verde
+            statusTxt.style.color = "#4ade80"; // Verde brillante
             statusTxt.classList.remove("animate-pulse");
         } 
         else if (presencia === "online" || presencia === "en línea") {
             statusTxt.innerText = "en línea";
-            statusTxt.style.color = "#00a884"; 
+            statusTxt.style.color = "#4ade80"; 
             statusTxt.classList.remove("animate-pulse");
         } 
         else {
@@ -356,28 +373,31 @@ function escucharEstadoDestinatario(id) {
     });
 }
 
-// --- 3. ACTUALIZAR MI PROPIA PRESENCIA ---
-function actualizarMiPresencia(estado) {
+// --- 4. ACTUALIZAR MI PROPIA PRESENCIA ---
+function actualizarMiPresencia(nuevoEstado) {
     if (!miId) return;
     const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     db.ref("usuarios_registrados/" + miId).update({
-        presencia: estado,
+        presencia: nuevoEstado,
         ultima_vez: ahora
     });
 }
 
-// --- 4. EJECUCIÓN (MUY IMPORTANTE) ---
-// Sin esto, la función no arranca y verás la rayita
+// --- 5. INICIALIZACIÓN (LO QUE HACE QUE TODO ARRANQUE) ---
+// Al cargar la página, si tenemos el ID de destino, empezamos a escuchar
 if (idDestino) {
     escucharEstadoDestinatario(idDestino);
 }
 
-// Eventos para que tú también aparezcas online/offline
+// Control automático de Online/Offline al entrar o salir de la ventana del chat
 window.addEventListener("focus", () => actualizarMiPresencia("online"));
-window.addEventListener("blur", () => actualizarMiEstadoOffline());
+window.addEventListener("blur", () => actualizarMiPresencia("offline"));
 
-function actualizarMiEstadoOffline() {
-    // Solo marcamos offline si realmente salimos de la ventana
-    actualizarMiPresencia("offline");
+// Manejo de desconexión forzada
+if (miId) {
+    db.ref("usuarios_registrados/" + miId).onDisconnect().update({
+        presencia: "offline",
+        ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
 }
