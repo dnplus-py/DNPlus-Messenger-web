@@ -297,65 +297,77 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// 1. CONFIGURACIÓN DE FIREBASE
+// 1. CONFIGURACIÓN COMPLETA DE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
 };
 
+// Inicialización vital para que Firebase funcione
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
 
-// 2. RECUPERAR IDENTIFICADORES
-const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
+// 2. RECUPERAR LOS DATOS DE CONEXIÓN
+// Estos IDs deben coincidir con los que guardas en lista_chats.html
 const idDestino = localStorage.getItem("chat_destinatario_id");
+const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
 const salaId = localStorage.getItem("chat_sala_id");
 
-// 3. FUNCIÓN: ESCUCHAR ENCABEZADO (Nombre, Foto, Estado)
+// 3. FUNCIÓN PARA CARGAR EL ENCABEZADO (Nombre, Foto y Estado)
 function cargarEncabezado() {
-    if (!idDestino) return;
-
     const nameTxt = document.getElementById("header-nombre");
     const statusTxt = document.getElementById("header-status");
     const photoImg = document.getElementById("header-photo");
 
+    if (!idDestino) {
+        console.error("No se encontró idDestino en localStorage");
+        return;
+    }
+
+    // Escuchar el nodo 'usuarios_registrados' en tiempo real
     db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
-        if (!u) return;
+        
+        if (!u) {
+            if (nameTxt) nameTxt.innerText = "Usuario";
+            return;
+        }
 
-        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
+        // Cargar Nombre y Foto
+        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario DNPlus";
         if (photoImg) photoImg.src = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
+        // Lógica de Presencia/Estado
         if (statusTxt) {
-            const pres = u.presencia || u.estado || "offline";
-            const ult = u.ultima_vez || "";
-            
-            if (pres === "online" || pres === "en línea") {
+            const presencia = u.presencia || u.estado || "offline";
+            const ultima = u.ultima_vez || "";
+
+            if (presencia === "online" || presencia === "en línea") {
                 statusTxt.innerText = "en línea";
                 statusTxt.style.color = "#4ade80";
-            } else if (pres === "escribiendo...") {
+            } else if (presencia === "escribiendo...") {
                 statusTxt.innerText = "escribiendo...";
                 statusTxt.style.color = "#4ade80";
-            } else if (pres === "grabando audio...") {
+            } else if (presencia === "grabando audio...") {
                 statusTxt.innerText = "grabando audio...";
                 statusTxt.style.color = "#ef4444";
             } else {
-                statusTxt.innerText = ult ? "últ. vez hoy a las " + ult : "offline";
+                statusTxt.innerText = ultima ? "últ. vez hoy a las " + ultima : "offline";
                 statusTxt.style.color = "#8696a0";
             }
         }
     });
 }
 
-// 4. FUNCIÓN: RECIBIR MENSAJES (Lo que faltaba para que "reciba")
+// 4. FUNCIÓN PARA RECIBIR Y MOSTRAR MENSAJES
 function escucharMensajes() {
-    const contenedor = document.getElementById("chat-messages"); // Asegúrate que este ID exista en tu HTML
+    const contenedor = document.getElementById("chat-messages");
     if (!salaId || !contenedor) return;
 
     db.ref("chats_privados/" + salaId).on("value", (snapshot) => {
-        contenedor.innerHTML = ""; // Limpiamos para recargar
+        contenedor.innerHTML = ""; // Limpiar antes de cargar
         
         snapshot.forEach((child) => {
             const msg = child.val();
@@ -364,58 +376,38 @@ function escucharMensajes() {
             const div = document.createElement("div");
             div.className = esMio ? "flex justify-end mb-2" : "flex justify-start mb-2";
             
-            // Estilo de la burbuja (puedes ajustar los colores aquí)
+            // Color verde para mis mensajes (#176f47) y oscuro para los recibidos
             const bgColor = esMio ? "#176f47" : "#202c33"; 
             
             div.innerHTML = `
-                <div style="background-color: ${bgColor}; padding: 8px 12px; border-radius: 10px; max-width: 70%; color: white; position: relative;">
-                    <p style="font-size: 14px; margin-bottom: 4px;">${msg.mensaje}</p>
-                    <span style="font-size: 10px; color: rgba(255,255,255,0.6); display: block; text-align: right;">${msg.hora}</span>
+                <div style="background-color: ${bgColor}; padding: 8px 12px; border-radius: 12px; max-width: 80%; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                    <p style="font-size: 14.5px; margin: 0;">${msg.mensaje}</p>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px;">${msg.hora}</div>
                 </div>
             `;
             contenedor.appendChild(div);
         });
         
-        // Auto-scroll al final al recibir mensaje
+        // Desplazar al último mensaje
         window.scrollTo(0, document.body.scrollHeight);
     });
 }
 
-// 5. FUNCIÓN: ENVIAR MENSAJE
-function enviarMensaje() {
-    const input = document.getElementById("message-input");
-    if (!input || !input.value.trim() || !salaId) return;
-
-    const nuevoMsg = {
-        mensaje: input.value.trim(),
-        remitente: miId,
-        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    };
-
-    db.ref("chats_privados/" + salaId).push(nuevoMsg);
-    input.value = ""; // Limpiar input
-}
-
-// 6. MI PRESENCIA (Online/Offline)
-function actualizarMiPresencia(st) {
-    if (!miId) return;
-    db.ref("usuarios_registrados/" + miId).update({
-        presencia: st,
-        ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-}
-
-// --- INICIALIZACIÓN ---
-window.onload = () => {
+// 5. INICIALIZACIÓN DE TODO EL CHAT
+function iniciarChat() {
     cargarEncabezado();
     escucharMensajes();
-    actualizarMiPresencia("online");
-};
+    
+    // Actualizar mi propia presencia al entrar
+    if (miId) {
+        const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        db.ref("usuarios_registrados/" + miId).update({ presencia: "online", ultima_vez: ahora });
+    }
+}
 
-window.onfocus = () => actualizarMiPresencia("online");
-window.onblur = () => actualizarMiPresencia("offline");
+// Ejecutar cuando la página esté lista
+window.onload = iniciarChat;
 
-// Vincular el botón de enviar si existe
-const btnEnviar = document.getElementById("send-btn");
-if (btnEnviar) btnEnviar.onclick = enviarMensaje;
+// Control de presencia automático
+window.onfocus = () => { if(miId) db.ref("usuarios_registrados/" + miId).update({ presencia: "online" }); };
+window.onblur = () => { if(miId) db.ref("usuarios_registrados/" + miId).update({ presencia: "offline" }); };
