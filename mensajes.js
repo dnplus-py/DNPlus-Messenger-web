@@ -296,3 +296,121 @@ document.addEventListener('click', (e) => {
         if(hm) hm.style.display = 'none';
     }
 });
+
+// 1. CONFIGURACIÓN DE FIREBASE
+const firebaseConfig = {
+    apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
+    databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+// 2. RECUPERAR DATOS AL INSTANTE (Para que no diga "Cargando...")
+const idDestino = localStorage.getItem("chat_destinatario_id");
+const nombreDestino = localStorage.getItem("chat_destinatario_nombre");
+const fotoDestino = localStorage.getItem("chat_destinatario_foto");
+const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
+const salaId = localStorage.getItem("chat_sala_id");
+
+// 3. CARGA INMEDIATA (Sin esperar a Firebase)
+function inicializarInterfaz() {
+    const nameTxt = document.getElementById("header-nombre");
+    const photoImg = document.getElementById("header-photo");
+
+    // Ponemos los datos que ya tenemos en el teléfono (Cero espera)
+    if (nameTxt && nombreDestino) nameTxt.innerText = nombreDestino;
+    if (photoImg && fotoDestino) photoImg.src = fotoDestino;
+
+    // Ahora sí, escuchamos el estado (online/ultima vez) en tiempo real
+    escucharPresencia();
+    // Cargamos los mensajes
+    escucharMensajes();
+}
+
+// 4. ESCUCHAR PRESENCIA (La rayita de abajo)
+function escucharPresencia() {
+    const statusTxt = document.getElementById("header-status");
+    if (!idDestino || !statusTxt) return;
+
+    db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
+        const u = snap.val();
+        if (!u) return;
+
+        const presencia = u.presencia || u.estado || "offline";
+        const ultima = u.ultima_vez || "";
+
+        if (presencia === "online" || presencia === "en línea") {
+            statusTxt.innerText = "en línea";
+            statusTxt.style.color = "#4ade80";
+        } else if (presencia === "escribiendo...") {
+            statusTxt.innerText = "escribiendo...";
+            statusTxt.style.color = "#4ade80";
+        } else if (presencia === "grabando audio...") {
+            statusTxt.innerText = "grabando audio...";
+            statusTxt.style.color = "#ef4444";
+        } else {
+            statusTxt.innerText = ultima ? "últ. vez hoy a las " + ultima : "offline";
+            statusTxt.style.color = "#8696a0";
+        }
+    });
+}
+
+// 5. ESCUCHAR MENSAJES (Recibir)
+function escucharMensajes() {
+    const contenedor = document.getElementById("chat-messages");
+    if (!salaId || !contenedor) return;
+
+    db.ref("chats_privados/" + salaId).on("value", (snapshot) => {
+        contenedor.innerHTML = "";
+        snapshot.forEach((child) => {
+            const msg = child.val();
+            const esMio = msg.remitente === miId;
+            
+            const div = document.createElement("div");
+            div.className = esMio ? "flex justify-end mb-2" : "flex justify-start mb-2";
+            
+            // Usamos el color verde que te gusta para tus mensajes
+            const bgColor = esMio ? "#176f47" : "#202c33"; 
+            
+            div.innerHTML = `
+                <div style="background-color: ${bgColor}; padding: 8px 12px; border-radius: 12px; max-width: 80%; color: white;">
+                    <p style="margin: 0; font-size: 15px;">${msg.mensaje}</p>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 2px;">${msg.hora}</div>
+                </div>
+            `;
+            contenedor.appendChild(div);
+        });
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+}
+
+// 6. ENVIAR MENSAJE
+function enviarMensaje() {
+    const input = document.getElementById("message-input");
+    if (!input || !input.value.trim() || !salaId) return;
+
+    const h = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const nuevoMsg = {
+        mensaje: input.value.trim(),
+        remitente: miId,
+        hora: h,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    db.ref("chats_privados/" + salaId).push(nuevoMsg);
+    input.value = "";
+}
+
+// ARRANQUE
+window.onload = inicializarInterfaz;
+
+// PRESENCIA PROPIA
+if (miId) {
+    const refMio = db.ref("usuarios_registrados/" + miId);
+    window.onfocus = () => refMio.update({ presencia: "online" });
+    window.onblur = () => refMio.update({ presencia: "offline" });
+    refMio.onDisconnect().update({ presencia: "offline", ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+}
