@@ -298,27 +298,57 @@ document.addEventListener('click', (e) => {
 });
 
 function escucharEstadoDestinatario(idDestino) {
-    console.log("Intentando cargar datos para:", idDestino); // PRUEBA 1
-    
-    if (!idDestino) {
-        console.error("ERROR: No hay ID de destino");
-        document.getElementById("header-name").innerText = "Error de ID";
-        return;
-    }
+    const statusTxt = document.getElementById("header-status"); 
+    const nameTxt = document.getElementById("header-name");
+    const photoImg = document.getElementById("header-photo");
+
+    if (!idDestino) return;
 
     db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
-        console.log("Datos recibidos de Firebase:", u); // PRUEBA 2
-
-        if (u) {
-            document.getElementById("header-name").innerText = u.nombre || "Usuario";
-            const foto = u.foto || u.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-            document.getElementById("header-photo").src = foto;
-            document.getElementById("header-status").innerText = u.estado || "online";
-        } else {
-            document.getElementById("header-name").innerText = "No encontrado";
+        
+        if (!u) {
+            if (nameTxt) nameTxt.innerText = "Usuario no encontrado";
+            return;
         }
-    }, (error) => {
-        console.error("Error de Firebase:", error);
+
+        // 1. CARGAR NOMBRE Y FOTO (Saca el "Cargando...")
+        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario DNPlus";
+        
+        // Buscamos foto o foto_perfil (compatibilidad total)
+        const fotoReal = u.foto || u.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        if (photoImg) photoImg.src = fotoReal;
+
+        // 2. LÓGICA DE PRIORIDAD DE ESTADOS (Usando tu nodo 'presencia')
+        if (!statusTxt) return;
+
+        // Prioridad 1: Grabando Audio
+        if (u.presencia === "grabando audio...") {
+            statusTxt.innerText = "grabando audio...";
+            statusTxt.style.color = "#ef4444"; // Rojo
+            statusTxt.classList.add("animate-pulse"); // Hace que parpadee
+        } 
+        // Prioridad 2: Escribiendo
+        else if (u.presencia === "escribiendo...") {
+            statusTxt.innerText = "escribiendo...";
+            statusTxt.style.color = "#00a884"; // Verde WhatsApp
+            statusTxt.classList.remove("animate-pulse");
+        } 
+        // Prioridad 3: En línea
+        else if (u.presencia === "online" || u.presencia === "en línea") {
+            statusTxt.innerText = "en línea";
+            statusTxt.style.color = "#00a884";
+            statusTxt.classList.remove("animate-pulse");
+        } 
+        // Prioridad 4: Última vez / Offline
+        else {
+            statusTxt.classList.remove("animate-pulse");
+            statusTxt.style.color = "#8696a0"; // Gris
+            if (u.ultima_vez) {
+                statusTxt.innerText = "últ. vez hoy a las " + u.ultima_vez;
+            } else {
+                statusTxt.innerText = "offline";
+            }
+        }
     });
 }
