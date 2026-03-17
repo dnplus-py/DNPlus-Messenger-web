@@ -296,5 +296,3 @@ document.addEventListener('click', (e) => {
         if(hm) hm.style.display = 'none';
     }
 });
-
-            
