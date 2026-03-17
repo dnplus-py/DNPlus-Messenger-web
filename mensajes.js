@@ -299,32 +299,38 @@ document.addEventListener('click', (e) => {
 
 // --- VARIABLES GLOBALES ---
 let timerEscribiendo;
-const miId = localStorage.getItem("mi_id_firebase"); 
-const idDestino = new URLSearchParams(window.location.search).get("id");
 
-// --- 1. ESCUCHAR DATOS Y ESTADO DEL DESTINATARIO (NOMBRE, FOTO Y PRESENCIA) ---
+// Puente de IDs: Buscamos en todas las opciones posibles para no fallar
+const miId = localStorage.getItem("mi_id_firebase") || localStorage.getItem("user_phone"); 
+const idDestino = new URLSearchParams(window.location.search).get("id") || localStorage.getItem("chat_destinatario_id");
+
+// --- 1. ESCUCHAR DATOS Y ESTADO DEL DESTINATARIO ---
 function escucharEstadoDestinatario(idDestino) {
     const statusTxt = document.getElementById("header-status"); 
     const nameTxt = document.getElementById("header-name");
     const photoImg = document.getElementById("header-photo");
 
-    if (!idDestino) return;
+    if (!idDestino) {
+        if (nameTxt) nameTxt.innerText = "Chat Privado"; 
+        return;
+    }
 
     db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
         const u = snap.val();
         
         if (!u) {
-            if (nameTxt) nameTxt.innerText = "Usuario no encontrado";
+            if (nameTxt) nameTxt.innerText = "Usuario DNPlus";
             return;
         }
 
-        // --- A. CARGAR INFO BÁSICA (Quita el "Cargando...") ---
-        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario DNPlus";
-        if (photoImg && u.foto_perfil) {
-            photoImg.src = u.foto_perfil;
-        }
+        // CARGAR INFO BÁSICA
+        if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
+        
+        // Probamos con 'foto' o 'foto_perfil' según lo tengas en Firebase
+        const imagen = u.foto || u.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        if (photoImg) photoImg.src = imagen;
 
-        // --- B. LÓGICA DE PRIORIDAD DE ESTADOS ---
+        // --- LÓGICA DE PRIORIDAD DE ESTADOS ---
         if (!statusTxt) return;
 
         if (u.estado === "grabando audio...") {
@@ -340,7 +346,6 @@ function escucharEstadoDestinatario(idDestino) {
             statusTxt.className = "text-[10px] text-green-400";
         } 
         else {
-            // Si está offline, mostramos la última vez
             statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
             statusTxt.className = "text-[10px] text-gray-400";
         }
@@ -378,7 +383,7 @@ function actualizarMiPresencia(estado) {
     db.ref("usuarios_registrados/" + miId).update(datos).catch(e => console.error("Error presencia:", e));
 }
 
-// --- 5. INICIALIZACIÓN Y EVENTOS ---
+// --- 5. INICIALIZACIÓN ---
 
 // Cargar info del contacto al entrar
 if (idDestino) {
