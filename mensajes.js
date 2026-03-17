@@ -297,104 +297,108 @@ document.addEventListener('click', (e) => {
     }
 });
 
-  // --- 1. CONFIGURACIÓN DE FIREBASE (Sacada de tu captura) ---
+  // --- 1. CONFIGURACIÓN E INICIALIZACIÓN ---
 const firebaseConfig = {
     apiKey: "AIzaSyD2nZF5QC-Zti80xP1A518qbUPnhRru_9A",
     databaseURL: "https://dnplus-messenger-pro-default-rtdb.firebaseio.com",
 };
 
-// Inicializar Firebase si no está inicializado
+// Inicializar Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
 
-// --- 2. RECUPERAR DATOS DEL ALMACENAMIENTO ---
-// Estos IDs son los que guardamos en lista_chats.html
+// --- 2. RECUPERAR DATOS DE ALMACENAMIENTO ---
+// Asegúrate de que estos nombres sean los mismos que usaste en lista_chats.html
 const miId = localStorage.getItem("user_phone") || localStorage.getItem("chat_destId");
 const idDestino = localStorage.getItem("chat_destinatario_id");
 
-// Verificación en consola para que tú mismo veas si los IDs están llegando
-console.log("Mi ID logueado:", miId);
-console.log("ID del contacto con el que hablo:", idDestino);
+// Esto aparecerá en la consola del navegador/inspeccionador para revisar
+console.log("Sistema: Iniciando carga de chat...");
+console.log("Mi ID:", miId);
+console.log("ID Destino:", idDestino);
 
-// --- 3. FUNCIÓN PARA ACTUALIZAR EL ENCABEZADO (Nombre, Foto y Estado) ---
+// --- 3. FUNCIÓN DE ESCUCHA ---
 function escucharEstadoDestinatario(id) {
     const statusTxt = document.getElementById("header-status"); 
     const nameTxt = document.getElementById("header-nombre");
     const photoImg = document.getElementById("header-photo");
 
-    if (!id || !statusTxt) {
-        console.error("No se encontró el ID de destino o el elemento header-status");
+    if (!id) {
+        console.error("Error: idDestino está vacío");
         return;
     }
 
-    // Escuchamos el nodo del usuario en Firebase en tiempo real
+    // Escuchamos los datos del contacto
     db.ref("usuarios_registrados/" + id).on("value", (snap) => {
         const u = snap.val();
         
         if (!u) {
-            console.warn("Usuario no encontrado en Firebase");
+            console.error("Error: No se encontró el usuario en la ruta usuarios_registrados/" + id);
+            if (nameTxt) nameTxt.innerText = "Usuario";
             if (statusTxt) statusTxt.innerText = "offline";
             return;
         }
 
-        // CARGAR NOMBRE Y FOTO EN EL HEADER
+        console.log("Datos recibidos de Firebase:", u);
+
+        // Actualizar Nombre
         if (nameTxt) nameTxt.innerText = u.nombre || "Usuario";
         
+        // Actualizar Foto
         const fotoReal = u.foto_perfil || u.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if (photoImg) photoImg.src = fotoReal;
 
-        // LÓGICA DE PRESENCIA (Dato que recibe el TextView)
-        // Buscamos 'presencia' que es el campo que usas en tu base de datos
-        const presencia = u.presencia || u.estado || "offline";
+        // Actualizar Estado (Presencia)
+        if (statusTxt) {
+            const presencia = u.presencia || u.estado || "offline";
+            const ultima = u.ultima_vez || "";
 
-        if (presencia === "grabando audio...") {
-            statusTxt.innerText = "grabando audio...";
-            statusTxt.style.color = "#ef4444"; // Rojo (como en tu captura)
-            statusTxt.classList.add("animate-pulse");
-        } 
-        else if (presencia === "escribiendo...") {
-            statusTxt.innerText = "escribiendo...";
-            statusTxt.style.color = "#4ade80"; // Verde brillante
-            statusTxt.classList.remove("animate-pulse");
-        } 
-        else if (presencia === "online" || presencia === "en línea") {
-            statusTxt.innerText = "en línea";
-            statusTxt.style.color = "#4ade80"; 
-            statusTxt.classList.remove("animate-pulse");
-        } 
-        else {
-            // Si está offline, muestra última vez
-            statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "offline";
-            statusTxt.style.color = "#8696a0"; // Gris
-            statusTxt.classList.remove("animate-pulse");
+            if (presencia === "grabando audio...") {
+                statusTxt.innerText = "grabando audio...";
+                statusTxt.style.color = "#ef4444";
+            } 
+            else if (presencia === "escribiendo...") {
+                statusTxt.innerText = "escribiendo...";
+                statusTxt.style.color = "#4ade80";
+            } 
+            else if (presencia === "online" || presencia === "en línea") {
+                statusTxt.innerText = "en línea";
+                statusTxt.style.color = "#4ade80";
+            } 
+            else {
+                statusTxt.innerText = ultima ? "últ. vez hoy a las " + ultima : "offline";
+                statusTxt.style.color = "#8696a0";
+            }
         }
+    }, (error) => {
+        console.error("Error en Firebase:", error);
     });
 }
 
-// --- 4. ACTUALIZAR MI PROPIA PRESENCIA ---
-function actualizarMiPresencia(nuevoEstado) {
+// --- 4. MI PROPIA PRESENCIA ---
+function actualizarMiPresencia(estado) {
     if (!miId) return;
     const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
     db.ref("usuarios_registrados/" + miId).update({
-        presencia: nuevoEstado,
+        presencia: estado,
         ultima_vez: ahora
     });
 }
 
-// --- 5. INICIALIZACIÓN (LO QUE HACE QUE TODO ARRANQUE) ---
-// Al cargar la página, si tenemos el ID de destino, empezamos a escuchar
+// --- 5. ARRANQUE DEL SCRIPT ---
 if (idDestino) {
     escucharEstadoDestinatario(idDestino);
+} else {
+    console.error("No se puede iniciar la escucha: idDestino es null");
 }
 
-// Control automático de Online/Offline al entrar o salir de la ventana del chat
+// Eventos de Online/Offline
 window.addEventListener("focus", () => actualizarMiPresencia("online"));
 window.addEventListener("blur", () => actualizarMiPresencia("offline"));
 
-// Manejo de desconexión forzada
+// Desconexión automática
 if (miId) {
     db.ref("usuarios_registrados/" + miId).onDisconnect().update({
         presencia: "offline",
