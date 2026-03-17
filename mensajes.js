@@ -296,3 +296,103 @@ document.addEventListener('click', (e) => {
         if(hm) hm.style.display = 'none';
     }
 });
+
+// --- VARIABLES GLOBALES ---
+let timerEscribiendo;
+// Obtenemos los IDs de la URL o del almacenamiento local
+const miId = localStorage.getItem("mi_id_firebase"); // Asegúrate de guardar tu ID al iniciar sesión
+const idDestino = new URLSearchParams(window.location.search).get("id");
+
+// --- 1. ESCUCHAR ESTADO DEL OTRO USUARIO ---
+function escucharEstadoDestinatario(idDestino) {
+    const statusTxt = document.getElementById("header-status"); 
+    if (!statusTxt) return;
+
+    db.ref("usuarios_registrados/" + idDestino).on("value", (snap) => {
+        const u = snap.val();
+        
+        // Si el usuario no existe o no tiene datos
+        if (!u) {
+            statusTxt.innerText = "offline";
+            statusTxt.className = "text-[10px] text-gray-400";
+            return;
+        }
+
+        // LÓGICA DE PRIORIDAD DE ESTADOS
+        if (u.estado === "grabando audio...") {
+            statusTxt.innerText = "grabando audio...";
+            statusTxt.className = "text-[10px] text-red-500 animate-pulse font-bold";
+        } 
+        else if (u.estado === "escribiendo...") {
+            statusTxt.innerText = "escribiendo...";
+            statusTxt.className = "text-[10px] text-green-400 font-bold";
+        } 
+        else if (u.estado === "online") {
+            statusTxt.innerText = "en línea";
+            statusTxt.className = "text-[10px] text-green-400";
+        } 
+        else {
+            // Si no está haciendo nada, mostramos la última vez o su estado por defecto
+            statusTxt.innerText = u.ultima_vez ? "últ. vez hoy a las " + u.ultima_vez : "fuera de línea";
+            statusTxt.className = "text-[10px] text-gray-400";
+        }
+    });
+}
+
+// --- 2. NOTIFICAR MI ESTADO (ESCRIBIENDO) ---
+function actualizarEstadoEscribiendo() {
+    if (!miId) return;
+    
+    // Solo actualizamos si no estábamos ya en ese estado (para ahorrar datos)
+    db.ref("usuarios_registrados/" + miId).update({ estado: "escribiendo..." });
+
+    clearTimeout(timerEscribiendo);
+
+    // Volver a online después de 2 segundos de inactividad
+    timerEscribiendo = setTimeout(() => {
+        actualizarMiPresencia("online");
+    }, 2000);
+}
+
+// --- 3. NOTIFICAR MI ESTADO (GRABANDO) ---
+function actualizarEstadoGrabando(estaGrabando) {
+    if (!miId) return;
+    
+    if (estaGrabando) {
+        db.ref("usuarios_registrados/" + miId).update({ estado: "grabando audio..." });
+    } else {
+        actualizarMiPresencia("online");
+    }
+}
+
+// --- 4. FUNCIÓN GENERAL DE PRESENCIA (ONLINE/OFFLINE) ---
+function actualizarMiPresencia(estado) {
+    if (!miId) return;
+    const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    let datos = { estado: estado };
+    if (estado === "offline") {
+        datos.ultima_vez = ahora;
+    }
+    
+    db.ref("usuarios_registrados/" + miId).update(datos).catch(e => console.error("Error presencia:", e));
+}
+
+// --- 5. INICIALIZACIÓN Y EVENTOS ---
+
+// Ejecutar cuando se carga el chat
+if (idDestino) {
+    escucharEstadoDestinatario(idDestino);
+}
+
+// Detectar si el usuario está viendo la app o no
+window.addEventListener("focus", () => actualizarMiPresencia("online"));
+window.addEventListener("blur", () => actualizarMiPresencia("offline"));
+
+// Manejo de desconexión forzada (al cerrar la pestaña)
+if (miId) {
+    db.ref("usuarios_registrados/" + miId).onDisconnect().update({
+        estado: "offline",
+        ultima_vez: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+}
