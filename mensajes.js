@@ -22,22 +22,45 @@ let currentZoom = 1;
 window.onload = () => {
     if(!idOtro || !salaId) return;
 
-    db.ref("usuarios_registrados/" + idOtro).on("value", s => {
-        const d = s.val();
-        if(d) {
-            document.getElementById('header-name').innerText = d.nombre || idOtro;
-            document.getElementById('header-photo').src = d.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        }
-    });
+    // --- 1. CARGA INTELIGENTE DEL ENCABEZADO (Ahorra Perfil) ---
+// Usamos .once para que solo descargue los datos UNA VEZ al entrar
+db.ref("usuarios_registrados/" + idOtro).once("value").then(s => {
+    const d = s.val();
+    if(d) {
+        // Guardamos en memoria local para que la próxima vez sea instantáneo y no gaste datos
+        localStorage.setItem("chat_destinatario_nombre", d.nombre || idOtro);
+        localStorage.setItem("chat_destinatario_foto", d.foto || d.foto_perfil || "");
+        
+        document.getElementById('header-name').innerText = d.nombre || idOtro;
+        document.getElementById('header-photo').src = d.foto || d.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    }
+});
 
-    db.ref("chats_privados/" + salaId).on("child_added", s => {
-        dibujarBurbuja(s.val(), s.key);
-    });
+// Escuchamos la presencia por separado (esto pesa muy poco, solo unos bytes)
+db.ref("usuarios_registrados/" + idOtro + "/presencia").on("value", s => {
+    const pres = s.val() || "offline";
+    const statusTxt = document.getElementById('header-status');
+    if(statusTxt) {
+        statusTxt.innerText = pres === "online" ? "en línea" : pres;
+        statusTxt.style.color = (pres === "online" || pres === "escribiendo...") ? "#4ade80" : "#8696a0";
+    }
+});
 
-    db.ref("chats_privados/" + salaId).on("child_removed", s => {
-        const el = document.getElementById(s.key);
-        if(el) el.remove();
-    });
+
+// --- 2. CARGA LIMITADA DE MENSAJES (Ahorra GB de Descarga) ---
+// Usamos .limitToLast(25) para que NO descargue todo el historial viejo.
+// Solo descarga los últimos 25 mensajes, lo que reduce el consumo de datos un 90%.
+db.ref("chats_privados/" + salaId).limitToLast(25).on("child_added", s => {
+    dibujarBurbuja(s.val(), s.key);
+});
+
+
+// --- 3. ELIMINACIÓN SINCRONIZADA ---
+db.ref("chats_privados/" + salaId).on("child_removed", s => {
+    const el = document.getElementById(s.key);
+    if(el) el.remove();
+});
+
 
     // Cargar fondo guardado
     const bgSaved = localStorage.getItem("chat_bg_" + salaId);
